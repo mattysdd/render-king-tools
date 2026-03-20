@@ -603,6 +603,10 @@
             <label>MINIMUM JOB VALUE ($)</label>
             <input type="number" id="set-min-job" value="2200" step="100" oninput="onSettingChange()">
           </div>
+          <div class="settings-field">
+            <label>SLAB LABOUR (FLAT FEE $)</label>
+            <input type="number" id="set-slab-labour" value="200" step="10" oninput="onSettingChange()">
+          </div>
         </div>
       </div>
     </div>
@@ -702,49 +706,124 @@
       </div>
     </div>
 
-    <!-- DULUX MATERIAL COSTS -->
+    <!-- DULUX PAC CARD PRODUCT PRICES -->
     <div class="card">
       <div class="card-header">
-        <h2>DULUX MATERIAL COSTS ($/SQM)</h2>
-        <span class="badge">2026 PACK CARD</span>
+        <h2>DULUX PAC CARD — PRODUCT PRICES</h2>
+        <span class="badge">2026 STODDARTS</span>
       </div>
       <div class="card-body">
         <div class="settings-grid">
           <div class="settings-field">
-            <label>BRICK / HEBEL</label>
-            <input type="number" id="set-mat-brick_hebel" value="5.85" step="0.01" oninput="onSettingChange()">
+            <label>LOW BUILD — ACRABUILD PLUS ($/BAG)</label>
+            <input type="number" id="set-pac-low-build" value="14.86" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EPS / BLUEBOARD</label>
-            <input type="number" id="set-mat-eps_blueboard" value="7.50" step="0.01" oninput="onSettingChange()">
+            <label>MEDIUM BUILD — ACRABUILD MED ($/BAG)</label>
+            <input type="number" id="set-pac-medium-build" value="11.60" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>SPECIALTY / ARCHITECTURAL</label>
-            <input type="number" id="set-mat-specialty" value="9.00" step="0.01" oninput="onSettingChange()">
+            <label>HIGH BUILD — COARSE 2002 ($/BAG)</label>
+            <input type="number" id="set-pac-high-build" value="11.60" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>HEBEL SUPPLY + INSTALL</label>
-            <input type="number" id="set-mat-hebel_supply" value="12.00" step="0.01" oninput="onSettingChange()">
+            <label>ACRAPRO P400 ($/BAG)</label>
+            <input type="number" id="set-pac-p400" value="21.10" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>FULL HEBEL SYSTEM</label>
-            <input type="number" id="set-mat-hebel_full" value="15.00" step="0.01" oninput="onSettingChange()">
+            <label>JOINT &amp; SKIM ($/BAG)</label>
+            <input type="number" id="set-pac-joint-skim" value="27.13" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EPS SUPPLY + INSTALL</label>
-            <input type="number" id="set-mat-eps_supply" value="8.00" step="0.01" oninput="onSettingChange()">
+            <label>POWERFINISH 15L ($/BUCKET)</label>
+            <input type="number" id="set-pac-powerfinish" value="73.57" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>FULL EPS SYSTEM</label>
-            <input type="number" id="set-mat-eps_full" value="12.00" step="0.01" oninput="onSettingChange()">
+            <label>SPONGE FINE 15L ($/BUCKET)</label>
+            <input type="number" id="set-pac-sponge-fine" value="73.57" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>SLAB BUILD ($/LM)</label>
-            <input type="number" id="set-mat-slab_build" value="2.00" step="0.01" oninput="onSettingChange()">
+            <label>COVENTRY MEDIUM 15L ($/BUCKET)</label>
+            <input type="number" id="set-pac-coventry-med" value="73.57" step="0.01" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>SLIM TRIM 1.5mm x 3m ($/LENGTH)</label>
+            <input type="number" id="set-pac-slim-trim" value="2.27" step="0.01" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>MUD BUMP 2.5mm x 3m ($/LENGTH)</label>
+            <input type="number" id="set-pac-mud-bump" value="3.04" step="0.01" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>FIBREGLASS MESH 1m x 50m ($/ROLL)</label>
+            <input type="number" id="set-pac-mesh-roll" value="8.99" step="0.01" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>BLUE TAPE 36mm x 55m ($/ROLL)</label>
+            <input type="number" id="set-pac-blue-tape" value="4.68" step="0.01" oninput="onSettingChange()">
           </div>
         </div>
         <div class="callout callout-info" style="margin-top:14px;">
-          <strong>SOURCE:</strong> Dulux Acratex 2026 Pack Card via Stoddarts. Powerfinish system ~$5.85/sqm, Renderwall ~$5.20/sqm, AAC Partywall ~$4.79/sqm. Actual costs vary by system and wastage.
+          <strong>SOURCE:</strong> Dulux Acratex 2026 PAC Card via Stoddarts. All prices ex GST. These are the per-unit costs used in the PO Processor material calculations.
+        </div>
+      </div>
+    </div>
+
+    <!-- PO PROCESSOR COVERAGE DIVISORS -->
+    <div class="card">
+      <div class="card-header">
+        <h2>PO PROCESSOR — COVERAGE DIVISORS</h2>
+        <span class="badge">LOCKED FORMULAS</span>
+      </div>
+      <div class="card-body">
+        <div class="callout callout-gold" style="margin-bottom:14px;">
+          <strong>FORMULA:</strong> Quantity = Area (m&sup2;) &divide; Divisor. Rounding rule: 0.00–0.34 rounds down, 0.35–0.99 rounds up.
+        </div>
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label>LOW BUILD — AAC (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-low-build-aac" value="4.7" step="0.1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>HIGH BUILD — SLAB (LM &divide; X)</label>
+            <input type="number" id="set-cov-high-build-slab" value="20" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>LOW BUILD — SLAB (LM &divide; X)</label>
+            <input type="number" id="set-cov-low-build-slab" value="10" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>TEXTURE — POWERFINISH (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-texture-powerfinish" value="12" step="0.5" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>TEXTURE — SPONGE FINE (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-texture-sponge" value="13.5" step="0.5" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>TEXTURE — COVENTRY MED (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-texture-coventry" value="11" step="0.5" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>ANGLES — AAC SLIM TRIM (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-angles-aac" value="5" step="0.5" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>MEDIUM BUILD — BRICK (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-medium-build-brick" value="2.7" step="0.1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>ANGLES — BRICK MUD BUMP (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-angles-brick" value="2.5" step="0.1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS TOTAL BAGS (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-eps-total" value="3" step="0.5" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>MESH — EPS (m&sup2; &divide; X)</label>
+            <input type="number" id="set-cov-mesh-eps" value="45" step="1" oninput="onSettingChange()">
+          </div>
         </div>
       </div>
     </div>
