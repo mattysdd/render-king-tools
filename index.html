@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RENDER KING — Business Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══ DRIFT WARNING BANNER ═══ -->
+<div id="drift-banner" class="drift-banner">WARNING: CRITICAL VALUES HAVE DRIFTED FROM LOCKED DEFAULTS — REVIEW SETTINGS IMMEDIATELY</div>
+
+<!-- ═══ TOP NAV BAR ═══ -->
+<nav class="topnav">
+  <div class="nav-brand">RENDER KING</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="calculator" onclick="switchTab('calculator')">MARGIN CALCULATOR</button>
+    <button class="nav-tab" data-tab="quote" onclick="switchTab('quote')">QUOTE GENERATOR</button>
+    <button class="nav-tab" data-tab="terms" onclick="switchTab('terms')">TERMS &amp; CONDITIONS</button>
+    <button class="nav-tab" data-tab="ai" onclick="switchTab('ai')">AI AGENT</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB 1: MARGIN CALCULATOR                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-calculator" class="tab-content active">
+  <div class="page">
+
+    <!-- SETTINGS -->
+    <div class="card">
+      <div class="card-header">
+        <h2>SETTINGS &amp; LOCKED DEFAULTS</h2>
+        <span class="badge">EDITABLE — STOP-CHECK ACTIVE</span>
+      </div>
+      <div class="card-body">
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label>SUBCONTRACTOR RATE ($/SQM)</label>
+            <input type="number" id="set-subbie-rate" value="27" step="0.5" oninput="checkDrift();recalc()">
+          </div>
+          <div class="settings-field">
+            <label>VARIATION RATE ($/HR)</label>
+            <input type="number" id="set-variation-rate" value="110" step="1" oninput="checkDrift();recalc()">
+          </div>
+          <div class="settings-field">
+            <label>MINIMUM JOB ($)</label>
+            <input type="number" id="set-min-job" value="2200" step="100" oninput="checkDrift();recalc()">
+          </div>
+        </div>
+        <div style="height:12px;"></div>
+        <div class="section-label">DIFFICULTY ADD-ONS ($/SQM)</div>
+        <div class="settings-grid" style="grid-template-columns:repeat(5,1fr);">
+          <div class="settings-field">
+            <label>LVL 1 — GROUND</label>
+            <input type="number" id="set-diff-1" value="0" step="1" oninput="checkDrift();recalc()">
+          </div>
+          <div class="settings-field">
+            <label>LVL 2 — LOWER</label>
+            <input type="number" id="set-diff-2" value="5" step="1" oninput="checkDrift();recalc()">
+          </div>
+          <div class="settings-field">
+            <label>LVL 3 — UPPER</label>
+            <input type="number" id="set-diff-3" value="12" step="1" oninput="checkDrift();recalc()">
+          </div>
+          <div class="settings-field">
+            <label>LVL 4 — DETAIL</label>
+            <input type="number" id="set-diff-4" value="22" step="1" oninput="checkDrift();recalc()">
+          </div>
+          <div class="settings-field">
+            <label>LVL 5 — LUXURY</label>
+            <input type="number" id="set-diff-5" value="35" step="1" oninput="checkDrift();recalc()">
+          </div>
+        </div>
+        <div style="height:12px;"></div>
+        <div class="section-label">VOLUME BUILDER FLOOR</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="settings-field">
+            <label>MIN SELL RATE ($/SQM)</label>
+            <input type="number" id="set-vol-floor" value="47" step="1" oninput="checkDrift();recalc()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SURFACE LINES -->
+    <div class="card">
+      <div class="card-header">
+        <h2>JOB LINE ITEMS</h2>
+        <span class="badge">UP TO 10 LINES</span>
+      </div>
+      <div class="card-body">
+        <div id="surface-lines" class="surface-lines"></div>
+        <button id="add-surface-btn" class="add-surface-btn" onclick="addSurfaceLine()">+ ADD LINE ITEM</button>
+      </div>
+    </div>
+
+    <!-- BUILDER TIER -->
+    <div class="card">
+      <div class="card-header"><h2>BUILDER PRICING TIER</h2></div>
+      <div class="card-body">
+        <div class="section-label">SELECT BUILDER TYPE</div>
+        <div id="tier-grid" class="tier-grid">
+          <div class="tier-option" onclick="selectTier(this,'volume')" data-key="volume">
+            <div class="tier-label">VOLUME BUILDER</div>
+            <div class="tier-rate">25–30% margin target | $2,200 min</div>
+          </div>
+          <div class="tier-option active" onclick="selectTier(this,'standard')" data-key="standard">
+            <div class="tier-label">STANDARD BUILDER</div>
+            <div class="tier-rate">40%+ margin | $2,200 min</div>
+          </div>
+          <div class="tier-option" onclick="selectTier(this,'luxury')" data-key="luxury">
+            <div class="tier-label">LUXURY BUILDER</div>
+            <div class="tier-rate">40%+ margin | Premium positioning</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div style="font-size:28px;color:var(--border-light);margin-bottom:8px;">&#9633;</div>
+      <div>Add line items above to see calculations</div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results-content">
+
+      <!-- SUMMARY -->
+      <div class="card">
+        <div class="card-header"><h2>JOB COST SUMMARY</h2><span class="badge">INTERNAL ONLY</span></div>
+        <div class="card-body">
+          <div id="vol-floor-warning" class="callout callout-red" style="display:none;margin-bottom:16px;">
+            <strong>VOLUME BUILDER FLOOR ACTIVE:</strong> One or more line items have been locked to the $47/sqm minimum sell rate. The calculated rate was below the floor.
+          </div>
+          <div class="results-grid four">
+            <div class="stat-card"><div class="stat-label">TOTAL AREA</div><div class="stat-value" id="r-total-sqm">—</div><div class="stat-sub">All lines combined</div></div>
+            <div class="stat-card"><div class="stat-label">TOTAL MATERIAL COST</div><div class="stat-value" id="r-mat-cost">—</div><div class="stat-sub" id="r-mat-sub">Dulux system estimate</div></div>
+            <div class="stat-card"><div class="stat-label">TOTAL LABOUR COST</div><div class="stat-value" id="r-lab-cost">—</div><div class="stat-sub" id="r-lab-sub">—</div></div>
+            <div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">TOTAL JOB COST</div><div class="stat-value gold" id="r-job-cost">—</div><div class="stat-sub" id="r-sqm-cost">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECOMMENDED SELL PRICE -->
+      <div class="card">
+        <div class="card-header"><h2>RECOMMENDED SELL PRICE</h2><span class="badge">ALL PRICES EX GST</span></div>
+        <div class="card-body" id="rec-sell-wrap"></div>
+      </div>
+
+      <!-- CUSTOM SELL PRICE -->
+      <div class="card">
+        <div class="card-header"><h2>CUSTOM SELL PRICE CHECK</h2></div>
+        <div class="card-body">
+          <div class="sell-price-wrap">
+            <label>ENTER SELL PRICE (EX GST):</label>
+            <input type="number" id="custom-sell" placeholder="0.00" oninput="recalc()">
+            <div class="sp-result" id="custom-margin-display">Enter a sell price to see your actual margin</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MARGIN BANDS -->
+      <div class="card">
+        <div class="card-header"><h2>MARGIN BANDS</h2></div>
+        <div class="card-body" id="margin-bands-wrap"></div>
+      </div>
+
+      <!-- PER-LINE BREAKDOWN -->
+      <div class="card">
+        <div class="card-header"><h2>PER-LINE BREAKDOWN</h2></div>
+        <div class="card-body" id="line-breakdown-wrap"></div>
+      </div>
+
+      <!-- MATERIAL ESTIMATE -->
+      <div class="card">
+        <div class="card-header"><h2>MATERIAL COST ESTIMATE</h2><span class="badge">DULUX PACK CARD</span></div>
+        <div class="card-body" id="material-wrap"></div>
+      </div>
+
+    </div><!-- /results-content -->
+  </div><!-- /page -->
+</div><!-- /tab-calculator -->
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB 2: QUOTE GENERATOR                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-quote" class="tab-content">
+  <div class="doc">
+
+    <!-- HEADER -->
+    <div class="doc-header">
+      <div class="header-row">
+        <div class="brand-block">
+          <div class="doc-label">FORMAL QUOTATION</div>
+          <h1>RENDER KING</h1>
+          <div class="tagline">Premium Acrylic Render &amp; Texture Finish Specialist — Gold Coast QLD</div>
+        </div>
+        <div class="contact-block">
+          <div class="cl"><strong>PHONE</strong> 0468 041 477</div>
+          <div class="cl"><strong>EMAIL</strong> admin@renderrender.com.au</div>
+          <div class="cl"><strong>WEB</strong> renderrender.com.au</div>
+          <div class="cl" style="margin-top:8px;font-size:10px;color:var(--grey-mid);">All prices ex GST unless stated</div>
+        </div>
+      </div>
+      <div class="quote-meta">
+        <div class="meta-cell">
+          <div class="meta-label">QUOTE NUMBER</div>
+          <div class="meta-value"><span contenteditable="true" id="q-quote-number">RK-2026-</span></div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">DATE ISSUED</div>
+          <div class="meta-value" id="q-date-display"></div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">QUOTE VALIDITY</div>
+          <select class="validity-select" id="q-validity-select" onchange="updateQuoteValidity()">
+            <option value="24">24 Hours</option>
+            <option value="48" selected>48 Hours</option>
+            <option value="120">5 Days</option>
+            <option value="168">7 Days</option>
+            <option value="336">14 Days</option>
+            <option value="720">30 Days</option>
+          </select>
+          <div class="expiry-note" id="q-expiry-note"></div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">BUILDER TYPE</div>
+          <select class="validity-select" id="q-builder-type">
+            <option value="standard">Standard Builder</option>
+            <option value="volume">Volume Builder</option>
+            <option value="luxury">Luxury Builder</option>
+          </select>
+        </div>
+      </div>
+      <div class="validity-banner" id="q-validity-banner">QUOTE VALID FOR 48 HOURS FROM DATE OF ISSUE</div>
+    </div>
+
+    <!-- BODY -->
+    <div class="doc-body">
+
+      <!-- Section 1: Client Details -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">1</div><h2>CLIENT DETAILS</h2></div>
+        <div class="g2">
+          <div>
+            <div class="field"><div class="field-lbl">CLIENT / COMPANY NAME</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">CONTACT NAME</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">PHONE</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">EMAIL</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+          </div>
+          <div>
+            <div class="field"><div class="field-lbl">SITE ADDRESS</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">LOT / PLAN NUMBER</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">WORK CONTRACT / PO NUMBER</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">BUILDER REFERENCE</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Scope of Work -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">2</div><h2>SCOPE OF WORK</h2></div>
+        <div class="field"><div class="field-lbl">PROJECT DESCRIPTION</div><div class="field-val tall" contenteditable="true">Acrylic render and texture finish application as per specifications below.</div></div>
+        <div class="g2" style="margin-top:14px;">
+          <div class="field"><div class="field-lbl">SUBSTRATE TYPE</div><div class="field-val" contenteditable="true">Brick/Hebel</div></div>
+          <div class="field"><div class="field-lbl">DIFFICULTY LEVEL</div><div class="field-val" contenteditable="true">Level 1 — Volume/Ground</div></div>
+        </div>
+      </div>
+
+      <!-- Section 3: Pricing -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">3</div><h2>PRICING SCHEDULE</h2></div>
+        <div class="pricing-wrap">
+          <table class="pricing-table">
+            <thead>
+              <tr>
+                <th>DESCRIPTION</th>
+                <th class="right">QTY</th>
+                <th>UNIT</th>
+                <th class="right">RATE (EX GST)</th>
+                <th class="right">TOTAL</th>
+                <th class="center no-print">DEL</th>
+              </tr>
+            </thead>
+            <tbody id="q-pricing-body"></tbody>
+            <tfoot>
+              <tr class="subtotal-row">
+                <td colspan="4" class="right">SUBTOTAL (EX GST)</td>
+                <td class="right" id="q-subtotal-cell">$0.00</td>
+                <td class="no-print"></td>
+              </tr>
+              <tr class="gst-row">
+                <td colspan="4" class="right">GST (10%)</td>
+                <td class="right" id="q-gst-cell">$0.00</td>
+                <td class="no-print"></td>
+              </tr>
+              <tr class="grand-total-row">
+                <td colspan="4" class="right">TOTAL (INC GST)</td>
+                <td class="right" id="q-grand-total-cell">$0.00</td>
+                <td class="no-print"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <button class="add-line-btn no-print" onclick="addQuoteLine()">+ ADD LINE ITEM</button>
+      </div>
+
+      <!-- Section 4: Inclusions & Exclusions -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">4</div><h2>INCLUSIONS &amp; EXCLUSIONS</h2></div>
+        <div class="inc-exc">
+          <div class="inc-col">
+            <h4>INCLUDED</h4>
+            <ul class="ie-list">
+              <li>Supply and application of acrylic render system</li>
+              <li>Surface preparation and priming</li>
+              <li>Corner beading and trim installation</li>
+              <li>Masking and protection of adjacent surfaces</li>
+              <li>Final texture coat application</li>
+              <li>Site cleanup on completion</li>
+              <li>Touch-up kit supplied</li>
+            </ul>
+          </div>
+          <div class="exc-col">
+            <h4>EXCLUDED</h4>
+            <ul class="ie-list">
+              <li>Scaffolding (unless specified in pricing)</li>
+              <li>Structural repairs or crack stitching</li>
+              <li>Painting (unless specified)</li>
+              <li>Removal of existing render</li>
+              <li>Waterproofing (unless specified)</li>
+              <li>Any work not explicitly listed above</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Payment Terms -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">5</div><h2>PAYMENT SCHEDULE</h2></div>
+        <table class="payment-table">
+          <thead>
+            <tr><th>STAGE</th><th>DESCRIPTION</th><th class="right">%</th><th class="right">AMOUNT (EX GST)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="stage-num">1</span></td>
+              <td>Booking Deposit — due on acceptance</td>
+              <td class="right" id="q-deposit-pct">10%</td>
+              <td class="right" id="q-deposit-amt">—</td>
+            </tr>
+            <tr>
+              <td><span class="stage-num">2</span></td>
+              <td>Material Payment — due before materials ordered</td>
+              <td class="right">50%</td>
+              <td class="right" id="q-material-amt">—</td>
+            </tr>
+            <tr>
+              <td><span class="stage-num">3</span></td>
+              <td>Final Payment — due on practical completion</td>
+              <td class="right" id="q-final-pct">40%</td>
+              <td class="right" id="q-final-amt">—</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="3" class="right">TOTAL (EX GST)</td><td class="right" id="q-payment-total">—</td></tr>
+          </tfoot>
+        </table>
+        <div class="callout callout-gold" style="margin-top:14px;">
+          <strong>PAYMENT TERMS:</strong> All invoices are due within 7 days of issue. Overdue accounts incur a $220 administration fee plus 3% per week interest on the outstanding balance. Governed by the Building Industry Fairness (Security of Payment) Act 2017 (QLD).
+        </div>
+      </div>
+
+      <!-- Section 6: T&C Summary -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">6</div><h2>KEY TERMS</h2></div>
+        <div class="tc-grid">
+          <div class="tc-item"><div class="tc-head">VARIATION RATE</div>$110/hr + GST — 2-hour minimum for all variations</div>
+          <div class="tc-item"><div class="tc-head">MINIMUM JOB</div>$2,200 ex GST minimum applies to all works</div>
+          <div class="tc-item"><div class="tc-head">QUOTE VALIDITY</div>This quote is valid for the period stated above from date of issue</div>
+          <div class="tc-item"><div class="tc-head">GOVERNING LAW</div>Building Industry Fairness (Security of Payment) Act 2017 (QLD)</div>
+        </div>
+      </div>
+
+      <!-- Section 7: Signature -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">7</div><h2>ACCEPTANCE</h2></div>
+        <div class="callout callout-gold" style="margin-bottom:16px;">
+          <strong>By signing below, the client accepts this quotation and agrees to the Payment Terms &amp; Conditions of Render Render Pty Ltd (trading as Render King).</strong>
+        </div>
+
+        <!-- Digital Signature (screen) -->
+        <div class="digital-sig-block no-print">
+          <div class="digital-sig-title">DIGITAL SIGNATURE</div>
+          <div class="digital-sig-subtitle">Draw your signature below to accept this quotation</div>
+          <div class="sig-accepted-banner" id="q-sig-accepted-banner">
+            <span class="acc-label"></span>
+          </div>
+          <div class="canvas-wrap" id="q-canvas-wrap">
+            <canvas id="q-sig-canvas"></canvas>
+            <div class="canvas-hint" id="q-canvas-hint">SIGN HERE</div>
+          </div>
+          <div class="sig-btn-row">
+            <button class="sig-btn sig-btn-clear" onclick="clearQuoteSig()">CLEAR</button>
+            <button class="sig-btn sig-btn-accept" id="q-accept-btn" onclick="acceptQuoteSig()" disabled>ACCEPT &amp; SIGN</button>
+          </div>
+          <img id="q-sig-image" style="display:none;max-width:300px;margin:10px auto;border:1px solid var(--border);" alt="Signature">
+        </div>
+
+        <!-- Print Signature -->
+        <div class="print-sig-grid">
+          <div>
+            <div class="print-sig-lbl">CLIENT SIGNATURE</div>
+            <div class="print-sig-line"></div>
+            <div class="print-sig-sub">Full Name: ___________________________</div>
+            <div class="print-sig-sub">Date: ___________________________</div>
+            <div class="print-sig-sub">Print Name: ___________________________</div>
+          </div>
+          <div>
+            <div class="print-sig-lbl">RENDER RENDER PTY LTD (RENDER KING)</div>
+            <div class="print-sig-line"></div>
+            <div class="print-sig-sub">Name: King Mannion</div>
+            <div class="print-sig-sub">Title: Director</div>
+            <div class="print-sig-sub">Date: ___________________________</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /doc-body -->
+
+    <div class="doc-footer">
+      <div><span class="gold">RENDER RENDER PTY LTD</span> — Trading as Render King</div>
+      <div>Phone: 0468 041 477 | Gold Coast, QLD</div>
+    </div>
+  </div><!-- /doc -->
+
+  <div class="quote-toolbar no-print">
+    <button class="tb-btn" onclick="saveQuoteToGitHub()">SAVE &amp; GET LINK</button>
+    <button class="tb-btn ghost" onclick="window.print()">PRINT / SAVE PDF</button>
+    <button class="tb-btn ghost" onclick="toggleEditMode()">EDIT MODE</button>
+    <button class="tb-btn ghost" onclick="clearQuoteForm()">CLEAR FORM</button>
+  </div>
+</div><!-- /tab-quote -->
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB 3: TERMS & CONDITIONS                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-terms" class="tab-content">
+  <div class="doc">
+    <div class="doc-header">
+      <div class="header-row">
+        <div class="brand-block">
+          <div class="doc-label">PAYMENT TERMS &amp; CONDITIONS</div>
+          <h1>RENDER KING</h1>
+          <div class="tagline">Render Render Pty Ltd — Gold Coast QLD</div>
+        </div>
+        <div class="contact-block">
+          <div class="cl"><strong>PHONE</strong> 0468 041 477</div>
+          <div class="cl"><strong>EMAIL</strong> admin@renderrender.com.au</div>
+          <div class="cl"><strong>WEB</strong> renderrender.com.au</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-body">
+
+      <!-- Section 1 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">1</div><h2>PAYMENT TERMS</h2></div>
+          <div class="clause"><span class="clause-num">1.1</span><span class="clause-text">All invoices issued by Render Render Pty Ltd (trading as Render King) are due and payable within seven (7) days from the date of issue unless otherwise agreed in writing.</span></div>
+          <div class="clause"><span class="clause-num">1.2</span><span class="clause-text">Payment must be made in full by the due date. Partial payments are not accepted unless a formal payment arrangement has been agreed upon in writing.</span></div>
+          <div class="clause"><span class="clause-num">1.3</span><span class="clause-text">All prices quoted are exclusive of GST unless explicitly stated otherwise.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">2</div><h2>PAYMENT STRUCTURE</h2></div>
+          <div class="clause"><span class="clause-num">2.1</span><span class="clause-text">For projects valued over $20,000 (ex GST): 5% booking deposit on acceptance, 50% material payment before materials are ordered, and 45% final payment on practical completion.</span></div>
+          <div class="clause"><span class="clause-num">2.2</span><span class="clause-text">For projects valued under $20,000 (ex GST): 10% booking deposit on acceptance, 50% material payment before materials are ordered, and 40% final payment on practical completion.</span></div>
+          <div class="clause"><span class="clause-num">2.3</span><span class="clause-text">Volume builder payment terms are negotiated separately and confirmed in writing prior to commencement.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">3</div><h2>OVERDUE PAYMENTS &amp; ENFORCEMENT</h2></div>
+          <div class="clause"><span class="clause-num">3.1</span><span class="clause-text">Any invoice that remains unpaid after the due date will incur a $220 administration fee.</span></div>
+          <div class="clause"><span class="clause-num">3.2</span><span class="clause-text">Interest will be charged at a rate of 3% per week on the outstanding balance from the date the invoice becomes overdue.</span></div>
+          <div class="clause"><span class="clause-num">3.3</span><span class="clause-text">Render Render Pty Ltd reserves the right to engage debt recovery services for any unpaid invoices. All associated recovery costs, including legal fees and collection agency charges, will be borne by the debtor.</span></div>
+          <div class="clause"><span class="clause-num">3.4</span><span class="clause-text">These terms are governed by the Building Industry Fairness (Security of Payment) Act 2017 (QLD). Render Render Pty Ltd reserves all rights under this legislation to recover payment for work performed.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">4</div><h2>SUSPENSION OF WORKS</h2></div>
+          <div class="clause"><span class="clause-num">4.1</span><span class="clause-text">Render Render Pty Ltd reserves the right to suspend works immediately if payment terms are breached.</span></div>
+          <div class="clause"><span class="clause-num">4.2</span><span class="clause-text">Any suspension due to non-payment may result in rescheduling and additional costs.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 5 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">5</div><h2>OWNERSHIP OF MATERIALS AND WORKS</h2></div>
+          <div class="clause"><span class="clause-num">5.1</span><span class="clause-text">All materials, finishes, and works supplied by Render Render Pty Ltd remain the property of the contractor until payment is received in full for all claims associated with the contract.</span></div>
+          <div class="clause"><span class="clause-num">5.2</span><span class="clause-text">Legal ownership transfers only once full settlement is cleared and confirmed.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 6 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">6</div><h2>WORK SUSPENSION AND SUBCONTRACTING LIMITATIONS</h2></div>
+          <div class="clause"><span class="clause-num">6.1</span><span class="clause-text">If any invoice remains unpaid beyond its due date or the agreed credit limit is exceeded, Render Render Pty Ltd reserves the right to stop work immediately.</span></div>
+          <div class="clause"><span class="clause-num">6.2</span><span class="clause-text">In the event of a payment dispute or unresolved claim, no third-party contractors, builders, or suppliers are to be engaged for continuation, rectification, or substitution of the contracted works until a written resolution is agreed upon by both parties.</span></div>
+          <div class="clause"><span class="clause-num">6.3</span><span class="clause-text">This clause ensures the integrity of the job and allows for proper dispute handling without interference or miscommunication.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 7 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">7</div><h2>VARIATIONS AND DELAYS</h2></div>
+          <div class="clause"><span class="clause-num">7.1</span><span class="clause-text">Any changes to the original scope of work must be submitted in writing and confirmed by both parties prior to execution.</span></div>
+          <div class="clause"><span class="clause-num">7.2</span><span class="clause-text">Additional work or alterations will be costed at the variation rate of $110/hr (ex GST) with a 2-hour minimum, or as a quoted variation, and billed accordingly.</span></div>
+          <div class="clause"><span class="clause-num">7.3</span><span class="clause-text">Delays caused by weather, site restrictions, or other trades may require rescheduling or additional charges, which will be communicated clearly at the time.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 8 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">8</div><h2>MINIMUM JOB VALUE</h2></div>
+          <div class="clause"><span class="clause-num">8.1</span><span class="clause-text">A minimum job value of $2,200 (ex GST) applies to all works undertaken by Render Render Pty Ltd.</span></div>
+          <div class="clause"><span class="clause-num">8.2</span><span class="clause-text">Any works quoted below this threshold will be invoiced at the minimum job value.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 9 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">9</div><h2>WORKMANSHIP WARRANTY</h2></div>
+          <div class="clause"><span class="clause-num">9.1</span><span class="clause-text">All workmanship is covered under statutory warranties as required by Queensland law.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 10 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">10</div><h2>SUPPLIER PRODUCT WARRANTY</h2></div>
+          <div class="clause"><span class="clause-num">10.1</span><span class="clause-text">Render Render Pty Ltd uses only premium, industry-leading products and materials supplied by trusted manufacturers including Dulux Acratex systems.</span></div>
+          <div class="clause"><span class="clause-num">10.2</span><span class="clause-text">All finishes, coatings, and specialised products used in your project are backed by the warranties of their respective suppliers.</span></div>
+          <div class="clause"><span class="clause-num">10.3</span><span class="clause-text">We confidently pass these protections on to you, ensuring that your investment is safeguarded by both our workmanship and the quality of the materials we use.</span></div>
+        </div>
+      </div>
+
+      <!-- Section 11 -->
+      <div class="section">
+        <div class="tc-section"><div class="tc-section-head"><div class="tc-section-num">11</div><h2>TERMINATION</h2></div>
+          <div class="clause"><span class="clause-num">11.1</span><span class="clause-text">Render Render Pty Ltd reserves the right to terminate this agreement if payment terms are repeatedly breached, site conditions become unworkable, or if outside contractors are engaged before a written dispute is resolved.</span></div>
+          <div class="clause"><span class="clause-num">11.2</span><span class="clause-text">Upon termination, any work completed up to that point will be invoiced and is payable immediately.</span></div>
+        </div>
+      </div>
+
+      <div class="end-mark">— END OF TERMS —</div>
+
+      <!-- SIGNATURE -->
+      <div class="tc-sig-section">
+        <div class="tc-sig-title">ACKNOWLEDGEMENT &amp; ACCEPTANCE</div>
+        <div class="callout callout-gold" style="margin-bottom:24px;">
+          <strong>By signing below, the client acknowledges they have read, understood, and agree to all Payment Terms &amp; Conditions set out in this document. These terms form part of the contract between the client and Render Render Pty Ltd (trading as Render King).</strong>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div class="field-lbl" style="margin-bottom:4px;">PROJECT / QUOTE REFERENCE</div>
+          <div class="field-val" contenteditable="true">&nbsp;</div>
+        </div>
+        <div class="print-sig-grid">
+          <div>
+            <div class="print-sig-lbl">CLIENT SIGNATURE</div>
+            <div class="print-sig-line"></div>
+            <div class="print-sig-sub">Full Name: ___________________________</div>
+            <div class="print-sig-sub">Date: ___________________________</div>
+            <div class="print-sig-sub">Print Name: ___________________________</div>
+          </div>
+          <div>
+            <div class="print-sig-lbl">RENDER RENDER PTY LTD (RENDER KING)</div>
+            <div class="print-sig-line"></div>
+            <div class="print-sig-sub">Name: King Mannion</div>
+            <div class="print-sig-sub">Title: Director</div>
+            <div class="print-sig-sub">Date: ___________________________</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /doc-body -->
+
+    <div class="doc-footer">
+      <div><span class="gold">RENDER RENDER PTY LTD</span> — Trading as Render King — Payment Terms &amp; Conditions</div>
+      <div>Phone: 0468 041 477 | Gold Coast, QLD</div>
+    </div>
+  </div><!-- /doc -->
+
+  <div class="quote-toolbar no-print">
+    <button class="tb-btn" onclick="window.print()">PRINT / SAVE PDF</button>
+  </div>
+</div><!-- /tab-terms -->
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB 4: AI AGENT                                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-ai" class="tab-content">
+  <div class="page">
+    <div class="card">
+      <div class="card-header"><h2>AI AGENT</h2><span class="badge">COMING SOON</span></div>
+      <div class="card-body">
+        <div class="callout callout-gold" style="margin-bottom:16px;">
+          <strong>PLACEHOLDER:</strong> The Render King AI Agent will be integrated here. This module will handle automated quoting, job extraction from plain-text descriptions, margin checking, and quote population.
+        </div>
+        <div class="ai-chat-area" id="ai-chat-area">
+          <div class="ai-message ai-system">Render King AI Agent — Coming Soon. This space is reserved for the AI-powered quoting and job management assistant.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-ai -->
+
+<script src="calculator.js"></script>
+<script src="quote.js"></script>
+
+</body>
+</html>
