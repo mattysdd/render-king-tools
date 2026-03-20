@@ -662,6 +662,101 @@ button { font-family:'Inter',sans-serif; }
   font-size:10px; color:var(--grey-mid);
 }
 
+/* ═══ AGENT FORM ═══ */
+.agent-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+}
+@media(max-width:700px) { .agent-grid { grid-template-columns:1fr; } }
+.agent-field { display:flex; flex-direction:column; gap:4px; }
+.agent-field label {
+  font-size:10px; font-weight:700; letter-spacing:0.5px;
+  color:var(--grey-mid); text-transform:uppercase;
+}
+.agent-field .opt-label { color:var(--grey-mid); font-weight:400; font-size:9px; }
+.agent-field input, .agent-field select, .agent-field textarea {
+  background:var(--surface); border:1px solid var(--border); color:var(--text);
+  padding:10px 12px; border-radius:6px; font-size:13px; font-family:'Inter',sans-serif;
+  transition:border-color .2s;
+}
+.agent-field input:focus, .agent-field select:focus, .agent-field textarea:focus {
+  border-color:var(--gold); outline:none;
+}
+.agent-field textarea { resize:vertical; min-height:80px; }
+.mic-wrap {
+  display:flex; align-items:center; gap:6px;
+}
+.mic-wrap input, .mic-wrap textarea { flex:1; }
+.mic-btn {
+  background:none; border:1px solid var(--gold-dark); color:var(--gold);
+  width:36px; height:36px; border-radius:6px; cursor:pointer;
+  font-size:16px; display:flex; align-items:center; justify-content:center;
+  transition:all .2s; flex-shrink:0;
+}
+.mic-btn:hover { background:var(--gold); color:var(--bg); }
+.mic-btn.mic-active {
+  background:var(--red); border-color:var(--red); color:white;
+  animation:mic-pulse 1s infinite;
+}
+@keyframes mic-pulse {
+  0%, 100% { opacity:1; }
+  50% { opacity:0.5; }
+}
+.agent-section {
+  background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  padding:16px; margin-bottom:12px;
+}
+.agent-section-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);
+}
+.agent-section-title {
+  font-size:12px; font-weight:700; color:var(--gold); letter-spacing:1px;
+}
+.agent-success-banner {
+  background:var(--gold); color:var(--bg); text-align:center;
+  padding:14px 20px; font-weight:700; font-size:13px; letter-spacing:1px;
+  border-radius:8px; margin-bottom:16px;
+}
+.voice-indicator {
+  position:fixed; bottom:100px; left:50%; transform:translateX(-50%);
+  background:var(--red); color:white; padding:10px 24px;
+  border-radius:20px; font-weight:700; font-size:12px; letter-spacing:1px;
+  z-index:9999; animation:mic-pulse 1s infinite;
+}
+.agent-actions {
+  display:flex; flex-direction:column; gap:10px; margin-top:16px;
+}
+.agent-populate-btn {
+  background:var(--gold); color:var(--bg); border:none;
+  padding:16px 24px; font-size:14px; font-weight:800; letter-spacing:1.5px;
+  border-radius:8px; cursor:pointer; text-transform:uppercase;
+  font-family:'Inter',sans-serif; transition:all .2s;
+}
+.agent-populate-btn:hover { background:var(--gold-dark); }
+.agent-clear-btn {
+  background:none; border:1px solid var(--border); color:var(--grey-mid);
+  padding:10px 20px; font-size:11px; font-weight:600; letter-spacing:1px;
+  border-radius:6px; cursor:pointer; text-transform:uppercase;
+  font-family:'Inter',sans-serif; transition:all .2s;
+}
+.agent-clear-btn:hover { border-color:var(--red); color:var(--red); }
+.agent-upload-zone { padding:8px 0; }
+.upload-hint { font-size:11px; color:var(--grey-mid); margin-bottom:8px; }
+.agent-file-list {
+  display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;
+}
+.agent-file-item {
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface); border:1px solid var(--border);
+  padding:8px 12px; border-radius:6px; font-size:12px;
+}
+.agent-file-thumb {
+  width:48px; height:48px; object-fit:cover; border-radius:4px;
+}
+.agent-file-icon { font-size:20px; }
+.agent-file-name { color:var(--text); font-weight:500; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.agent-file-size { color:var(--grey-mid); font-size:10px; }
+
 /* ═══ PRINT ═══ */
 .no-print {}
 @media print {

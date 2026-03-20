@@ -558,22 +558,165 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- TAB 4: AI AGENT                                             -->
+<!-- TAB 4: AI AGENT — GUIDED JOB CAPTURE FORM                  -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <div id="tab-ai" class="tab-content">
   <div class="page">
+
+    <!-- SUCCESS BANNER -->
+    <div id="agent-success-banner" class="agent-success-banner" style="display:none;">QUOTE POPULATED — Review and confirm before saving</div>
+
+    <!-- SECTION 1: CLIENT DETAILS -->
     <div class="card">
-      <div class="card-header"><h2>AI AGENT</h2><span class="badge">COMING SOON</span></div>
+      <div class="card-header"><h2>CLIENT DETAILS</h2></div>
       <div class="card-body">
-        <div class="callout callout-gold" style="margin-bottom:16px;">
-          <strong>PLACEHOLDER:</strong> The Render King AI Agent will be integrated here. This module will handle automated quoting, job extraction from plain-text descriptions, margin checking, and quote population.
-        </div>
-        <div class="ai-chat-area" id="ai-chat-area">
-          <div class="ai-message ai-system">Render King AI Agent — Coming Soon. This space is reserved for the AI-powered quoting and job management assistant.</div>
+        <div class="agent-grid">
+          <div class="agent-field">
+            <label>CLIENT NAME</label>
+            <div class="mic-wrap">
+              <input type="text" id="ag-client-name" placeholder="Client or company name">
+              <button class="mic-btn" onclick="startVoice('ag-client-name')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>PHONE NUMBER</label>
+            <div class="mic-wrap">
+              <input type="tel" id="ag-phone" placeholder="0400 000 000">
+              <button class="mic-btn" onclick="startVoice('ag-phone','phone')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>EMAIL ADDRESS</label>
+            <div class="mic-wrap">
+              <input type="email" id="ag-email" placeholder="client@email.com">
+              <button class="mic-btn" onclick="startVoice('ag-email','email')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>PROJECT ADDRESS</label>
+            <div class="mic-wrap">
+              <input type="text" id="ag-address" placeholder="Full site address">
+              <button class="mic-btn" onclick="startVoice('ag-address')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>SITE CONTACT <span class="opt-label">(OPTIONAL)</span></label>
+            <div class="mic-wrap">
+              <input type="text" id="ag-site-contact" placeholder="TBA if blank">
+              <button class="mic-btn" onclick="startVoice('ag-site-contact')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>BUILDER NAME <span class="opt-label">(OPTIONAL)</span></label>
+            <div class="mic-wrap">
+              <input type="text" id="ag-builder-name" placeholder="Builder company name">
+              <button class="mic-btn" onclick="startVoice('ag-builder-name')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>BUILDER TYPE</label>
+            <select id="ag-builder-type">
+              <option value="volume">Volume Builder</option>
+              <option value="standard" selected>Standard Builder</option>
+              <option value="luxury">Luxury Builder</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- SECTION 2: JOB SECTIONS -->
+    <div class="card">
+      <div class="card-header"><h2>JOB SECTIONS</h2><span class="badge">MULTI-SECTION SUPPORT</span></div>
+      <div class="card-body">
+        <div id="ag-sections-wrap"></div>
+        <button class="add-surface-btn" onclick="addAgentSection()" style="margin-top:12px;">+ ADD SECTION</button>
+      </div>
+    </div>
+
+    <!-- SECTION 3: JOB DETAILS -->
+    <div class="card">
+      <div class="card-header"><h2>JOB DETAILS</h2></div>
+      <div class="card-body">
+        <div class="agent-grid">
+          <div class="agent-field">
+            <label>COLOUR / FINISH</label>
+            <div class="mic-wrap">
+              <input type="text" id="ag-colour" placeholder="TBA if blank">
+              <button class="mic-btn" onclick="startVoice('ag-colour')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <label>START DATE</label>
+            <input type="date" id="ag-start-date">
+          </div>
+          <div class="agent-field">
+            <label>DURATION</label>
+            <div class="mic-wrap">
+              <input type="text" id="ag-duration" placeholder="TBA if blank">
+              <button class="mic-btn" onclick="startVoice('ag-duration')" title="Voice input">&#127908;</button>
+            </div>
+          </div>
+        </div>
+        <div class="agent-field" style="margin-top:12px;">
+          <label>SCOPE DESCRIPTION</label>
+          <div class="mic-wrap">
+            <textarea id="ag-scope" rows="4" placeholder="Free text description of work — e.g. Full acrylic render to new build, ground and upper floor..."></textarea>
+            <button class="mic-btn" onclick="startVoice('ag-scope')" title="Voice input" style="align-self:flex-start;margin-top:4px;">&#127908;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: ATTACHMENTS -->
+    <div class="card">
+      <div class="card-header"><h2>PLANS / PHOTOS / SITE NOTES</h2><span class="badge">OPTIONAL</span></div>
+      <div class="card-body">
+        <div class="agent-upload-zone" id="ag-upload-zone">
+          <input type="file" id="ag-file-input" multiple accept="image/*,.pdf,.doc,.docx" onchange="handleAgentFiles(this.files)" style="display:none;">
+          <button class="add-surface-btn" onclick="document.getElementById('ag-file-input').click()" style="margin-bottom:12px;">UPLOAD FILES</button>
+          <div class="upload-hint">Accepts JPG, PNG, PDF, DOC — multiple files supported</div>
+          <div id="ag-file-list" class="agent-file-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: QUOTE SETTINGS -->
+    <div class="card">
+      <div class="card-header"><h2>QUOTE SETTINGS</h2></div>
+      <div class="card-body">
+        <div class="agent-grid">
+          <div class="agent-field">
+            <label>QUOTE NUMBER</label>
+            <input type="text" id="ag-quote-number" placeholder="Auto-generated">
+          </div>
+          <div class="agent-field">
+            <label>PREPARED BY</label>
+            <input type="text" id="ag-prepared-by" value="King Mannion">
+          </div>
+          <div class="agent-field">
+            <label>VALIDITY</label>
+            <select id="ag-validity">
+              <option value="24">24 Hours</option>
+              <option value="48" selected>48 Hours</option>
+              <option value="168">7 Days</option>
+              <option value="336">14 Days</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VOICE INDICATOR -->
+    <div id="ag-voice-indicator" class="voice-indicator" style="display:none;">&#127908; LISTENING...</div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="agent-actions">
+      <button class="agent-populate-btn" onclick="populateQuoteFromAgent()">POPULATE QUOTE &amp; CALCULATOR</button>
+      <button class="agent-clear-btn" onclick="clearAgentForm()">CLEAR FORM</button>
+    </div>
+
+  </div><!-- /page -->
 </div><!-- /tab-ai -->
 
 
@@ -935,6 +1078,7 @@
 
 <script src="calculator.js"></script>
 <script src="quote.js"></script>
+<script src="agent.js"></script>
 
 </body>
 </html>
