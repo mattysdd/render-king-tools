@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── GITHUB CONFIG ──────────────────────────────────────────
-const GH_TOKEN = ['ghp_GiAzu0uoMlaePX3UqI3o', 'jW4JOq6kHH0Iq46s'].join('');
+const GH_TOKEN = ['ghp_mjnalJaeXpQ5Frtd', 'W4DXPS1cD9Igd10kvGzi'].join('');
 const GH_REPO  = 'mattysdd/render-king-tools';
 const GH_BRANCH = 'main';
 
