@@ -1,0 +1,19 @@
+{
+  "quoteId": "RK-TEST-TOKEN-CHECK",
+  "client": "Token Test Client",
+  "project": "1 Test Street, Gold Coast",
+  "date": "2026-03-21",
+  "lines": [
+    {
+      "desc": "Acrylic Render \u2014 Brick/Hebel",
+      "qty": 100,
+      "unit": "sqm",
+      "rate": 55,
+      "total": 5500
+    }
+  ],
+  "subtotal": 5500,
+  "gst": 550,
+  "total": 6050,
+  "notes": "Token verification test \u2014 safe to delete"
+}
