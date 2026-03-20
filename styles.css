@@ -642,6 +642,26 @@ button { font-family:'Inter',sans-serif; }
 }
 .btn-remove-line:hover { color:var(--red) !important; }
 
+/* ═══ MARKET BAR ═══ */
+.market-bar-wrap { padding:2px 0; }
+.market-bar-track {
+  position:relative; height:8px; background:var(--border); border-radius:4px;
+  overflow:visible;
+}
+.market-bar-fill {
+  height:100%; border-radius:4px;
+  background:linear-gradient(90deg, var(--red), var(--amber), var(--green));
+}
+.market-bar-marker {
+  position:absolute; top:-4px; width:3px; height:16px;
+  background:var(--gold); border-radius:2px; transform:translateX(-50%);
+  box-shadow:0 0 6px rgba(201,168,76,0.5);
+}
+.market-bar-labels {
+  display:flex; justify-content:space-between; margin-top:4px;
+  font-size:10px; color:var(--grey-mid);
+}
+
 /* ═══ PRINT ═══ */
 .no-print {}
 @media print {

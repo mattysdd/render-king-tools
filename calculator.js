@@ -13,98 +13,177 @@ function switchTab(tabId) {
 }
 
 // ── LOCKED DEFAULTS ────────────────────────────────────────
-const LOCKED_DEFAULTS = {
-  subbieRate: 27,
-  variationRate: 110,
-  minJob: 2200,
-  diff1: 0,
-  diff2: 5,
-  diff3: 12,
-  diff4: 22,
-  diff5: 35,
-  volFloor: 47
+var LOCKED_DEFAULTS = {
+  'set-subbie-rate': 27,
+  'set-variation-rate': 110,
+  'set-min-job': 2200,
+  'set-diff-1': 0,
+  'set-diff-2': 5,
+  'set-diff-3': 12,
+  'set-diff-4': 22,
+  'set-diff-5': 35,
+  'set-vol-floor': 47,
+  'set-sub-brick_hebel': 55,
+  'set-sub-eps_blueboard': 75,
+  'set-sub-specialty': 110,
+  'set-sub-hebel_supply': 110,
+  'set-sub-hebel_full': 165,
+  'set-sub-eps_supply': 85,
+  'set-sub-eps_full': 150,
+  'set-sub-slab_build': 15,
+  'set-mat-brick_hebel': 5.85,
+  'set-mat-eps_blueboard': 7.50,
+  'set-mat-specialty': 9.00,
+  'set-mat-hebel_supply': 12.00,
+  'set-mat-hebel_full': 15.00,
+  'set-mat-eps_supply': 8.00,
+  'set-mat-eps_full': 12.00,
+  'set-mat-slab_build': 2.00,
+  'set-margin-volume': 27.5,
+  'set-margin-standard': 40,
+  'set-margin-luxury': 40,
+  'set-mkt-brick_hebel-min': 40,
+  'set-mkt-brick_hebel-max': 70,
+  'set-mkt-eps_blueboard-min': 70,
+  'set-mkt-eps_blueboard-max': 120,
+  'set-mkt-specialty-min': 100,
+  'set-mkt-specialty-max': 180,
+  'set-mkt-hebel_supply-min': 90,
+  'set-mkt-hebel_supply-max': 140,
+  'set-mkt-hebel_full-min': 140,
+  'set-mkt-hebel_full-max': 200,
+  'set-mkt-eps_supply-min': 75,
+  'set-mkt-eps_supply-max': 110,
+  'set-mkt-eps_full-min': 120,
+  'set-mkt-eps_full-max': 180
 };
 
-// ── SUBSTRATE TYPES ────────────────────────────────────────
-const SUBSTRATES = {
-  'brick_hebel':        { name:'Brick / Hebel',                          baseRate:55,  unit:'sqm', matCostPerSqm:5.85 },
-  'eps_blueboard':      { name:'EPS / Blueboard',                        baseRate:75,  unit:'sqm', matCostPerSqm:7.50 },
-  'specialty':          { name:'Specialty / Architectural',              baseRate:110, unit:'sqm', matCostPerSqm:9.00 },
-  'hebel_supply':       { name:'Hebel Supply + Install',                 baseRate:110, unit:'sqm', matCostPerSqm:12.00 },
-  'hebel_full':         { name:'Full Hebel System (Supply+Install+Render)', baseRate:165, unit:'sqm', matCostPerSqm:15.00 },
-  'eps_supply':         { name:'EPS Supply + Install',                   baseRate:85,  unit:'sqm', matCostPerSqm:8.00 },
-  'eps_full':           { name:'Full EPS System (Supply+Install+Render)',   baseRate:150, unit:'sqm', matCostPerSqm:12.00 },
-  'slab_build':         { name:'Slab Build (Linear Metre)',              baseRate:15,  unit:'lm',  matCostPerSqm:2.00 }
+// ── SUBSTRATE DEFINITIONS ──────────────────────────────────
+// baseRate and matCostPerSqm are read dynamically from settings
+var SUBSTRATE_KEYS = {
+  'brick_hebel':   { name:'Brick / Hebel',                             unit:'sqm', subId:'set-sub-brick_hebel',   matId:'set-mat-brick_hebel' },
+  'eps_blueboard': { name:'EPS / Blueboard',                           unit:'sqm', subId:'set-sub-eps_blueboard', matId:'set-mat-eps_blueboard' },
+  'specialty':     { name:'Specialty / Architectural',                 unit:'sqm', subId:'set-sub-specialty',     matId:'set-mat-specialty' },
+  'hebel_supply':  { name:'Hebel Supply + Install',                    unit:'sqm', subId:'set-sub-hebel_supply',  matId:'set-mat-hebel_supply' },
+  'hebel_full':    { name:'Full Hebel System (Supply+Install+Render)', unit:'sqm', subId:'set-sub-hebel_full',    matId:'set-mat-hebel_full' },
+  'eps_supply':    { name:'EPS Supply + Install',                      unit:'sqm', subId:'set-sub-eps_supply',    matId:'set-mat-eps_supply' },
+  'eps_full':      { name:'Full EPS System (Supply+Install+Render)',   unit:'sqm', subId:'set-sub-eps_full',      matId:'set-mat-eps_full' },
+  'slab_build':    { name:'Slab Build (Linear Metre)',                 unit:'lm',  subId:'set-sub-slab_build',    matId:'set-mat-slab_build' }
 };
 
 // ── DIFFICULTY LEVELS ──────────────────────────────────────
-const DIFFICULTY_LEVELS = {
-  1: { name:'Volume / Ground',    desc:'Standard ground floor, flat walls, easy access, no scaffold' },
-  2: { name:'Lower Complexity',   desc:'Some height, minor scaffold or planks, limited cutting-in' },
-  3: { name:'Upper Storey',       desc:'Full upper storey, scaffold required, moderate complexity' },
-  4: { name:'Detail / Complex',   desc:'Curves, reveals, complex profiles, tight access, multi-level scaffold' },
-  5: { name:'Luxury / Architectural', desc:'Maximum complexity, full scaffold, architectural detail, premium finish' }
+var DIFFICULTY_LEVELS = {
+  1: { name:'Volume / Ground',       desc:'Standard ground floor, flat walls, easy access, no scaffold' },
+  2: { name:'Lower Complexity',      desc:'Some height, minor scaffold or planks, limited cutting-in' },
+  3: { name:'Upper Storey',          desc:'Full upper storey, scaffold required, moderate complexity' },
+  4: { name:'Detail / Complex',      desc:'Curves, reveals, complex profiles, tight access, multi-level scaffold' },
+  5: { name:'Luxury / Architectural',desc:'Maximum complexity, full scaffold, architectural detail, premium finish' }
 };
 
 // ── BUILDER TIERS ──────────────────────────────────────────
-const BUILDER_TIERS = {
-  volume:   { name:'Volume Builder',   marginTarget:0.275, marginMin:0.25, marginMax:0.30, minJob:2200 },
-  standard: { name:'Standard Builder',  marginTarget:0.40,  marginMin:0.40, marginMax:0.50, minJob:2200 },
-  luxury:   { name:'Luxury Builder',    marginTarget:0.40,  marginMin:0.40, marginMax:0.55, minJob:2200 }
+var BUILDER_TIERS = {
+  volume:   { name:'Volume Builder',   marginSettingId:'set-margin-volume',   marginMin:0.25, marginMax:0.30, minJob:2200 },
+  standard: { name:'Standard Builder',  marginSettingId:'set-margin-standard', marginMin:0.40, marginMax:0.50, minJob:2200 },
+  luxury:   { name:'Luxury Builder',    marginSettingId:'set-margin-luxury',   marginMin:0.40, marginMax:0.55, minJob:2200 }
 };
 
 let currentTier = 'standard';
 
 // ── DULUX MATERIAL ESTIMATES (from Dulux Pack Card 2026) ───
-const DULUX_MATERIALS = {
-  'AcraPrime Water Base 15L':          { unitCost:104.64, coverageSqm:100, unit:'15L pail' },
-  'Powerfinish 15L':                   { unitCost:73.57,  coverageSqm:16.7, unit:'15L pail' },
-  'Acraskin Low Gloss 15L':            { unitCost:143.84, coverageSqm:100, unit:'15L pail' },
-  'Acrabuild Medium Build 20kg':       { unitCost:11.60,  coverageSqm:5,   unit:'20kg bag' },
-  'Renderwall Joint & Skim 20kg':      { unitCost:27.13,  coverageSqm:7.7, unit:'20kg bag' },
-  '200mm Green Mesh Tape 50m':         { unitCost:21.33,  coverageSqm:100, unit:'50m roll' },
-  'PreTape Mask Film 2700mm':          { unitCost:8.65,   coverageSqm:100, unit:'roll' },
-  'Touch Up Can Kit':                  { unitCost:4.58,   coverageSqm:200, unit:'kit' },
-  'Slim Trim 3000mm':                  { unitCost:2.27,   coverageSqm:33.3, unit:'3m piece' }
-};
+var DULUX_MATERIALS = [
+  { name:'AcraPrime Water Base 15L',    costPer100:104.64, coverPer100:1, unit:'pail' },
+  { name:'Powerfinish 15L',             costPer100:441.42, coverPer100:6, unit:'pails' },
+  { name:'200mm Green Mesh Tape 50m',   costPer100:21.33,  coverPer100:1, unit:'roll' },
+  { name:'PreTape Mask Film 2700mm',    costPer100:8.65,   coverPer100:1, unit:'roll' },
+  { name:'Touch Up Can Kit',            costPer100:2.29,   coverPer100:0.5, unit:'kit' },
+  { name:'Slim Trim 3000mm',            costPer100:6.81,   coverPer100:3, unit:'pcs' }
+];
 
 // ── HELPERS ────────────────────────────────────────────────
-const fmt = n => {
+var fmt = n => {
   if (n === 0 || isNaN(n)) return '$0.00';
   return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
 
 function getSettingVal(id) {
-  return parseFloat(document.getElementById(id)?.value) || 0;
+  const el = document.getElementById(id);
+  if (!el) return LOCKED_DEFAULTS[id] || 0;
+  return parseFloat(el.value) || 0;
 }
 
 function getDiffAddon(level) {
   return getSettingVal('set-diff-' + level);
 }
 
+function getSubstrateBaseRate(subKey) {
+  const sub = SUBSTRATE_KEYS[subKey];
+  return sub ? getSettingVal(sub.subId) : 0;
+}
+
+function getSubstrateMatCost(subKey) {
+  const sub = SUBSTRATE_KEYS[subKey];
+  return sub ? getSettingVal(sub.matId) : 0;
+}
+
+function getTierMarginTarget(tierKey) {
+  const tier = BUILDER_TIERS[tierKey];
+  if (!tier) return 0.40;
+  return getSettingVal(tier.marginSettingId) / 100;
+}
+
+// ── LOCALSTORAGE PERSISTENCE ──────────────────────────────
+var STORAGE_KEY = 'rk_settings';
+
+function saveSettings() {
+  const data = {};
+  Object.keys(LOCKED_DEFAULTS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data[id] = parseFloat(el.value);
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadSettings() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    Object.keys(data).forEach(id => {
+      const el = document.getElementById(id);
+      if (el && data[id] !== undefined && data[id] !== null) {
+        el.value = data[id];
+      }
+    });
+  } catch(e) { /* ignore corrupt data */ }
+}
+
+function resetAllSettings() {
+  if (!confirm('Reset ALL settings to locked defaults? This cannot be undone.')) return;
+  Object.keys(LOCKED_DEFAULTS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = LOCKED_DEFAULTS[id];
+  });
+  localStorage.removeItem(STORAGE_KEY);
+  checkDrift();
+  recalc();
+}
+
 // ── STOP-CHECK / DRIFT DETECTION ──────────────────────────
 function checkDrift() {
-  const checks = [
-    { id:'set-subbie-rate',    locked: LOCKED_DEFAULTS.subbieRate },
-    { id:'set-variation-rate', locked: LOCKED_DEFAULTS.variationRate },
-    { id:'set-min-job',        locked: LOCKED_DEFAULTS.minJob },
-    { id:'set-diff-1',         locked: LOCKED_DEFAULTS.diff1 },
-    { id:'set-diff-2',         locked: LOCKED_DEFAULTS.diff2 },
-    { id:'set-diff-3',         locked: LOCKED_DEFAULTS.diff3 },
-    { id:'set-diff-4',         locked: LOCKED_DEFAULTS.diff4 },
-    { id:'set-diff-5',         locked: LOCKED_DEFAULTS.diff5 },
-    { id:'set-vol-floor',      locked: LOCKED_DEFAULTS.volFloor }
-  ];
-
   let drifted = false;
-  checks.forEach(c => {
-    const el = document.getElementById(c.id);
-    const val = parseFloat(el?.value) || 0;
-    if (val !== c.locked) {
+  let driftDetails = [];
+
+  Object.keys(LOCKED_DEFAULTS).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const val = parseFloat(el.value);
+    const locked = LOCKED_DEFAULTS[id];
+    if (val !== locked) {
       drifted = true;
-      if (el) el.style.borderColor = 'var(--gold)';
+      el.style.borderColor = 'var(--gold)';
+      driftDetails.push(id);
     } else {
-      if (el) el.style.borderColor = '';
+      el.style.borderColor = '';
     }
   });
 
@@ -112,6 +191,14 @@ function checkDrift() {
   if (banner) {
     banner.classList.toggle('visible', drifted);
   }
+  return drifted;
+}
+
+// ── SETTING CHANGE HANDLER ────────────────────────────────
+function onSettingChange() {
+  saveSettings();
+  checkDrift();
+  recalc();
 }
 
 // ── BUILDER TIER SELECTION ─────────────────────────────────
@@ -134,8 +221,9 @@ function addSurfaceLine(defaultSubstrate, defaultDiff) {
   const diff = defaultDiff || 1;
 
   let subOptions = '';
-  Object.entries(SUBSTRATES).forEach(([key, val]) => {
-    subOptions += `<option value="${key}" ${key===sub?'selected':''}>${val.name} — from $${val.baseRate}/${val.unit}</option>`;
+  Object.entries(SUBSTRATE_KEYS).forEach(([key, val]) => {
+    const rate = getSubstrateBaseRate(key);
+    subOptions += `<option value="${key}" ${key===sub?'selected':''}>${val.name} — from $${rate}/${val.unit}</option>`;
   });
 
   let diffOptions = '';
@@ -183,7 +271,8 @@ function removeSurfaceLine(id) {
 
 function updateAddBtn() {
   const count = document.querySelectorAll('.surface-line').length;
-  document.getElementById('add-surface-btn').style.display = count >= 10 ? 'none' : 'block';
+  const btn = document.getElementById('add-surface-btn');
+  if (btn) btn.style.display = count >= 10 ? 'none' : 'block';
 }
 
 // ── MAIN RECALC ────────────────────────────────────────────
@@ -197,12 +286,12 @@ function recalc() {
     const name = document.getElementById('name-'+id)?.value || ('Line ' + id);
 
     if (subKey && qty > 0) {
-      const substrate = SUBSTRATES[subKey];
+      const substrate = SUBSTRATE_KEYS[subKey];
       const diffAddon = getDiffAddon(diffLevel);
-      const baseRate = substrate.baseRate;
+      const baseRate = getSubstrateBaseRate(subKey);
       const totalRate = baseRate + diffAddon;
       const unit = substrate.unit;
-      const matCostPerUnit = substrate.matCostPerSqm;
+      const matCostPerUnit = getSubstrateMatCost(subKey);
 
       lines.push({
         id, name, subKey, substrate, diffLevel, diffAddon,
@@ -212,13 +301,16 @@ function recalc() {
   });
 
   const hasLines = lines.length > 0;
-  document.getElementById('empty-state').style.display = hasLines ? 'none' : 'block';
-  document.getElementById('results-content').style.display = hasLines ? 'block' : 'none';
+  const emptyEl = document.getElementById('empty-state');
+  const resultsEl = document.getElementById('results-content');
+  if (emptyEl) emptyEl.style.display = hasLines ? 'none' : 'block';
+  if (resultsEl) resultsEl.style.display = hasLines ? 'block' : 'none';
   if (!hasLines) { clearResults(); return; }
 
   const subbieRate = getSettingVal('set-subbie-rate');
   const minJob = getSettingVal('set-min-job');
   const volFloor = getSettingVal('set-vol-floor');
+  const tierMarginTarget = getTierMarginTarget(currentTier);
   const tier = BUILDER_TIERS[currentTier];
 
   // Calculate per-line costs
@@ -234,7 +326,7 @@ function recalc() {
     l.costPerUnit = l.lineCost / l.qty;
 
     // Recommended sell at tier target margin
-    l.sellAtTarget = l.lineCost / (1 - tier.marginTarget);
+    l.sellAtTarget = l.lineCost / (1 - tierMarginTarget);
     l.sellRateAtTarget = l.sellAtTarget / l.qty;
 
     // Volume builder floor check
@@ -257,19 +349,21 @@ function recalc() {
   const costPerUnit = totalQty > 0 ? totalCost / totalQty : 0;
 
   // Volume floor warning
-  document.getElementById('vol-floor-warning').style.display = volFloorActive ? 'block' : 'none';
+  const vfwEl = document.getElementById('vol-floor-warning');
+  if (vfwEl) vfwEl.style.display = volFloorActive ? 'block' : 'none';
 
   // Summary stats
-  document.getElementById('r-total-sqm').textContent = totalQty.toFixed(1) + (lines[0]?.unit === 'lm' ? ' lm' : ' sqm');
-  document.getElementById('r-mat-cost').textContent = fmt(totalMatCost);
-  document.getElementById('r-mat-sub').textContent = 'Dulux system estimate';
-  document.getElementById('r-lab-cost').textContent = fmt(totalLabCost);
-  document.getElementById('r-lab-sub').textContent = `@ ${fmt(subbieRate)}/sqm subbie rate`;
-  document.getElementById('r-job-cost').textContent = fmt(totalCost);
-  document.getElementById('r-sqm-cost').textContent = `${fmt(costPerUnit)}/unit blended cost`;
+  const unitLabel = lines[0]?.unit === 'lm' ? ' lm' : ' sqm';
+  setText('r-total-sqm', totalQty.toFixed(1) + unitLabel);
+  setText('r-mat-cost', fmt(totalMatCost));
+  setText('r-mat-sub', 'Dulux system estimate');
+  setText('r-lab-cost', fmt(totalLabCost));
+  setText('r-lab-sub', `@ ${fmt(subbieRate)}/sqm subbie rate`);
+  setText('r-job-cost', fmt(totalCost));
+  setText('r-sqm-cost', `${fmt(costPerUnit)}/unit blended cost`);
 
   // Recommended sell price
-  renderRecommendedSell(lines, tier, totalCost, totalQty);
+  renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQty);
 
   // Custom sell price check
   const customSell = parseFloat(document.getElementById('custom-sell')?.value) || 0;
@@ -278,24 +372,37 @@ function recalc() {
     const customProfit = customSell - totalCost;
     const cls = customMargin >= 40 ? 'color:var(--green)' : customMargin >= 30 ? 'color:var(--amber)' : 'color:var(--red)';
     const label = customMargin >= 40 ? 'TARGET MET' : customMargin >= 30 ? 'BELOW TARGET' : 'DANGER ZONE';
-    document.getElementById('custom-margin-display').innerHTML =
-      `<span style="${cls};font-weight:800;">${customMargin.toFixed(1)}% MARGIN</span> — Profit: ${fmt(customProfit)} — <strong>${label}</strong>`;
+    setHTML('custom-margin-display',
+      `<span style="${cls};font-weight:800;">${customMargin.toFixed(1)}% MARGIN</span> — Profit: ${fmt(customProfit)} — <strong>${label}</strong>`);
   } else {
-    document.getElementById('custom-margin-display').textContent = 'Enter a sell price to see your actual margin';
+    setText('custom-margin-display', 'Enter a sell price to see your actual margin');
   }
 
   // Margin bands
   renderMarginBands(totalCost, totalQty);
 
   // Per-line breakdown
-  renderLineBreakdown(lines, tier);
+  renderLineBreakdown(lines, tier, tierMarginTarget);
+
+  // Market rate comparison
+  renderMarketComparison(lines, tierMarginTarget);
 
   // Material estimate
   renderMaterialEstimate(lines, totalQty);
 }
 
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function setHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
 // ── RECOMMENDED SELL PRICE ─────────────────────────────────
-function renderRecommendedSell(lines, tier, totalCost, totalQty) {
+function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQty) {
   const totalSell = lines.reduce((s, l) => s + l.sellAtTarget, 0);
   const avgRate = totalQty > 0 ? totalSell / totalQty : 0;
   const profit = totalSell - totalCost;
@@ -308,6 +415,9 @@ function renderRecommendedSell(lines, tier, totalCost, totalQty) {
     finalSell = minJob;
     minApplied = true;
   }
+
+  const finalProfit = finalSell - totalCost;
+  const finalMargin = finalSell > 0 ? ((finalSell - totalCost) / finalSell) * 100 : 0;
 
   let html = `<div class="results-grid four">
     <div class="stat-card" style="border-color:var(--gold);">
@@ -322,13 +432,13 @@ function renderRecommendedSell(lines, tier, totalCost, totalQty) {
     </div>
     <div class="stat-card">
       <div class="stat-label">GROSS PROFIT</div>
-      <div class="stat-value green">${fmt(profit)}</div>
+      <div class="stat-value green">${fmt(finalProfit)}</div>
       <div class="stat-sub">Before overheads</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">GROSS MARGIN</div>
-      <div class="stat-value ${margin >= 40 ? 'green' : margin >= 30 ? 'amber' : 'red'}">${margin.toFixed(1)}%</div>
-      <div class="stat-sub">${tier.name} target: ${(tier.marginTarget*100).toFixed(0)}%</div>
+      <div class="stat-value ${finalMargin >= 40 ? 'green' : finalMargin >= 30 ? 'amber' : 'red'}">${finalMargin.toFixed(1)}%</div>
+      <div class="stat-sub">${tier.name} target: ${(tierMarginTarget*100).toFixed(0)}%</div>
     </div>
   </div>`;
 
@@ -338,7 +448,7 @@ function renderRecommendedSell(lines, tier, totalCost, totalQty) {
     </div>`;
   }
 
-  document.getElementById('rec-sell-wrap').innerHTML = html;
+  setHTML('rec-sell-wrap', html);
 }
 
 // ── MARGIN BANDS ───────────────────────────────────────────
@@ -348,6 +458,7 @@ function renderMarginBands(totalCost, totalQty) {
     <thead><tr>
       <th>MARGIN</th><th>SELL PRICE (JOB)</th><th>$/UNIT SELL</th><th>PROFIT</th><th>STATUS</th>
     </tr></thead><tbody>`;
+
   bands.forEach(b => {
     const sell = totalCost / (1 - b/100);
     const profit = sell - totalCost;
@@ -364,17 +475,18 @@ function renderMarginBands(totalCost, totalQty) {
     </tr>`;
   });
   html += '</tbody></table>';
-  document.getElementById('margin-bands-wrap').innerHTML = html;
+  setHTML('margin-bands-wrap', html);
 }
 
 // ── PER-LINE BREAKDOWN ─────────────────────────────────────
-function renderLineBreakdown(lines, tier) {
+function renderLineBreakdown(lines, tier, tierMarginTarget) {
+  const marginPct = (tierMarginTarget * 100).toFixed(0);
   let html = `<table class="breakdown-table">
     <thead><tr>
       <th>LINE</th><th>SUBSTRATE</th><th>DIFFICULTY</th><th class="right">QTY</th>
       <th class="right">BASE RATE</th><th class="right">DIFF ADD-ON</th><th class="right">TOTAL RATE</th>
       <th class="right">MAT COST</th><th class="right">LAB COST</th><th class="right">LINE COST</th>
-      <th class="right">SELL @ ${(tier.marginTarget*100).toFixed(0)}%</th><th class="right">MARGIN</th>
+      <th class="right">SELL @ ${marginPct}%</th><th class="right">MARGIN</th>
     </tr></thead><tbody>`;
 
   let totalCost = 0, totalSell = 0;
@@ -409,21 +521,94 @@ function renderLineBreakdown(lines, tier) {
     <td class="right">${totalMargin.toFixed(1)}%</td>
   </tr></tfoot></table>`;
 
-  document.getElementById('line-breakdown-wrap').innerHTML = html;
+  setHTML('line-breakdown-wrap', html);
+}
+
+// ── MARKET RATE COMPARISON ─────────────────────────────────
+function renderMarketComparison(lines, tierMarginTarget) {
+  // Build market rate map from settings
+  const marketRates = {};
+  Object.keys(SUBSTRATE_KEYS).forEach(key => {
+    const minEl = document.getElementById('set-mkt-' + key + '-min');
+    const maxEl = document.getElementById('set-mkt-' + key + '-max');
+    if (minEl && maxEl) {
+      marketRates[key] = {
+        min: parseFloat(minEl.value) || 0,
+        max: parseFloat(maxEl.value) || 0
+      };
+    }
+  });
+
+  let html = `<div class="callout callout-info" style="margin-bottom:14px;">
+    <strong>GOLD COAST RENDERING MARKET RATES (2025-2026)</strong> — Your sell rate vs. market range. Rates are per sqm, ex GST. Market data from local industry research.
+  </div>
+  <table class="margin-table">
+    <thead><tr>
+      <th>LINE</th><th>SUBSTRATE</th><th>YOUR SELL RATE</th><th>MARKET MIN</th><th>MARKET MAX</th><th>MARKET MID</th><th>POSITION</th>
+    </tr></thead><tbody>`;
+
+  lines.forEach(l => {
+    const sellRate = l.sellAtTarget / l.qty;
+    const mkt = marketRates[l.subKey];
+    if (mkt && mkt.max > 0) {
+      const mid = (mkt.min + mkt.max) / 2;
+      let position = '';
+      let posClass = '';
+      if (sellRate < mkt.min) {
+        position = 'BELOW MARKET';
+        posClass = 'color:var(--red);font-weight:700;';
+      } else if (sellRate <= mid) {
+        position = 'LOWER HALF';
+        posClass = 'color:var(--amber);font-weight:700;';
+      } else if (sellRate <= mkt.max) {
+        position = 'UPPER HALF';
+        posClass = 'color:var(--green);font-weight:700;';
+      } else {
+        position = 'ABOVE MARKET';
+        posClass = 'color:var(--gold);font-weight:700;';
+      }
+
+      // Market position bar
+      const range = mkt.max - mkt.min;
+      const pct = range > 0 ? Math.min(100, Math.max(0, ((sellRate - mkt.min) / range) * 100)) : 50;
+
+      html += `<tr>
+        <td>${l.name}</td>
+        <td>${l.substrate.name}</td>
+        <td class="right">${fmt(sellRate)}/sqm</td>
+        <td class="right">${fmt(mkt.min)}</td>
+        <td class="right">${fmt(mkt.max)}</td>
+        <td class="right">${fmt(mid)}</td>
+        <td style="${posClass}">${position}</td>
+      </tr>
+      <tr><td colspan="7" style="padding:4px 12px 12px;">
+        <div class="market-bar-wrap">
+          <div class="market-bar-track">
+            <div class="market-bar-fill" style="width:${pct}%"></div>
+            <div class="market-bar-marker" style="left:${pct}%"></div>
+          </div>
+          <div class="market-bar-labels">
+            <span>${fmt(mkt.min)}</span>
+            <span>${fmt(mkt.max)}</span>
+          </div>
+        </div>
+      </td></tr>`;
+    } else {
+      html += `<tr>
+        <td>${l.name}</td>
+        <td>${l.substrate.name}</td>
+        <td class="right">${fmt(sellRate)}/sqm</td>
+        <td colspan="4" style="color:var(--grey-mid);">No market data available</td>
+      </tr>`;
+    }
+  });
+
+  html += '</tbody></table>';
+  setHTML('market-check-wrap', html);
 }
 
 // ── MATERIAL COST ESTIMATE ─────────────────────────────────
 function renderMaterialEstimate(lines, totalQty) {
-  // Estimate based on Dulux Powerfinish system as default
-  const products = [
-    { name:'AcraPrime Water Base 15L',    costPer100:104.64, coverPer100:1, unit:'pail' },
-    { name:'Powerfinish 15L',             costPer100:441.42, coverPer100:6, unit:'pails' },
-    { name:'200mm Green Mesh Tape 50m',   costPer100:21.33,  coverPer100:1, unit:'roll' },
-    { name:'PreTape Mask Film 2700mm',    costPer100:8.65,   coverPer100:1, unit:'roll' },
-    { name:'Touch Up Can Kit',            costPer100:2.29,   coverPer100:0.5, unit:'kit' },
-    { name:'Slim Trim 3000mm',            costPer100:6.81,   coverPer100:3, unit:'pcs' }
-  ];
-
   let html = `<div class="callout callout-info" style="margin-bottom:14px;">
     <strong>ESTIMATE BASED ON DULUX POWERFINISH SYSTEM</strong> — Actual material requirements vary by substrate, system, and site conditions. Costs sourced from 2026 Stoddarts Dulux Pack Card.
   </div>
@@ -434,14 +619,13 @@ function renderMaterialEstimate(lines, totalQty) {
     </tr></thead><tbody>`;
 
   let totalMatCost = 0;
-  products.forEach(p => {
+  DULUX_MATERIALS.forEach(p => {
     const scaledCost = (p.costPer100 / 100) * totalQty;
-    const scaledQty = (p.coverPer100 / 100) * totalQty;
     totalMatCost += scaledCost;
     html += `<tr>
       <td>${p.name}</td>
       <td class="right">${p.coverPer100} ${p.unit}</td>
-      <td class="right">${fmt(p.costPer100 / p.coverPer100)}</td>
+      <td class="right">${fmt(p.coverPer100 > 0 ? p.costPer100 / p.coverPer100 : 0)}</td>
       <td class="right">${fmt(p.costPer100)}</td>
       <td class="right">${fmt(scaledCost)}</td>
     </tr>`;
@@ -452,22 +636,24 @@ function renderMaterialEstimate(lines, totalQty) {
     <td class="right">${fmt(totalMatCost)}</td>
   </tr></tfoot></table>`;
 
-  document.getElementById('material-wrap').innerHTML = html;
+  setHTML('material-wrap', html);
 }
 
 // ── CLEAR RESULTS ──────────────────────────────────────────
 function clearResults() {
   ['r-mat-cost','r-lab-cost','r-job-cost','r-sqm-cost','r-mat-sub','r-lab-sub','r-total-sqm'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.textContent = '—';
+    setText(id, '—');
   });
-  ['rec-sell-wrap','margin-bands-wrap','line-breakdown-wrap','material-wrap'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.innerHTML = '';
+  ['rec-sell-wrap','margin-bands-wrap','line-breakdown-wrap','material-wrap','market-check-wrap'].forEach(id => {
+    setHTML(id, '');
   });
-  document.getElementById('vol-floor-warning').style.display = 'none';
+  const vfwEl = document.getElementById('vol-floor-warning');
+  if (vfwEl) vfwEl.style.display = 'none';
 }
 
 // ── INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  loadSettings();
   checkDrift();
   addSurfaceLine('brick_hebel', 1);
 });
