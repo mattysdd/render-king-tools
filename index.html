@@ -81,7 +81,7 @@
             <strong>VOLUME BUILDER FLOOR ACTIVE:</strong> One or more line items have been locked to the $47/sqm minimum sell rate. The calculated rate was below the floor.
           </div>
           <div class="results-grid four">
-            <div class="stat-card"><div class="stat-label">TOTAL AREA</div><div class="stat-value" id="r-total-sqm">—</div><div class="stat-sub">All lines combined</div></div>
+            <div class="stat-card"><div class="stat-label">TOTAL RENDER AREA</div><div class="stat-value" id="r-total-sqm">—</div><div class="stat-sub" id="r-total-sqm-sub">Render lines only (excl. slabs & installs)</div></div>
             <div class="stat-card"><div class="stat-label">TOTAL MATERIAL COST</div><div class="stat-value" id="r-mat-cost">—</div><div class="stat-sub" id="r-mat-sub">Dulux system estimate</div></div>
             <div class="stat-card"><div class="stat-label">TOTAL LABOUR COST</div><div class="stat-value" id="r-lab-cost">—</div><div class="stat-sub" id="r-lab-sub">—</div></div>
             <div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">TOTAL JOB COST</div><div class="stat-value gold" id="r-job-cost">—</div><div class="stat-sub" id="r-sqm-cost">—</div></div>
@@ -1110,6 +1110,26 @@
           <div class="settings-field">
             <label>EPS PANELS ($/SQM SUPPLY)</label>
             <input type="number" id="set-mat-eps-install" value="35" step="1" oninput="onSettingChange()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREW PRODUCTIVITY -->
+    <div class="card">
+      <div class="card-header">
+        <h2>CREW PRODUCTIVITY</h2>
+        <span class="badge">REFERENCE</span>
+      </div>
+      <div class="card-body">
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label>STANDARD CREW SIZE (PEOPLE)</label>
+            <input type="number" id="set-crew-size" value="3" step="1" min="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>OUTPUT PER CREW PER DAY (SQM)</label>
+            <input type="number" id="set-crew-output" value="50" step="5" min="10" oninput="onSettingChange()">
           </div>
         </div>
       </div>
