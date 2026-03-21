@@ -34,7 +34,7 @@
     <div class="card">
       <div class="card-header">
         <h2>JOB LINE ITEMS</h2>
-        <span class="badge">UP TO 10 LINES</span>
+        <span class="badge">UP TO 20 LINES</span>
       </div>
       <div class="card-body">
         <div id="surface-lines" class="surface-lines"></div>
@@ -337,9 +337,30 @@
         </div>
       </div>
 
-      <!-- Section 7: Signature -->
+      <!-- Section 7: Site Photos & Plans -->
       <div class="section">
-        <div class="section-hd"><div class="sec-num">7</div><h2>ACCEPTANCE</h2></div>
+        <div class="section-hd"><div class="sec-num">7</div><h2>SITE PHOTOS, PLANS &amp; MARKUPS</h2></div>
+        <div class="quote-attachments-zone no-print">
+          <input type="file" id="q-attach-input" multiple accept="image/*,.pdf" onchange="handleQuoteAttachments(this.files)" style="display:none;">
+          <button class="add-line-btn" onclick="document.getElementById('q-attach-input').click()" style="margin-bottom:10px;">UPLOAD PHOTOS / PLANS</button>
+          <div class="upload-hint">Accepts JPG, PNG, PDF — multiple files supported</div>
+        </div>
+        <div id="q-attach-list" class="quote-attach-list"></div>
+        <div class="callout callout-info" style="margin-top:14px;">
+          <strong>NOTE:</strong> Attached files are stored with this quote and visible when the quote link is shared.
+        </div>
+      </div>
+
+      <!-- Section 8: Special Conditions -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">8</div><h2>SPECIAL CONDITIONS</h2></div>
+        <div id="q-special-conditions" class="special-conditions-list"></div>
+        <button class="add-line-btn no-print" onclick="addSpecialCondition()" style="margin-top:10px;">+ ADD SPECIAL CONDITION</button>
+      </div>
+
+      <!-- Section 9: Signature -->
+      <div class="section">
+        <div class="section-hd"><div class="sec-num">9</div><h2>ACCEPTANCE</h2></div>
         <div class="callout callout-gold" style="margin-bottom:16px;">
           <strong>By signing below, the client accepts this quotation and agrees to the Payment Terms &amp; Conditions of Render Render Pty Ltd (trading as Render King).</strong>
         </div>
@@ -367,16 +388,34 @@
           <div>
             <div class="print-sig-lbl">CLIENT SIGNATURE</div>
             <div class="print-sig-line"></div>
-            <div class="print-sig-sub">Full Name: ___________________________</div>
-            <div class="print-sig-sub">Date: ___________________________</div>
-            <div class="print-sig-sub">Print Name: ___________________________</div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Full Name</label>
+              <input type="text" class="sig-field-input" id="q-sig-client-name" placeholder="Type full name">
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Date</label>
+              <input type="date" class="sig-field-input" id="q-sig-client-date">
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Print Name</label>
+              <input type="text" class="sig-field-input" id="q-sig-client-print" placeholder="Print name">
+            </div>
           </div>
           <div>
             <div class="print-sig-lbl">RENDER RENDER PTY LTD (RENDER KING)</div>
             <div class="print-sig-line"></div>
-            <div class="print-sig-sub">Name: King Mannion</div>
-            <div class="print-sig-sub">Title: Director</div>
-            <div class="print-sig-sub">Date: ___________________________</div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Name</label>
+              <span class="sig-field-locked">King Mannion</span>
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Title</label>
+              <span class="sig-field-locked">Director</span>
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Date</label>
+              <input type="date" class="sig-field-input" id="q-sig-rk-date">
+            </div>
           </div>
         </div>
       </div>
@@ -530,16 +569,34 @@
           <div>
             <div class="print-sig-lbl">CLIENT SIGNATURE</div>
             <div class="print-sig-line"></div>
-            <div class="print-sig-sub">Full Name: ___________________________</div>
-            <div class="print-sig-sub">Date: ___________________________</div>
-            <div class="print-sig-sub">Print Name: ___________________________</div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Full Name</label>
+              <input type="text" class="sig-field-input" id="tc-sig-client-name" placeholder="Type full name">
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Date</label>
+              <input type="date" class="sig-field-input" id="tc-sig-client-date">
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Print Name</label>
+              <input type="text" class="sig-field-input" id="tc-sig-client-print" placeholder="Print name">
+            </div>
           </div>
           <div>
             <div class="print-sig-lbl">RENDER RENDER PTY LTD (RENDER KING)</div>
             <div class="print-sig-line"></div>
-            <div class="print-sig-sub">Name: King Mannion</div>
-            <div class="print-sig-sub">Title: Director</div>
-            <div class="print-sig-sub">Date: ___________________________</div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Name</label>
+              <span class="sig-field-locked">King Mannion</span>
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Title</label>
+              <span class="sig-field-locked">Director</span>
+            </div>
+            <div class="sig-field-row">
+              <label class="sig-field-label">Date</label>
+              <input type="date" class="sig-field-input" id="tc-sig-rk-date">
+            </div>
           </div>
         </div>
       </div>

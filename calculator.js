@@ -224,7 +224,7 @@ var lineCount = 0;
 
 function addSurfaceLine(defaultSubstrate, defaultDiff) {
   var count = document.querySelectorAll('.surface-line').length;
-  if (count >= 10) return;
+  if (count >= 20) return;
   lineCount++;
   var id = lineCount;
   var sub = defaultSubstrate || 'brick_hebel';
@@ -276,7 +276,7 @@ function removeSurfaceLine(id) {
 function updateAddBtn() {
   var count = document.querySelectorAll('.surface-line').length;
   var btn = document.getElementById('add-surface-btn');
-  if (btn) btn.style.display = count >= 10 ? 'none' : 'block';
+  if (btn) btn.style.display = count >= 20 ? 'none' : 'block';
 }
 
 // ═══════════════════════════════════════════════════════════

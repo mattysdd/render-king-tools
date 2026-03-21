@@ -188,10 +188,114 @@ function acceptQuoteSig() {
   img.style.display = 'block';
 }
 
+// ── QUOTE ATTACHMENTS ──────────────────────────────────────
+var quoteAttachments = [];
+
+function handleQuoteAttachments(files) {
+  Array.from(files).forEach(function(file) {
+    if (quoteAttachments.length >= 10) { alert('Maximum 10 attachments'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var att = {
+        id: Date.now() + '_' + Math.random().toString(36).substr(2,6),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        data: e.target.result
+      };
+      quoteAttachments.push(att);
+      renderQuoteAttachments();
+    };
+    reader.readAsDataURL(file);
+  });
+  // Reset input so same file can be re-uploaded
+  document.getElementById('q-attach-input').value = '';
+}
+
+function renderQuoteAttachments() {
+  var list = document.getElementById('q-attach-list');
+  if (!list) return;
+  if (quoteAttachments.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:12px;color:#888;font-size:13px;">No attachments yet</div>';
+    return;
+  }
+  var html = '<div class="attach-grid">';
+  quoteAttachments.forEach(function(att) {
+    var isImage = att.type && att.type.startsWith('image/');
+    if (isImage) {
+      html += '<div class="attach-item" id="att-' + att.id + '">' +
+        '<img src="' + att.data + '" class="attach-thumb" alt="' + att.name + '">' +
+        '<div class="attach-name">' + att.name + '</div>' +
+        '<button class="attach-remove no-print" onclick="removeQuoteAttachment(\'' + att.id + '\')">&times;</button>' +
+        '</div>';
+    } else {
+      html += '<div class="attach-item attach-file" id="att-' + att.id + '">' +
+        '<div class="attach-icon">PDF</div>' +
+        '<div class="attach-name">' + att.name + '</div>' +
+        '<button class="attach-remove no-print" onclick="removeQuoteAttachment(\'' + att.id + '\')">&times;</button>' +
+        '</div>';
+    }
+  });
+  html += '</div>';
+  list.innerHTML = html;
+}
+
+function removeQuoteAttachment(id) {
+  quoteAttachments = quoteAttachments.filter(function(a) { return a.id !== id; });
+  renderQuoteAttachments();
+}
+
+// ── SPECIAL CONDITIONS ─────────────────────────────────────
+var specialConditionId = 0;
+
+function addSpecialCondition(text) {
+  specialConditionId++;
+  var id = specialConditionId;
+  var container = document.getElementById('q-special-conditions');
+  if (!container) return;
+  var div = document.createElement('div');
+  div.className = 'special-condition-item';
+  div.id = 'sc-' + id;
+  div.innerHTML = '<span class="sc-num">' + document.querySelectorAll('.special-condition-item').length + 1 + '.</span>' +
+    '<input type="text" class="sc-input" value="' + (text || '') + '" placeholder="Enter special condition...">' +
+    '<button class="attach-remove no-print" onclick="removeSpecialCondition(' + id + ')">&times;</button>';
+  container.appendChild(div);
+  renumberSpecialConditions();
+}
+
+function removeSpecialCondition(id) {
+  var el = document.getElementById('sc-' + id);
+  if (el) el.remove();
+  renumberSpecialConditions();
+}
+
+function renumberSpecialConditions() {
+  document.querySelectorAll('.special-condition-item').forEach(function(item, i) {
+    var num = item.querySelector('.sc-num');
+    if (num) num.textContent = (i + 1) + '.';
+  });
+}
+
+function getSpecialConditions() {
+  var conditions = [];
+  document.querySelectorAll('.special-condition-item .sc-input').forEach(function(input) {
+    if (input.value.trim()) conditions.push(input.value.trim());
+  });
+  return conditions;
+}
+
 // ── SAVE TO GITHUB ─────────────────────────────────────────
 async function saveQuoteToGitHub() {
   const quoteNum = document.getElementById('q-quote-number')?.textContent?.trim() || 'RK-DRAFT';
   const quoteId = quoteNum.replace(/[^a-zA-Z0-9-]/g, '') + '-' + Date.now();
+
+  // Collect signature field values
+  var sigFields = {
+    clientName: (document.getElementById('q-sig-client-name') || {}).value || '',
+    clientDate: (document.getElementById('q-sig-client-date') || {}).value || '',
+    clientPrint: (document.getElementById('q-sig-client-print') || {}).value || '',
+    rkDate: (document.getElementById('q-sig-rk-date') || {}).value || ''
+  };
 
   // Collect quote data
   const quoteData = {
@@ -201,6 +305,9 @@ async function saveQuoteToGitHub() {
     validity: document.getElementById('q-validity-select')?.value || '48',
     builderType: document.getElementById('q-builder-type')?.value || 'standard',
     html: document.querySelector('#tab-quote .doc')?.innerHTML || '',
+    attachments: quoteAttachments,
+    specialConditions: getSpecialConditions(),
+    signatureFields: sigFields,
     savedAt: new Date().toISOString()
   };
 
@@ -233,7 +340,7 @@ async function saveQuoteToGitHub() {
   }
 }
 
-// ── LOAD QUOTE FROM GITHUB ─────────────────────────────────
+// ── LOAD QUOTE FROM GITHUB ─────────────────────────────
 async function loadQuoteFromGitHub(quoteId) {
   try {
     const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/quotes/${quoteId}.json?ref=${GH_BRANCH}`, {
@@ -247,6 +354,37 @@ async function loadQuoteFromGitHub(quoteId) {
       if (docEl && decoded.html) {
         docEl.innerHTML = decoded.html;
       }
+
+      // Restore attachments
+      if (decoded.attachments && decoded.attachments.length > 0) {
+        quoteAttachments = decoded.attachments;
+        renderQuoteAttachments();
+      }
+
+      // Restore special conditions
+      if (decoded.specialConditions && decoded.specialConditions.length > 0) {
+        var scContainer = document.getElementById('q-special-conditions');
+        if (scContainer) scContainer.innerHTML = '';
+        specialConditionId = 0;
+        decoded.specialConditions.forEach(function(text) {
+          addSpecialCondition(text);
+        });
+      }
+
+      // Restore signature fields
+      if (decoded.signatureFields) {
+        var sf = decoded.signatureFields;
+        var el;
+        el = document.getElementById('q-sig-client-name');
+        if (el && sf.clientName) el.value = sf.clientName;
+        el = document.getElementById('q-sig-client-date');
+        if (el && sf.clientDate) el.value = sf.clientDate;
+        el = document.getElementById('q-sig-client-print');
+        if (el && sf.clientPrint) el.value = sf.clientPrint;
+        el = document.getElementById('q-sig-rk-date');
+        if (el && sf.rkDate) el.value = sf.rkDate;
+      }
+
       switchTab('quote');
     }
   } catch (e) {
@@ -299,6 +437,21 @@ function clearQuoteForm() {
 
   // Clear signature
   clearQuoteSig();
+
+  // Clear attachments
+  quoteAttachments = [];
+  renderQuoteAttachments();
+
+  // Clear special conditions
+  var scContainer = document.getElementById('q-special-conditions');
+  if (scContainer) scContainer.innerHTML = '';
+  specialConditionId = 0;
+
+  // Clear signature fields
+  ['q-sig-client-name','q-sig-client-date','q-sig-client-print','q-sig-rk-date'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 
   // Recalc
   calcQuoteTotals();

@@ -108,16 +108,18 @@ body {
   text-transform:uppercase; color:var(--gold);
 }
 .surface-line-controls {
-  display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:12px; align-items:end;
+  display:grid; grid-template-columns:1.5fr 2.5fr 2fr 0.8fr 1.5fr 32px; gap:8px; align-items:end;
 }
+.surface-line-controls .field-group { min-width:0; overflow:hidden; }
 .field-group { display:flex; flex-direction:column; gap:5px; }
 .field-group label {
   font-size:10px; font-weight:700; letter-spacing:1px;
   text-transform:uppercase; color:var(--text-secondary);
 }
 .field-group select, .field-group input {
-  border:1px solid var(--border); padding:10px 12px;
-  font-family:inherit; font-size:13px; color:var(--white);
+  border:1px solid var(--border); padding:8px 10px;
+  font-family:inherit; font-size:12px; color:var(--white);
+  min-width:0; max-width:100%; box-sizing:border-box;
   background:var(--card-bg); -webkit-appearance:none; appearance:none;
   outline:none; transition:border .2s; border-radius:3px;
 }
@@ -757,6 +759,55 @@ button { font-family:'Inter',sans-serif; }
 .agent-file-name { color:var(--text); font-weight:500; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .agent-file-size { color:var(--grey-mid); font-size:10px; }
 
+/* ═══ SIGNATURE INPUTS ═══ */
+.sig-field-group { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+.sig-field-group label { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-secondary); }
+.sig-field-group input {
+  border:1px solid var(--border); padding:8px 10px; font-family:inherit; font-size:13px;
+  color:var(--white); background:var(--card-bg); outline:none; transition:border .2s; border-radius:3px;
+}
+.sig-field-group input:focus { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,168,76,0.15); }
+.sig-field-group input[readonly] { opacity:0.7; cursor:not-allowed; background:var(--panel); }
+.sig-field-group .locked-label { font-size:11px; color:var(--grey-mid); font-style:italic; }
+
+/* ═══ QUOTE ATTACHMENTS ═══ */
+.quote-attachments-zone { margin-bottom:12px; }
+.upload-hint { font-size:11px; color:var(--grey-mid); margin-top:4px; }
+.attach-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+  gap:12px; margin-top:12px;
+}
+.attach-item {
+  background:var(--card-bg); border:1px solid var(--border); border-radius:4px;
+  padding:10px; position:relative; text-align:center;
+}
+.attach-item:hover { border-color:var(--gold-dark); }
+.attach-thumb { width:100%; height:100px; object-fit:cover; border-radius:3px; margin-bottom:6px; }
+.attach-name { font-size:11px; color:var(--text-secondary); word-break:break-all; }
+.attach-icon {
+  width:60px; height:60px; margin:0 auto 8px; background:var(--panel);
+  border-radius:4px; display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:800; color:var(--gold); letter-spacing:1px;
+}
+.attach-remove {
+  position:absolute; top:4px; right:4px; width:22px; height:22px;
+  border:none; background:rgba(0,0,0,0.7); color:var(--white); border-radius:50%;
+  cursor:pointer; font-size:14px; line-height:22px; text-align:center; padding:0;
+}
+.attach-remove:hover { background:var(--red); }
+
+/* ═══ SPECIAL CONDITIONS ═══ */
+.special-condition-item {
+  display:flex; align-items:center; gap:10px; margin-bottom:8px;
+}
+.sc-num { font-size:13px; font-weight:700; color:var(--gold); min-width:24px; }
+.sc-input {
+  flex:1; border:1px solid var(--border); padding:10px 12px;
+  font-family:inherit; font-size:13px; color:var(--white);
+  background:var(--card-bg); outline:none; transition:border .2s; border-radius:3px;
+}
+.sc-input:focus { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,168,76,0.15); }
+
 /* ═══ PRINT ═══ */
 .no-print {}
 @media print {
@@ -773,6 +824,16 @@ button { font-family:'Inter',sans-serif; }
   .tab-content { display:none; }
   .tab-content.active, .tab-content.print-active { display:block; }
   .print-sig-grid { display:grid !important; }
+  .sig-field-group input { border:none; border-bottom:1px solid #999; background:white; color:#111; padding:4px 0; }
+  .sig-field-group input[readonly] { background:white; opacity:1; }
+  .special-condition-item { margin-bottom:4px; }
+  .sc-input { border:none; border-bottom:1px solid #ccc; background:white; color:#111; padding:4px 0; }
+  .sc-num { color:#a68a3e !important; }
+  .attach-item { background:white; border:1px solid #ddd; }
+  .attach-name { color:#333 !important; }
+  .attach-icon { background:#f0f0f0; color:#a68a3e !important; }
+  .attach-remove { display:none !important; }
+  .quote-attachments-zone { display:none !important; }
   @page { margin:1.5cm; }
   .stat-value, .field-val, .clause-text, .tc-item, .pricing-table td, .payment-table td { color:#111 !important; }
   .stat-label, .field-lbl, .clause-num, .tc-head { color:#555 !important; }
