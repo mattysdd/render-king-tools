@@ -101,6 +101,9 @@ var LOCKED_DEFAULTS = {
   'set-mkt-hebel_install-max': 110,
   'set-mkt-eps_install-min': 55,
   'set-mkt-eps_install-max': 90,
+  // Crew productivity
+  'set-crew-size': 3,
+  'set-crew-output': 50,
   // Margin targets
   'set-margin-volume': 27.5,
   'set-margin-standard': 40,
@@ -123,20 +126,25 @@ var LOCKED_DEFAULTS = {
 };
 
 // ── SUBSTRATE DEFINITIONS ──────────────────────────────────
+// Ordered for dropdown display. `dropdown:false` = hidden from calculator dropdown (Settings only).
+// `nonRender:true` = excluded from Total Render Area / Avg Sell Rate calculations.
 var SUBSTRATE_KEYS = {
-  'brick_hebel':   { name:'Brick / Hebel',                             unit:'sqm', subId:'set-sub-brick_hebel',   matType:'aac' },
-  'eps_blueboard': { name:'EPS / Blueboard',                           unit:'sqm', subId:'set-sub-eps_blueboard', matType:'eps' },
-  'specialty':     { name:'Specialty / Architectural',                 unit:'sqm', subId:'set-sub-specialty',     matType:'aac' },
-  'hebel_supply':  { name:'Hebel Supply + Install',                    unit:'sqm', subId:'set-sub-hebel_supply',  matType:'aac' },
-  'hebel_full':    { name:'Full Hebel System (Supply+Install+Render)', unit:'sqm', subId:'set-sub-hebel_full',    matType:'aac' },
-  'eps_supply':    { name:'EPS Supply + Install',                      unit:'sqm', subId:'set-sub-eps_supply',    matType:'eps' },
-  'eps_full':      { name:'Full EPS System (Supply+Install+Render)',   unit:'sqm', subId:'set-sub-eps_full',      matType:'eps' },
-  'slab_build':        { name:'Slab Build (Linear Metre)',                 unit:'lm',  subId:'set-sub-slab_build',        matType:'slab' },
-  'specialty_finish':  { name:'Specialty Finish',                           unit:'sqm', subId:'set-sub-specialty_finish',  matType:'specialty_finish' },
-  'ext_microcement':   { name:'External Microcement',                       unit:'sqm', subId:'set-sub-ext_microcement',   matType:'ext_microcement' },
-  'other_standard':    { name:'Other / Standard Finish',                    unit:'sqm', subId:'set-sub-other_standard',    matType:'aac' },
-  'hebel_install':     { name:'Hebel / AAC Supply & Install',               unit:'sqm', subId:'set-sub-hebel_install',     matType:'hebel_install' },
-  'eps_install':       { name:'EPS Supply & Install',                       unit:'sqm', subId:'set-sub-eps_install',       matType:'eps_install' }
+  // GROUP 1 — RENDER SYSTEMS
+  'slab_build':        { name:'Slab Build (Linear Metre)',                 unit:'lm',  subId:'set-sub-slab_build',        matType:'slab',             group:'render', nonRender:true },
+  'brick_hebel':       { name:'Brick / Hebel',                             unit:'sqm', subId:'set-sub-brick_hebel',       matType:'aac',              group:'render' },
+  'eps_blueboard':     { name:'EPS / Blueboard',                           unit:'sqm', subId:'set-sub-eps_blueboard',     matType:'eps',              group:'render' },
+  'specialty_finish':  { name:'Specialty Finish',                           unit:'sqm', subId:'set-sub-specialty_finish',  matType:'specialty_finish', group:'render' },
+  'specialty':         { name:'Specialty / Architectural',                 unit:'sqm', subId:'set-sub-specialty',         matType:'aac',              group:'render' },
+  'ext_microcement':   { name:'External Microcement',                       unit:'sqm', subId:'set-sub-ext_microcement',   matType:'ext_microcement',  group:'render' },
+  'other_standard':    { name:'Other / Standard Finish',                    unit:'sqm', subId:'set-sub-other_standard',    matType:'aac',              group:'render' },
+  // GROUP 2 — INSTALL SYSTEMS
+  'hebel_supply':      { name:'Hebel Supply + Install',                    unit:'sqm', subId:'set-sub-hebel_supply',      matType:'aac',              group:'install', nonRender:true },
+  'hebel_full':        { name:'Full Hebel System (Supply+Install+Render)', unit:'sqm', subId:'set-sub-hebel_full',        matType:'aac',              group:'install', nonRender:true },
+  'eps_supply':        { name:'EPS Supply + Install',                      unit:'sqm', subId:'set-sub-eps_supply',        matType:'eps',              group:'install', nonRender:true },
+  'eps_full':          { name:'Full EPS System (Supply+Install+Render)',   unit:'sqm', subId:'set-sub-eps_full',          matType:'eps',              group:'install', nonRender:true },
+  // BACKGROUND ONLY — not in calculator dropdown (rates in Settings tab)
+  'hebel_install':     { name:'Hebel / AAC Supply & Install',               unit:'sqm', subId:'set-sub-hebel_install',     matType:'hebel_install',    group:'background', dropdown:false },
+  'eps_install':       { name:'EPS Supply & Install',                       unit:'sqm', subId:'set-sub-eps_install',       matType:'eps_install',       group:'background', dropdown:false }
 };
 
 // ── DIFFICULTY LEVELS ──────────────────────────────────────
@@ -266,12 +274,23 @@ function addSurfaceLine(defaultSubstrate, defaultDiff) {
   var sub = defaultSubstrate || 'brick_hebel';
   var diff = defaultDiff || 1;
 
+  // Build grouped dropdown (skip dropdown:false substrates)
   var subOptions = '';
+  var currentGroup = '';
   Object.entries(SUBSTRATE_KEYS).forEach(function(entry) {
     var key = entry[0], val = entry[1];
+    if (val.dropdown === false) return; // skip background-only substrates
     var rate = getSubstrateBaseRate(key);
+    var grp = val.group || 'render';
+    if (grp !== currentGroup) {
+      if (currentGroup) subOptions += '</optgroup>';
+      var grpLabel = grp === 'install' ? '─── INSTALL SYSTEMS ───' : '─── RENDER SYSTEMS ───';
+      subOptions += '<optgroup label="' + grpLabel + '">';
+      currentGroup = grp;
+    }
     subOptions += '<option value="' + key + '" ' + (key===sub?'selected':'') + '>' + val.name + ' — from $' + rate + '/' + val.unit + '</option>';
   });
+  if (currentGroup) subOptions += '</optgroup>';
 
   var diffOptions = '';
   for (var i = 1; i <= 5; i++) {
@@ -553,7 +572,9 @@ function recalc() {
   var tier = BUILDER_TIERS[currentTier];
 
   // Calculate per-line costs
-  var totalQty = 0;
+  var totalQty = 0;       // ALL lines (for total job cost)
+  var renderQty = 0;      // Render lines only (for Total Render Area / Avg Sell Rate)
+  var renderSell = 0;     // Render sell total (for Avg Sell Rate)
   var totalMatCost = 0;
   var totalLabCost = 0;
   var volFloorActive = false;
@@ -561,6 +582,7 @@ function recalc() {
   lines.forEach(function(l) {
     l.lineCost = l.matCost + l.labCost;
     l.costPerUnit = l.qty > 0 ? l.lineCost / l.qty : 0;
+    l.isNonRender = !!(SUBSTRATE_KEYS[l.subKey] && SUBSTRATE_KEYS[l.subKey].nonRender);
 
     // Recommended sell at tier target margin
     l.sellAtTarget = l.lineCost / (1 - tierMarginTarget);
@@ -580,6 +602,12 @@ function recalc() {
     totalQty += l.qty;
     totalMatCost += l.matCost;
     totalLabCost += l.labCost;
+
+    // Track render-only totals
+    if (!l.isNonRender) {
+      renderQty += l.qty;
+      renderSell += l.sellAtTarget;
+    }
   });
 
   var totalCost = totalMatCost + totalLabCost;
@@ -589,9 +617,9 @@ function recalc() {
   var vfwEl = document.getElementById('vol-floor-warning');
   if (vfwEl) vfwEl.style.display = volFloorActive ? 'block' : 'none';
 
-  // Summary stats
-  var unitLabel = lines[0]?.unit === 'lm' ? ' lm' : ' sqm';
-  setText('r-total-sqm', totalQty.toFixed(1) + unitLabel);
+  // Summary stats — TOTAL RENDER AREA excludes non-render lines
+  setText('r-total-sqm', renderQty.toFixed(1) + ' sqm');
+  setText('r-total-sqm-sub', 'Render lines only (excl. slabs & installs)');
   setText('r-mat-cost', fmt(totalMatCost));
   setText('r-mat-sub', 'Dulux PAC Card — exact PO calc');
   setText('r-lab-cost', fmt(totalLabCost));
@@ -612,7 +640,7 @@ function recalc() {
   setText('r-sqm-cost', fmt(costPerUnit) + '/unit blended cost');
 
   // Recommended sell price
-  renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQty);
+  renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQty, renderQty, renderSell);
 
   // Custom sell price check
   var customSell = parseFloat(document.getElementById('custom-sell')?.value) || 0;
@@ -627,8 +655,8 @@ function recalc() {
     setText('custom-margin-display', 'Enter a sell price to see your actual margin');
   }
 
-  // Margin bands
-  renderMarginBands(totalCost, totalQty);
+  // Margin bands (use renderQty for $/sqm display)
+  renderMarginBands(totalCost, renderQty);
 
   // Per-line breakdown
   renderLineBreakdown(lines, tier, tierMarginTarget);
@@ -651,9 +679,10 @@ function setHTML(id, html) {
 }
 
 // ── RECOMMENDED SELL PRICE ─────────────────────────────────
-function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQty) {
+function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQty, renderQty, renderSell) {
   var totalSell = lines.reduce(function(s, l) { return s + l.sellAtTarget; }, 0);
-  var avgRate = totalQty > 0 ? totalSell / totalQty : 0;
+  // AVG SELL RATE based on render lines only
+  var avgRate = renderQty > 0 ? renderSell / renderQty : 0;
   var profit = totalSell - totalCost;
   var margin = totalSell > 0 ? ((totalSell - totalCost) / totalSell) * 100 : 0;
   var minJob = getSettingVal('set-min-job');
@@ -676,8 +705,8 @@ function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQt
     '</div>' +
     '<div class="stat-card">' +
       '<div class="stat-label">AVG SELL RATE</div>' +
-      '<div class="stat-value">' + fmt(avgRate) + '/unit</div>' +
-      '<div class="stat-sub">Blended across all lines</div>' +
+      '<div class="stat-value">' + fmt(avgRate) + '/sqm</div>' +
+      '<div class="stat-sub">Render lines only — blended rate</div>' +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="stat-label">GROSS PROFIT</div>' +

@@ -13,26 +13,33 @@ function addAgentSection(defaults) {
   var d = defaults || {};
 
   var subOptions = '';
-  var subKeys = {
-    'brick_hebel':   'Brick / Hebel',
-    'eps_blueboard': 'EPS / Blueboard',
-    'specialty':     'Specialty / Architectural',
-    'hebel_supply':  'Hebel Supply + Install',
-    'hebel_full':    'Full Hebel System (Supply+Install+Render)',
-    'eps_supply':    'EPS Supply + Install',
-    'eps_full':      'Full EPS System (Supply+Install+Render)',
-    'slab_build':        'Slab Build (Linear Metre)',
-    'specialty_finish':  'Specialty Finish',
-    'ext_microcement':   'External Microcement',
-    'other_standard':    'Other / Standard Finish',
-    'hebel_install':     'Hebel / AAC Supply & Install',
-    'eps_install':       'EPS Supply & Install'
-  };
-
-  Object.keys(subKeys).forEach(function(key) {
-    var sel = (key === (d.substrate || 'brick_hebel')) ? ' selected' : '';
-    subOptions += '<option value="' + key + '"' + sel + '>' + subKeys[key] + '</option>';
+  // Ordered to match calculator dropdown — grouped, no background-only substrates
+  var renderSubs = [
+    ['slab_build',       'Slab Build (Linear Metre)'],
+    ['brick_hebel',      'Brick / Hebel'],
+    ['eps_blueboard',    'EPS / Blueboard'],
+    ['specialty_finish', 'Specialty Finish'],
+    ['specialty',        'Specialty / Architectural'],
+    ['ext_microcement',  'External Microcement'],
+    ['other_standard',   'Other / Standard Finish']
+  ];
+  var installSubs = [
+    ['hebel_supply', 'Hebel Supply + Install'],
+    ['hebel_full',   'Full Hebel System (Supply+Install+Render)'],
+    ['eps_supply',   'EPS Supply + Install'],
+    ['eps_full',     'Full EPS System (Supply+Install+Render)']
+  ];
+  subOptions += '<optgroup label="\u2500\u2500\u2500 RENDER SYSTEMS \u2500\u2500\u2500">';
+  renderSubs.forEach(function(s) {
+    var sel = (s[0] === (d.substrate || 'brick_hebel')) ? ' selected' : '';
+    subOptions += '<option value="' + s[0] + '"' + sel + '>' + s[1] + '</option>';
   });
+  subOptions += '</optgroup><optgroup label="\u2500\u2500\u2500 INSTALL SYSTEMS \u2500\u2500\u2500">';
+  installSubs.forEach(function(s) {
+    var sel = (s[0] === (d.substrate || 'brick_hebel')) ? ' selected' : '';
+    subOptions += '<option value="' + s[0] + '"' + sel + '>' + s[1] + '</option>';
+  });
+  subOptions += '</optgroup>';
 
   var diffOptions = '';
   for (var i = 1; i <= 5; i++) {
