@@ -139,9 +139,9 @@ var SUBSTRATE_KEYS = {
   'other_standard':    { name:'Other / Standard Finish',                    unit:'sqm', subId:'set-sub-other_standard',    matType:'aac',              group:'render' },
   // GROUP 2 — INSTALL SYSTEMS
   'hebel_supply':      { name:'Hebel Supply + Install',                    unit:'sqm', subId:'set-sub-hebel_supply',      matType:'aac',              group:'install', nonRender:true },
-  'hebel_full':        { name:'Full Hebel System (Supply+Install+Render)', unit:'sqm', subId:'set-sub-hebel_full',        matType:'aac',              group:'install', nonRender:true },
+  'hebel_full':        { name:'Full Hebel System (Supply+Install+Render)', unit:'sqm', subId:'set-sub-hebel_full',        matType:'hebel_full',       group:'install' },
   'eps_supply':        { name:'EPS Supply + Install',                      unit:'sqm', subId:'set-sub-eps_supply',        matType:'eps',              group:'install', nonRender:true },
-  'eps_full':          { name:'Full EPS System (Supply+Install+Render)',   unit:'sqm', subId:'set-sub-eps_full',          matType:'eps',              group:'install', nonRender:true },
+  'eps_full':          { name:'Full EPS System (Supply+Install+Render)',   unit:'sqm', subId:'set-sub-eps_full',          matType:'eps_full',         group:'install' },
   // BACKGROUND ONLY — not in calculator dropdown (rates in Settings tab)
   'hebel_install':     { name:'Hebel / AAC Supply & Install',               unit:'sqm', subId:'set-sub-hebel_install',     matType:'hebel_install',    group:'background', dropdown:false },
   'eps_install':       { name:'EPS Supply & Install',                       unit:'sqm', subId:'set-sub-eps_install',       matType:'eps_install',       group:'background', dropdown:false }
@@ -493,6 +493,67 @@ function calculateMaterials(subKey, matType, qty, textureType) {
       materials.push({ name: 'Microcement Coat ' + coat, qty: bucketsPerCoat, unit: 'buckets', unitPrice: mcBucketPrice, total: bucketsPerCoat * mcBucketPrice });
     }
 
+  } else if (matType === 'hebel_full') {
+    // ═══ FULL HEBEL SYSTEM — DUAL LAYER ═══
+    // Layer 1: Install — flat rate material
+    var hfInstMatRate = p('set-mat-hebel-install');
+    var hfInstMatTotal = qty * hfInstMatRate;
+    materials.push({ name: 'INSTALL LAYER — Hebel / AAC Panels (Supply)', qty: qty, unit: 'sqm', unitPrice: hfInstMatRate, total: hfInstMatTotal, layer: 'install' });
+
+    // Layer 2: Render — same formula as Brick/Hebel
+    // Medium Build bags = m² ÷ 2.7
+    var hfMedRaw = qty / p('set-cov-medium-build-brick');
+    var hfMedQty = poRound(hfMedRaw);
+    materials.push({ name: 'RENDER LAYER — Acrabuild Medium (Medium Build)', qty: hfMedQty, unit: 'bags', unitPrice: p('set-pac-medium-build'), total: hfMedQty * p('set-pac-medium-build'), layer: 'render' });
+
+    // Powerfinish buckets = m² ÷ 12
+    var hfTexDiv = p('set-cov-texture-powerfinish');
+    var hfTexRaw = qty / hfTexDiv;
+    var hfTexQty = poRound(hfTexRaw);
+    materials.push({ name: 'RENDER LAYER — Powerfinish 15L', qty: hfTexQty, unit: 'buckets', unitPrice: p('set-pac-powerfinish'), total: hfTexQty * p('set-pac-powerfinish'), layer: 'render' });
+
+    // Slim Trim angles = m² ÷ 5
+    var hfAngRaw = qty / p('set-cov-angles-aac');
+    var hfAngQty = poRound(hfAngRaw);
+    materials.push({ name: 'RENDER LAYER — Slim Trim 1.5mm x 3m (Angles)', qty: hfAngQty, unit: 'lengths', unitPrice: p('set-pac-slim-trim'), total: hfAngQty * p('set-pac-slim-trim'), layer: 'render' });
+
+    // Render mesh rolls = m² ÷ 45
+    var hfMeshRaw = qty / p('set-cov-mesh-eps');
+    var hfMeshQty = poRound(hfMeshRaw);
+    materials.push({ name: 'RENDER LAYER — Fibreglass Mesh Roll 1m x 50m', qty: hfMeshQty, unit: 'rolls', unitPrice: p('set-pac-mesh-roll'), total: hfMeshQty * p('set-pac-mesh-roll'), layer: 'render' });
+
+  } else if (matType === 'eps_full') {
+    // ═══ FULL EPS SYSTEM — DUAL LAYER ═══
+    // Layer 1: Install — flat rate material
+    var efInstMatRate = p('set-mat-eps-install');
+    var efInstMatTotal = qty * efInstMatRate;
+    materials.push({ name: 'INSTALL LAYER — EPS Panels (Supply)', qty: qty, unit: 'sqm', unitPrice: efInstMatRate, total: efInstMatTotal, layer: 'install' });
+
+    // Layer 2: Render — same formula as EPS/Blueboard
+    // Low Build bags = m² ÷ 3 (50/50 split)
+    var efEpsTotalRaw = qty / p('set-cov-eps-total');
+    var efEpsTotalQty = poRound(efEpsTotalRaw);
+    var efEpsLowBuild = Math.ceil(efEpsTotalQty / 2);
+    var efEpsP400 = efEpsTotalQty - efEpsLowBuild;
+    materials.push({ name: 'RENDER LAYER — Acrabuild Plus (Low Build)', qty: efEpsLowBuild, unit: 'bags', unitPrice: p('set-pac-low-build'), total: efEpsLowBuild * p('set-pac-low-build'), layer: 'render' });
+    materials.push({ name: 'RENDER LAYER — AcraPro P400', qty: efEpsP400, unit: 'bags', unitPrice: p('set-pac-p400'), total: efEpsP400 * p('set-pac-p400'), layer: 'render' });
+
+    // Powerfinish buckets = m² ÷ 12
+    var efTexDiv = p('set-cov-texture-powerfinish');
+    var efTexRaw = qty / efTexDiv;
+    var efTexQty = poRound(efTexRaw);
+    materials.push({ name: 'RENDER LAYER — Powerfinish 15L', qty: efTexQty, unit: 'buckets', unitPrice: p('set-pac-powerfinish'), total: efTexQty * p('set-pac-powerfinish'), layer: 'render' });
+
+    // Slim Trim angles = m² ÷ 5
+    var efAngRaw = qty / p('set-cov-angles-aac');
+    var efAngQty = poRound(efAngRaw);
+    materials.push({ name: 'RENDER LAYER — Slim Trim 1.5mm x 3m (Angles)', qty: efAngQty, unit: 'lengths', unitPrice: p('set-pac-slim-trim'), total: efAngQty * p('set-pac-slim-trim'), layer: 'render' });
+
+    // Render mesh rolls = m² ÷ 45
+    var efMeshRaw = qty / p('set-cov-mesh-eps');
+    var efMeshQty = poRound(efMeshRaw);
+    materials.push({ name: 'RENDER LAYER — Fibreglass Mesh Roll 1m x 50m', qty: efMeshQty, unit: 'rolls', unitPrice: p('set-pac-mesh-roll'), total: efMeshQty * p('set-pac-mesh-roll'), layer: 'render' });
+
   } else if (matType === 'hebel_install') {
     // HEBEL / AAC SUPPLY & INSTALL — flat rate, no complex formula
     var hebelMatRate = p('set-mat-hebel-install');
@@ -540,6 +601,12 @@ function recalc() {
         labCost = qty * getSettingVal('set-lab-specialty');
       } else if (matType === 'ext_microcement') {
         labCost = qty * getSettingVal('set-lab-microcement');
+      } else if (matType === 'hebel_full') {
+        // DUAL LAYER: install labour + render labour
+        labCost = (qty * getSettingVal('set-lab-hebel-install')) + (qty * getSettingVal('set-subbie-rate'));
+      } else if (matType === 'eps_full') {
+        // DUAL LAYER: install labour + render labour
+        labCost = (qty * getSettingVal('set-lab-eps-install')) + (qty * getSettingVal('set-subbie-rate'));
       } else if (matType === 'hebel_install') {
         labCost = qty * getSettingVal('set-lab-hebel-install');
       } else if (matType === 'eps_install') {
@@ -632,7 +699,9 @@ function recalc() {
   if (labTypes['ext_microcement']) labSubParts.push('Microcement @ $' + getSettingVal('set-lab-microcement') + '/sqm');
   if (labTypes['hebel_install']) labSubParts.push('Hebel Install @ $' + getSettingVal('set-lab-hebel-install') + '/sqm');
   if (labTypes['eps_install']) labSubParts.push('EPS Install @ $' + getSettingVal('set-lab-eps-install') + '/sqm');
-  if (labTypes['brick_hebel'] || labTypes['eps_blueboard'] || labTypes['specialty'] || labTypes['hebel_supply'] || labTypes['hebel_full'] || labTypes['eps_supply'] || labTypes['eps_full'] || labTypes['other_standard']) {
+  if (labTypes['hebel_full']) labSubParts.push('Full Hebel: Install $' + getSettingVal('set-lab-hebel-install') + ' + Render $' + subbieRate + '/sqm');
+  if (labTypes['eps_full']) labSubParts.push('Full EPS: Install $' + getSettingVal('set-lab-eps-install') + ' + Render $' + subbieRate + '/sqm');
+  if (labTypes['brick_hebel'] || labTypes['eps_blueboard'] || labTypes['specialty'] || labTypes['hebel_supply'] || labTypes['eps_supply'] || labTypes['other_standard']) {
     labSubParts.push('Subbie @ ' + fmt(subbieRate) + '/sqm');
   }
   setText('r-lab-sub', labSubParts.length > 0 ? labSubParts.join(' | ') : '@ ' + fmt(subbieRate) + '/sqm subbie rate');
@@ -812,62 +881,128 @@ function renderMaterialBreakdown(lines) {
   var grandTotal = 0;
 
   lines.forEach(function(l) {
+    var isDualLayer = (l.matType === 'hebel_full' || l.matType === 'eps_full');
+
     html += '<h4 style="color:var(--gold);margin:18px 0 8px;font-size:13px;letter-spacing:1px;">' +
       l.name.toUpperCase() + ' — ' + l.substrate.name + ' (' + l.qty + ' ' + l.unit + ')' +
+      (isDualLayer ? ' <span style="color:var(--amber);font-size:11px;">[DUAL LAYER]</span>' : '') +
     '</h4>';
 
-    html += '<table class="mat-table"><thead><tr>' +
-      '<th>PRODUCT</th><th class="right">QTY</th><th>UNIT</th><th class="right">UNIT PRICE</th><th class="right">TOTAL</th>' +
-    '</tr></thead><tbody>';
+    if (isDualLayer) {
+      // ── DUAL LAYER DISPLAY ──
+      var installMats = l.materials.filter(function(m) { return m.layer === 'install'; });
+      var renderMats = l.materials.filter(function(m) { return m.layer === 'render'; });
+      var installMatTotal = installMats.reduce(function(s, m) { return s + m.total; }, 0);
+      var renderMatTotal = renderMats.reduce(function(s, m) { return s + m.total; }, 0);
+      var installLabRate = l.matType === 'hebel_full' ? getSettingVal('set-lab-hebel-install') : getSettingVal('set-lab-eps-install');
+      var renderLabRate = getSettingVal('set-subbie-rate');
+      var installLabCost = l.qty * installLabRate;
+      var renderLabCost = l.qty * renderLabRate;
 
-    var lineMatTotal = 0;
-    l.materials.forEach(function(m) {
-      lineMatTotal += m.total;
-      html += '<tr>' +
-        '<td>' + m.name + '</td>' +
-        '<td class="right">' + m.qty + '</td>' +
-        '<td>' + m.unit + '</td>' +
-        '<td class="right">' + fmt(m.unitPrice) + '</td>' +
-        '<td class="right">' + fmt(m.total) + '</td>' +
-      '</tr>';
-    });
+      // Install Layer table
+      html += '<div style="margin:6px 0 2px;padding:6px 10px;background:rgba(255,215,0,0.08);border-left:3px solid var(--gold);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--gold);">INSTALL LAYER</div>';
+      html += '<table class="mat-table"><thead><tr>' +
+        '<th>PRODUCT</th><th class="right">QTY</th><th>UNIT</th><th class="right">UNIT PRICE</th><th class="right">TOTAL</th>' +
+      '</tr></thead><tbody>';
+      installMats.forEach(function(m) {
+        html += '<tr><td>' + m.name.replace('INSTALL LAYER — ','') + '</td>' +
+          '<td class="right">' + m.qty + '</td><td>' + m.unit + '</td>' +
+          '<td class="right">' + fmt(m.unitPrice) + '</td><td class="right">' + fmt(m.total) + '</td></tr>';
+      });
+      html += '<tr style="border-top:1px solid var(--grey-dark);">' +
+        '<td>Install Labour (' + l.qty + ' sqm @ ' + fmt(installLabRate) + '/sqm)</td>' +
+        '<td class="right">' + l.qty + '</td><td>sqm</td>' +
+        '<td class="right">' + fmt(installLabRate) + '</td>' +
+        '<td class="right">' + fmt(installLabCost) + '</td></tr>';
+      html += '</tbody><tfoot><tr class="total-row">' +
+        '<td colspan="4">INSTALL LAYER TOTAL</td>' +
+        '<td class="right">' + fmt(installMatTotal + installLabCost) + '</td>' +
+      '</tr></tfoot></table>';
 
-    grandTotal += lineMatTotal;
+      // Render Layer table
+      html += '<div style="margin:12px 0 2px;padding:6px 10px;background:rgba(255,215,0,0.08);border-left:3px solid var(--green);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--green);">RENDER LAYER</div>';
+      html += '<table class="mat-table"><thead><tr>' +
+        '<th>PRODUCT</th><th class="right">QTY</th><th>UNIT</th><th class="right">UNIT PRICE</th><th class="right">TOTAL</th>' +
+      '</tr></thead><tbody>';
+      renderMats.forEach(function(m) {
+        html += '<tr><td>' + m.name.replace('RENDER LAYER — ','') + '</td>' +
+          '<td class="right">' + m.qty + '</td><td>' + m.unit + '</td>' +
+          '<td class="right">' + fmt(m.unitPrice) + '</td><td class="right">' + fmt(m.total) + '</td></tr>';
+      });
+      html += '<tr style="border-top:1px solid var(--grey-dark);">' +
+        '<td>Render Labour (' + l.qty + ' sqm @ ' + fmt(renderLabRate) + '/sqm)</td>' +
+        '<td class="right">' + l.qty + '</td><td>sqm</td>' +
+        '<td class="right">' + fmt(renderLabRate) + '</td>' +
+        '<td class="right">' + fmt(renderLabCost) + '</td></tr>';
+      html += '</tbody><tfoot><tr class="total-row">' +
+        '<td colspan="4">RENDER LAYER TOTAL</td>' +
+        '<td class="right">' + fmt(renderMatTotal + renderLabCost) + '</td>' +
+      '</tr></tfoot></table>';
 
-    // Labour row — per-substrate rate labels
-    var labLabel;
-    if (l.matType === 'slab') {
-      labLabel = 'Slab Labour (Flat Fee)';
-    } else if (l.matType === 'specialty_finish') {
-      labLabel = 'Specialty Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-specialty')) + '/' + l.unit + ')';
-    } else if (l.matType === 'ext_microcement') {
-      labLabel = 'Microcement Labour — 3 Coats (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-microcement')) + '/' + l.unit + ')';
-    } else if (l.matType === 'hebel_install') {
-      labLabel = 'Hebel Install Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-hebel-install')) + '/' + l.unit + ')';
-    } else if (l.matType === 'eps_install') {
-      labLabel = 'EPS Install Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-eps-install')) + '/' + l.unit + ')';
+      var lineMatTotal = installMatTotal + renderMatTotal;
+      grandTotal += lineMatTotal;
+
+      // Combined line total
+      html += '<div style="margin:8px 0 16px;padding:10px;background:var(--grey-darker);border:1px solid var(--grey-dark);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="font-weight:700;font-size:13px;letter-spacing:1px;">LINE TOTAL (Install + Render)</span>' +
+        '<span style="font-weight:800;font-size:16px;color:var(--gold);">' + fmt(lineMatTotal + l.labCost) + '</span>' +
+      '</div>';
+
     } else {
-      labLabel = 'Subcontractor Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-subbie-rate')) + '/' + l.unit + ')';
-    }
-    html += '<tr style="border-top:1px solid var(--grey-dark);">' +
-      '<td>' + labLabel + '</td>' +
-      '<td class="right">' + (l.matType === 'slab' ? '1' : l.qty) + '</td>' +
-      '<td>' + (l.matType === 'slab' ? 'job' : l.unit) + '</td>' +
-      '<td class="right">' + (function() {
-        if (l.matType === 'slab') return fmt(getSettingVal('set-slab-labour'));
-        if (l.matType === 'specialty_finish') return fmt(getSettingVal('set-lab-specialty'));
-        if (l.matType === 'ext_microcement') return fmt(getSettingVal('set-lab-microcement'));
-        if (l.matType === 'hebel_install') return fmt(getSettingVal('set-lab-hebel-install'));
-        if (l.matType === 'eps_install') return fmt(getSettingVal('set-lab-eps-install'));
-        return fmt(getSettingVal('set-subbie-rate'));
-      })() + '</td>' +
-      '<td class="right">' + fmt(l.labCost) + '</td>' +
-    '</tr>';
+      // ── STANDARD SINGLE-LAYER DISPLAY ──
+      html += '<table class="mat-table"><thead><tr>' +
+        '<th>PRODUCT</th><th class="right">QTY</th><th>UNIT</th><th class="right">UNIT PRICE</th><th class="right">TOTAL</th>' +
+      '</tr></thead><tbody>';
 
-    html += '</tbody><tfoot><tr class="total-row">' +
-      '<td colspan="4">LINE TOTAL (Materials + Labour)</td>' +
-      '<td class="right">' + fmt(lineMatTotal + l.labCost) + '</td>' +
-    '</tr></tfoot></table>';
+      var lineMatTotal = 0;
+      l.materials.forEach(function(m) {
+        lineMatTotal += m.total;
+        html += '<tr>' +
+          '<td>' + m.name + '</td>' +
+          '<td class="right">' + m.qty + '</td>' +
+          '<td>' + m.unit + '</td>' +
+          '<td class="right">' + fmt(m.unitPrice) + '</td>' +
+          '<td class="right">' + fmt(m.total) + '</td>' +
+        '</tr>';
+      });
+
+      grandTotal += lineMatTotal;
+
+      // Labour row — per-substrate rate labels
+      var labLabel;
+      if (l.matType === 'slab') {
+        labLabel = 'Slab Labour (Flat Fee)';
+      } else if (l.matType === 'specialty_finish') {
+        labLabel = 'Specialty Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-specialty')) + '/' + l.unit + ')';
+      } else if (l.matType === 'ext_microcement') {
+        labLabel = 'Microcement Labour — 3 Coats (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-microcement')) + '/' + l.unit + ')';
+      } else if (l.matType === 'hebel_install') {
+        labLabel = 'Hebel Install Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-hebel-install')) + '/' + l.unit + ')';
+      } else if (l.matType === 'eps_install') {
+        labLabel = 'EPS Install Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-eps-install')) + '/' + l.unit + ')';
+      } else {
+        labLabel = 'Subcontractor Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-subbie-rate')) + '/' + l.unit + ')';
+      }
+      html += '<tr style="border-top:1px solid var(--grey-dark);">' +
+        '<td>' + labLabel + '</td>' +
+        '<td class="right">' + (l.matType === 'slab' ? '1' : l.qty) + '</td>' +
+        '<td>' + (l.matType === 'slab' ? 'job' : l.unit) + '</td>' +
+        '<td class="right">' + (function() {
+          if (l.matType === 'slab') return fmt(getSettingVal('set-slab-labour'));
+          if (l.matType === 'specialty_finish') return fmt(getSettingVal('set-lab-specialty'));
+          if (l.matType === 'ext_microcement') return fmt(getSettingVal('set-lab-microcement'));
+          if (l.matType === 'hebel_install') return fmt(getSettingVal('set-lab-hebel-install'));
+          if (l.matType === 'eps_install') return fmt(getSettingVal('set-lab-eps-install'));
+          return fmt(getSettingVal('set-subbie-rate'));
+        })() + '</td>' +
+        '<td class="right">' + fmt(l.labCost) + '</td>' +
+      '</tr>';
+
+      html += '</tbody><tfoot><tr class="total-row">' +
+        '<td colspan="4">LINE TOTAL (Materials + Labour)</td>' +
+        '<td class="right">' + fmt(lineMatTotal + l.labCost) + '</td>' +
+      '</tr></tfoot></table>';
+    }
   });
 
   // Grand total
