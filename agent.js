@@ -21,7 +21,12 @@ function addAgentSection(defaults) {
     'hebel_full':    'Full Hebel System (Supply+Install+Render)',
     'eps_supply':    'EPS Supply + Install',
     'eps_full':      'Full EPS System (Supply+Install+Render)',
-    'slab_build':    'Slab Build (Linear Metre)'
+    'slab_build':        'Slab Build (Linear Metre)',
+    'specialty_finish':  'Specialty Finish',
+    'ext_microcement':   'External Microcement',
+    'other_standard':    'Other / Standard Finish',
+    'hebel_install':     'Hebel / AAC Supply & Install',
+    'eps_install':       'EPS Supply & Install'
   };
 
   Object.keys(subKeys).forEach(function(key) {
@@ -317,7 +322,12 @@ function populateQuoteFromAgent() {
           'hebel_full': 'Full Hebel System',
           'eps_supply': 'EPS Supply + Install',
           'eps_full': 'Full EPS System',
-          'slab_build': 'Slab Build'
+          'slab_build': 'Slab Build',
+          'specialty_finish': 'Specialty Finish',
+          'ext_microcement': 'External Microcement',
+          'other_standard': 'Other / Standard Finish',
+          'hebel_install': 'Hebel / AAC Install',
+          'eps_install': 'EPS Install'
         }[subKey] || subKey;
         subNames.push(s.label + ': ' + subName);
       });

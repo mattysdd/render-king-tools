@@ -70,6 +70,37 @@ var LOCKED_DEFAULTS = {
   'set-cov-angles-brick': 2.5,
   'set-cov-eps-total': 3,
   'set-cov-mesh-eps': 45,
+  // New substrate/install types
+  'set-sub-specialty_finish': 95,
+  'set-sub-ext_microcement': 180,
+  'set-sub-other_standard': 55,
+  'set-sub-hebel_install': 80,
+  'set-sub-eps_install': 65,
+  // Specialty finish labour
+  'set-lab-specialty': 35,
+  'set-lab-microcement': 55,
+  'set-lab-hebel-install': 35,
+  'set-lab-eps-install': 30,
+  // Hebel/EPS install material rates
+  'set-mat-hebel-install': 45,
+  'set-mat-eps-install': 35,
+  // Microcement product pricing
+  'set-pac-microcement-bucket': 350,
+  'set-cov-microcement-spread': 25,
+  'set-microcement-coats': 3,
+  // Specialty texture divisor (doubled rate = halved divisor)
+  'set-cov-texture-specialty': 6,
+  // Market rates for new substrates
+  'set-mkt-specialty_finish-min': 85,
+  'set-mkt-specialty_finish-max': 140,
+  'set-mkt-ext_microcement-min': 150,
+  'set-mkt-ext_microcement-max': 250,
+  'set-mkt-other_standard-min': 40,
+  'set-mkt-other_standard-max': 70,
+  'set-mkt-hebel_install-min': 70,
+  'set-mkt-hebel_install-max': 110,
+  'set-mkt-eps_install-min': 55,
+  'set-mkt-eps_install-max': 90,
   // Margin targets
   'set-margin-volume': 27.5,
   'set-margin-standard': 40,
@@ -100,7 +131,12 @@ var SUBSTRATE_KEYS = {
   'hebel_full':    { name:'Full Hebel System (Supply+Install+Render)', unit:'sqm', subId:'set-sub-hebel_full',    matType:'aac' },
   'eps_supply':    { name:'EPS Supply + Install',                      unit:'sqm', subId:'set-sub-eps_supply',    matType:'eps' },
   'eps_full':      { name:'Full EPS System (Supply+Install+Render)',   unit:'sqm', subId:'set-sub-eps_full',      matType:'eps' },
-  'slab_build':    { name:'Slab Build (Linear Metre)',                 unit:'lm',  subId:'set-sub-slab_build',    matType:'slab' }
+  'slab_build':        { name:'Slab Build (Linear Metre)',                 unit:'lm',  subId:'set-sub-slab_build',        matType:'slab' },
+  'specialty_finish':  { name:'Specialty Finish',                           unit:'sqm', subId:'set-sub-specialty_finish',  matType:'specialty_finish' },
+  'ext_microcement':   { name:'External Microcement',                       unit:'sqm', subId:'set-sub-ext_microcement',   matType:'ext_microcement' },
+  'other_standard':    { name:'Other / Standard Finish',                    unit:'sqm', subId:'set-sub-other_standard',    matType:'aac' },
+  'hebel_install':     { name:'Hebel / AAC Supply & Install',               unit:'sqm', subId:'set-sub-hebel_install',     matType:'hebel_install' },
+  'eps_install':       { name:'EPS Supply & Install',                       unit:'sqm', subId:'set-sub-eps_install',       matType:'eps_install' }
 };
 
 // ── DIFFICULTY LEVELS ──────────────────────────────────────
@@ -387,6 +423,68 @@ function calculateMaterials(subKey, matType, qty, textureType) {
     var slabLowRaw = qty / p('set-cov-low-build-slab');
     var slabLowQty = poRound(slabLowRaw);
     materials.push({ name: 'Acrabuild Plus (Low Build — Slab)', qty: slabLowQty, unit: 'bags', unitPrice: p('set-pac-low-build'), total: slabLowQty * p('set-pac-low-build') });
+
+  } else if (matType === 'specialty_finish') {
+    // SPECIALTY FINISH — EPS system with doubled texture rate
+    // EPS Low Build bags = m² ÷ 3 × 50%
+    var specEpsTotalRaw = qty / p('set-cov-eps-total');
+    var specEpsLowRaw = specEpsTotalRaw * 0.5;
+    var specEpsLowQty = poRound(specEpsLowRaw);
+    materials.push({ name: 'Acrabuild Plus (Low Build — Specialty)', qty: specEpsLowQty, unit: 'bags', unitPrice: p('set-pac-low-build'), total: specEpsLowQty * p('set-pac-low-build') });
+
+    // EPS P400 bags = m² ÷ 3 × 50%
+    var specEpsP400Raw = specEpsTotalRaw * 0.5;
+    var specEpsP400Qty = poRound(specEpsP400Raw);
+    materials.push({ name: 'AcraPro P400 (Specialty)', qty: specEpsP400Qty, unit: 'bags', unitPrice: p('set-pac-p400'), total: specEpsP400Qty * p('set-pac-p400') });
+
+    // Powerfinish buckets = m² ÷ 6 (DOUBLED from standard)
+    var specTexDiv = p('set-cov-texture-specialty');
+    var specTexRaw = qty / specTexDiv;
+    var specTexQty = poRound(specTexRaw);
+    materials.push({ name: 'Powerfinish 15L (Specialty — 2× Rate)', qty: specTexQty, unit: 'buckets', unitPrice: p('set-pac-powerfinish'), total: specTexQty * p('set-pac-powerfinish') });
+
+    // Slim Trim angles = m² ÷ 5
+    var specAnglesRaw = qty / p('set-cov-angles-aac');
+    var specAnglesQty = poRound(specAnglesRaw);
+    materials.push({ name: 'Slim Trim 1.5mm x 3m (Angles)', qty: specAnglesQty, unit: 'lengths', unitPrice: p('set-pac-slim-trim'), total: specAnglesQty * p('set-pac-slim-trim') });
+
+    // Fibreglass mesh rolls = m² ÷ 45
+    var specMeshRaw = qty / p('set-cov-mesh-eps');
+    var specMeshQty = poRound(specMeshRaw);
+    materials.push({ name: 'Fibreglass Mesh Roll 1m x 50m', qty: specMeshQty, unit: 'rolls', unitPrice: p('set-pac-mesh-roll'), total: specMeshQty * p('set-pac-mesh-roll') });
+
+  } else if (matType === 'ext_microcement') {
+    // EXTERNAL MICROCEMENT — brick base coat + 3 microcement coats
+    // Base coat: Medium Build bags = m² ÷ 2.7
+    var mcMedRaw = qty / p('set-cov-medium-build-brick');
+    var mcMedQty = poRound(mcMedRaw);
+    materials.push({ name: 'Acrabuild Medium (Base Coat)', qty: mcMedQty, unit: 'bags', unitPrice: p('set-pac-medium-build'), total: mcMedQty * p('set-pac-medium-build') });
+
+    // Mud Bump angles = m² ÷ 2.5
+    var mcAnglesRaw = qty / p('set-cov-angles-brick');
+    var mcAnglesQty = poRound(mcAnglesRaw);
+    materials.push({ name: 'Mud Bump 2.5mm x 3m (Angles)', qty: mcAnglesQty, unit: 'lengths', unitPrice: p('set-pac-mud-bump'), total: mcAnglesQty * p('set-pac-mud-bump') });
+
+    // Microcement top coat: 3 coats, m² ÷ 25 per coat
+    var mcSpread = p('set-cov-microcement-spread');
+    var mcBucketPrice = p('set-pac-microcement-bucket');
+    var mcCoats = p('set-microcement-coats') || 3;
+    var bucketsPerCoat = poRound(qty / mcSpread);
+    for (var coat = 1; coat <= mcCoats; coat++) {
+      materials.push({ name: 'Microcement Coat ' + coat, qty: bucketsPerCoat, unit: 'buckets', unitPrice: mcBucketPrice, total: bucketsPerCoat * mcBucketPrice });
+    }
+
+  } else if (matType === 'hebel_install') {
+    // HEBEL / AAC SUPPLY & INSTALL — flat rate, no complex formula
+    var hebelMatRate = p('set-mat-hebel-install');
+    var hebelMatTotal = qty * hebelMatRate;
+    materials.push({ name: 'Hebel / AAC Panels (Supply)', qty: qty, unit: 'sqm', unitPrice: hebelMatRate, total: hebelMatTotal });
+
+  } else if (matType === 'eps_install') {
+    // EPS SUPPLY & INSTALL — flat rate, no complex formula
+    var epsInstMatRate = p('set-mat-eps-install');
+    var epsInstMatTotal = qty * epsInstMatRate;
+    materials.push({ name: 'EPS Panels (Supply)', qty: qty, unit: 'sqm', unitPrice: epsInstMatRate, total: epsInstMatTotal });
   }
 
   return materials;
@@ -415,10 +513,18 @@ function recalc() {
       var materials = calculateMaterials(subKey, matType, qty, textureType);
       var matCost = materials.reduce(function(sum, m) { return sum + m.total; }, 0);
 
-      // Labour cost
+      // Labour cost — per-substrate rates
       var labCost;
       if (matType === 'slab') {
         labCost = getSettingVal('set-slab-labour'); // Flat $200 per slab
+      } else if (matType === 'specialty_finish') {
+        labCost = qty * getSettingVal('set-lab-specialty');
+      } else if (matType === 'ext_microcement') {
+        labCost = qty * getSettingVal('set-lab-microcement');
+      } else if (matType === 'hebel_install') {
+        labCost = qty * getSettingVal('set-lab-hebel-install');
+      } else if (matType === 'eps_install') {
+        labCost = qty * getSettingVal('set-lab-eps-install');
       } else {
         labCost = qty * getSettingVal('set-subbie-rate');
       }
@@ -489,11 +595,19 @@ function recalc() {
   setText('r-mat-cost', fmt(totalMatCost));
   setText('r-mat-sub', 'Dulux PAC Card — exact PO calc');
   setText('r-lab-cost', fmt(totalLabCost));
-  if (lines.some(function(l) { return l.matType === 'slab'; })) {
-    setText('r-lab-sub', 'Includes slab flat fee $' + getSettingVal('set-slab-labour'));
-  } else {
-    setText('r-lab-sub', '@ ' + fmt(subbieRate) + '/sqm subbie rate');
+  // Build labour sub-text showing per-substrate rates
+  var labSubParts = [];
+  var labTypes = {};
+  lines.forEach(function(l) { labTypes[l.matType] = true; });
+  if (labTypes['slab']) labSubParts.push('Slab flat fee $' + getSettingVal('set-slab-labour'));
+  if (labTypes['specialty_finish']) labSubParts.push('Specialty @ $' + getSettingVal('set-lab-specialty') + '/sqm');
+  if (labTypes['ext_microcement']) labSubParts.push('Microcement @ $' + getSettingVal('set-lab-microcement') + '/sqm');
+  if (labTypes['hebel_install']) labSubParts.push('Hebel Install @ $' + getSettingVal('set-lab-hebel-install') + '/sqm');
+  if (labTypes['eps_install']) labSubParts.push('EPS Install @ $' + getSettingVal('set-lab-eps-install') + '/sqm');
+  if (labTypes['brick_hebel'] || labTypes['eps_blueboard'] || labTypes['specialty'] || labTypes['hebel_supply'] || labTypes['hebel_full'] || labTypes['eps_supply'] || labTypes['eps_full'] || labTypes['other_standard']) {
+    labSubParts.push('Subbie @ ' + fmt(subbieRate) + '/sqm');
   }
+  setText('r-lab-sub', labSubParts.length > 0 ? labSubParts.join(' | ') : '@ ' + fmt(subbieRate) + '/sqm subbie rate');
   setText('r-job-cost', fmt(totalCost));
   setText('r-sqm-cost', fmt(costPerUnit) + '/unit blended cost');
 
@@ -691,13 +805,33 @@ function renderMaterialBreakdown(lines) {
 
     grandTotal += lineMatTotal;
 
-    // Labour row
-    var labLabel = l.matType === 'slab' ? 'Slab Labour (Flat Fee)' : 'Subcontractor Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-subbie-rate')) + '/' + l.unit + ')';
+    // Labour row — per-substrate rate labels
+    var labLabel;
+    if (l.matType === 'slab') {
+      labLabel = 'Slab Labour (Flat Fee)';
+    } else if (l.matType === 'specialty_finish') {
+      labLabel = 'Specialty Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-specialty')) + '/' + l.unit + ')';
+    } else if (l.matType === 'ext_microcement') {
+      labLabel = 'Microcement Labour — 3 Coats (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-microcement')) + '/' + l.unit + ')';
+    } else if (l.matType === 'hebel_install') {
+      labLabel = 'Hebel Install Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-hebel-install')) + '/' + l.unit + ')';
+    } else if (l.matType === 'eps_install') {
+      labLabel = 'EPS Install Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-lab-eps-install')) + '/' + l.unit + ')';
+    } else {
+      labLabel = 'Subcontractor Labour (' + l.qty + ' ' + l.unit + ' @ ' + fmt(getSettingVal('set-subbie-rate')) + '/' + l.unit + ')';
+    }
     html += '<tr style="border-top:1px solid var(--grey-dark);">' +
       '<td>' + labLabel + '</td>' +
       '<td class="right">' + (l.matType === 'slab' ? '1' : l.qty) + '</td>' +
       '<td>' + (l.matType === 'slab' ? 'job' : l.unit) + '</td>' +
-      '<td class="right">' + (l.matType === 'slab' ? fmt(getSettingVal('set-slab-labour')) : fmt(getSettingVal('set-subbie-rate'))) + '</td>' +
+      '<td class="right">' + (function() {
+        if (l.matType === 'slab') return fmt(getSettingVal('set-slab-labour'));
+        if (l.matType === 'specialty_finish') return fmt(getSettingVal('set-lab-specialty'));
+        if (l.matType === 'ext_microcement') return fmt(getSettingVal('set-lab-microcement'));
+        if (l.matType === 'hebel_install') return fmt(getSettingVal('set-lab-hebel-install'));
+        if (l.matType === 'eps_install') return fmt(getSettingVal('set-lab-eps-install'));
+        return fmt(getSettingVal('set-subbie-rate'));
+      })() + '</td>' +
       '<td class="right">' + fmt(l.labCost) + '</td>' +
     '</tr>';
 

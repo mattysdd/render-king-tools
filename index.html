@@ -851,6 +851,26 @@
             <label>SLAB BUILD ($/LM)</label>
             <input type="number" id="set-sub-slab_build" value="15" step="0.5" oninput="onSettingChange()">
           </div>
+          <div class="settings-field">
+            <label>SPECIALTY FINISH</label>
+            <input type="number" id="set-sub-specialty_finish" value="95" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EXTERNAL MICROCEMENT</label>
+            <input type="number" id="set-sub-ext_microcement" value="180" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>OTHER / STANDARD FINISH</label>
+            <input type="number" id="set-sub-other_standard" value="55" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>HEBEL / AAC INSTALL (SUPPLY+INSTALL)</label>
+            <input type="number" id="set-sub-hebel_install" value="80" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS INSTALL (SUPPLY+INSTALL)</label>
+            <input type="number" id="set-sub-eps_install" value="65" step="1" oninput="onSettingChange()">
+          </div>
         </div>
       </div>
     </div>
@@ -962,9 +982,13 @@
             <label>BLUE TAPE 36mm x 55m ($/ROLL)</label>
             <input type="number" id="set-pac-blue-tape" value="4.68" step="0.01" oninput="onSettingChange()">
           </div>
+          <div class="settings-field">
+            <label>MICROCEMENT ($/BUCKET — 25m²/COAT)</label>
+            <input type="number" id="set-pac-microcement-bucket" value="350" step="1" oninput="onSettingChange()">
+          </div>
         </div>
         <div class="callout callout-info" style="margin-top:14px;">
-          <strong>SOURCE:</strong> Dulux Acratex 2026 PAC Card via Stoddarts. All prices ex GST. These are the per-unit costs used in the PO Processor material calculations.
+          <strong>SOURCE:</strong> Dulux Acratex 2026 PAC Card via Stoddarts + Microcement King pricing. All prices ex GST. These are the per-unit costs used in the PO Processor material calculations.
         </div>
       </div>
     </div>
@@ -1023,6 +1047,69 @@
           <div class="settings-field">
             <label>MESH — EPS (m&sup2; &divide; X)</label>
             <input type="number" id="set-cov-mesh-eps" value="45" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>TEXTURE — SPECIALTY (m&sup2; &divide; X) [2&times; RATE]</label>
+            <input type="number" id="set-cov-texture-specialty" value="6" step="0.5" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>MICROCEMENT SPREAD (m&sup2; &divide; X PER COAT)</label>
+            <input type="number" id="set-cov-microcement-spread" value="25" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>MICROCEMENT COATS (NUMBER)</label>
+            <input type="number" id="set-microcement-coats" value="3" step="1" min="1" max="5" oninput="onSettingChange()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LABOUR RATES BY SUBSTRATE -->
+    <div class="card">
+      <div class="card-header">
+        <h2>LABOUR RATES BY SUBSTRATE</h2>
+        <span class="badge">LOCKED DEFAULTS</span>
+      </div>
+      <div class="card-body">
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label>SPECIALTY FINISH ($/SQM)</label>
+            <input type="number" id="set-lab-specialty" value="35" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EXTERNAL MICROCEMENT ($/SQM — 3 COATS)</label>
+            <input type="number" id="set-lab-microcement" value="55" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>HEBEL / AAC INSTALL ($/SQM)</label>
+            <input type="number" id="set-lab-hebel-install" value="35" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS INSTALL ($/SQM)</label>
+            <input type="number" id="set-lab-eps-install" value="30" step="1" oninput="onSettingChange()">
+          </div>
+        </div>
+        <div class="callout callout-info" style="margin-top:14px;">
+          <strong>NOTE:</strong> Standard render labour ($27/sqm) is set in the Core Settings section above. These are substrate-specific labour rates for specialty work.
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTALL MATERIAL RATES -->
+    <div class="card">
+      <div class="card-header">
+        <h2>INSTALL MATERIAL RATES</h2>
+        <span class="badge">SUPPLY + INSTALL</span>
+      </div>
+      <div class="card-body">
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label>HEBEL / AAC PANELS ($/SQM SUPPLY)</label>
+            <input type="number" id="set-mat-hebel-install" value="45" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS PANELS ($/SQM SUPPLY)</label>
+            <input type="number" id="set-mat-eps-install" value="35" step="1" oninput="onSettingChange()">
           </div>
         </div>
       </div>
@@ -1114,6 +1201,46 @@
           <div class="settings-field">
             <label>FULL EPS MAX</label>
             <input type="number" id="set-mkt-eps_full-max" value="180" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>SPECIALTY FINISH MIN</label>
+            <input type="number" id="set-mkt-specialty_finish-min" value="85" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>SPECIALTY FINISH MAX</label>
+            <input type="number" id="set-mkt-specialty_finish-max" value="140" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EXT MICROCEMENT MIN</label>
+            <input type="number" id="set-mkt-ext_microcement-min" value="150" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EXT MICROCEMENT MAX</label>
+            <input type="number" id="set-mkt-ext_microcement-max" value="250" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>OTHER/STANDARD MIN</label>
+            <input type="number" id="set-mkt-other_standard-min" value="40" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>OTHER/STANDARD MAX</label>
+            <input type="number" id="set-mkt-other_standard-max" value="70" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>HEBEL INSTALL MIN</label>
+            <input type="number" id="set-mkt-hebel_install-min" value="70" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>HEBEL INSTALL MAX</label>
+            <input type="number" id="set-mkt-hebel_install-max" value="110" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS INSTALL MIN</label>
+            <input type="number" id="set-mkt-eps_install-min" value="55" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS INSTALL MAX</label>
+            <input type="number" id="set-mkt-eps_install-max" value="90" step="1" oninput="onSettingChange()">
           </div>
         </div>
       </div>
