@@ -133,8 +133,8 @@ var SUBSTRATE_KEYS = {
   'slab_build':        { name:'Slab Build (Linear Metre)',                 unit:'lm',  subId:'set-sub-slab_build',        matType:'slab',             group:'render', nonRender:true },
   'brick_hebel':       { name:'Brick / Hebel',                             unit:'sqm', subId:'set-sub-brick_hebel',       matType:'aac',              group:'render' },
   'eps_blueboard':     { name:'EPS / Blueboard',                           unit:'sqm', subId:'set-sub-eps_blueboard',     matType:'eps',              group:'render' },
-  'specialty_finish':  { name:'Specialty Finish',                           unit:'sqm', subId:'set-sub-specialty_finish',  matType:'specialty_finish', group:'render' },
   'specialty':         { name:'Specialty / Architectural',                 unit:'sqm', subId:'set-sub-specialty',         matType:'aac',              group:'render' },
+  'specialty_finish':  { name:'Specialty Finish',                           unit:'sqm', subId:'set-sub-specialty_finish',  matType:'specialty_finish', group:'render' },
   'ext_microcement':   { name:'External Microcement',                       unit:'sqm', subId:'set-sub-ext_microcement',   matType:'ext_microcement',  group:'render' },
   'other_standard':    { name:'Other / Standard Finish',                    unit:'sqm', subId:'set-sub-other_standard',    matType:'aac',              group:'render' },
   // GROUP 2 — INSTALL SYSTEMS
@@ -585,6 +585,8 @@ function recalc() {
       var substrate = SUBSTRATE_KEYS[subKey];
       var diffAddon = getDiffAddon(diffLevel);
       var baseRate = getSubstrateBaseRate(subKey);
+      // Slab lines use flat rate — no difficulty add-on
+      if (substrate.matType === 'slab') diffAddon = 0;
       var totalRate = baseRate + diffAddon;
       var unit = substrate.unit;
       var matType = substrate.matType;
@@ -656,8 +658,14 @@ function recalc() {
     l.isNonRender = !!(SUBSTRATE_KEYS[l.subKey] && SUBSTRATE_KEYS[l.subKey].nonRender);
 
     // Recommended sell at tier target margin
-    l.sellAtTarget = l.lineCost / (1 - tierMarginTarget);
-    l.sellRateAtTarget = l.qty > 0 ? l.sellAtTarget / l.qty : 0;
+    if (l.matType === 'slab') {
+      // Slab sells at flat rate × qty (not margin-derived)
+      l.sellRateAtTarget = l.totalRate;
+      l.sellAtTarget = l.totalRate * l.qty;
+    } else {
+      l.sellAtTarget = l.lineCost / (1 - tierMarginTarget);
+      l.sellRateAtTarget = l.qty > 0 ? l.sellAtTarget / l.qty : 0;
+    }
 
     // Volume builder floor check
     l.floorApplied = false;
@@ -1136,9 +1144,85 @@ function clearResults() {
   if (vfwEl) vfwEl.style.display = 'none';
 }
 
+// ── T&C SIGNATURE PADS ────────────────────────────────────
+var tcClientCanvas, tcClientCtx, tcClientDrawing = false;
+var tcRkCanvas, tcRkCtx;
+
+function initTcSignaturePads() {
+  // Client signature pad
+  tcClientCanvas = document.getElementById('tc-client-sig-canvas');
+  if (tcClientCanvas) {
+    var wrap = document.getElementById('tc-client-canvas-wrap');
+    tcClientCanvas.width = wrap.offsetWidth;
+    tcClientCanvas.height = wrap.offsetHeight;
+    tcClientCtx = tcClientCanvas.getContext('2d');
+    tcClientCtx.strokeStyle = '#000';
+    tcClientCtx.lineWidth = 2;
+    tcClientCtx.lineCap = 'round';
+    tcClientCanvas.addEventListener('mousedown', tcClientStart);
+    tcClientCanvas.addEventListener('mousemove', tcClientMove);
+    tcClientCanvas.addEventListener('mouseup', tcClientEnd);
+    tcClientCanvas.addEventListener('mouseleave', tcClientEnd);
+    tcClientCanvas.addEventListener('touchstart', function(e) { e.preventDefault(); tcClientStart(e.touches[0]); });
+    tcClientCanvas.addEventListener('touchmove', function(e) { e.preventDefault(); tcClientMove(e.touches[0]); });
+    tcClientCanvas.addEventListener('touchend', tcClientEnd);
+  }
+  // RK signature pad (locked / pre-signed)
+  tcRkCanvas = document.getElementById('tc-rk-sig-canvas');
+  if (tcRkCanvas) {
+    var rkWrap = document.getElementById('tc-rk-canvas-wrap');
+    tcRkCanvas.width = rkWrap.offsetWidth;
+    tcRkCanvas.height = rkWrap.offsetHeight;
+    tcRkCtx = tcRkCanvas.getContext('2d');
+    tcRkCtx.strokeStyle = '#000';
+    tcRkCtx.lineWidth = 2;
+    tcRkCtx.lineCap = 'round';
+    // Draw "King Mannion" cursive text as pre-signed
+    tcRkCtx.font = 'italic 28px Georgia, serif';
+    tcRkCtx.fillStyle = '#000';
+    tcRkCtx.fillText('King Mannion', 20, tcRkCanvas.height / 2 + 8);
+  }
+}
+
+function tcClientStart(e) {
+  tcClientDrawing = true;
+  tcClientCtx.beginPath();
+  var rect = tcClientCanvas.getBoundingClientRect();
+  tcClientCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  var hint = document.getElementById('tc-client-canvas-hint');
+  if (hint) hint.style.display = 'none';
+}
+
+function tcClientMove(e) {
+  if (!tcClientDrawing) return;
+  var rect = tcClientCanvas.getBoundingClientRect();
+  tcClientCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  tcClientCtx.stroke();
+}
+
+function tcClientEnd() { tcClientDrawing = false; }
+
+function clearTcClientSig() {
+  if (!tcClientCtx) return;
+  tcClientCtx.clearRect(0, 0, tcClientCanvas.width, tcClientCanvas.height);
+  var hint = document.getElementById('tc-client-canvas-hint');
+  if (hint) hint.style.display = 'block';
+}
+
+// ── REFRESH MARKET RATES ──────────────────────────────────
+function refreshMarketRates() {
+  var ts = new Date();
+  var opts = { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' };
+  var tsEl = document.getElementById('market-rates-timestamp');
+  if (tsEl) tsEl.textContent = 'Last refreshed: ' + ts.toLocaleDateString('en-AU', opts);
+  var btn = document.getElementById('refresh-market-rates-btn');
+  if (btn) { btn.textContent = 'REFRESHED ✓'; setTimeout(function() { btn.textContent = 'REFRESH MARKET RATES'; }, 2000); }
+}
+
 // ── INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   loadSettings();
   checkDrift();
   addSurfaceLine('brick_hebel', 1);
+  initTcSignaturePads();
 });

@@ -566,9 +566,16 @@
           <div class="field-val" contenteditable="true">&nbsp;</div>
         </div>
         <div class="print-sig-grid">
+          <!-- CLIENT SIDE -->
           <div>
             <div class="print-sig-lbl">CLIENT SIGNATURE</div>
-            <div class="print-sig-line"></div>
+            <div class="canvas-wrap" id="tc-client-canvas-wrap" style="height:120px;margin-bottom:10px;">
+              <canvas id="tc-client-sig-canvas"></canvas>
+              <div class="canvas-hint" id="tc-client-canvas-hint">SIGN HERE</div>
+            </div>
+            <div class="sig-btn-row" style="margin-bottom:10px;">
+              <button class="sig-btn sig-btn-clear" onclick="clearTcClientSig()">CLEAR</button>
+            </div>
             <div class="sig-field-row">
               <label class="sig-field-label">Full Name</label>
               <input type="text" class="sig-field-input" id="tc-sig-client-name" placeholder="Type full name">
@@ -582,9 +589,13 @@
               <input type="text" class="sig-field-input" id="tc-sig-client-print" placeholder="Print name">
             </div>
           </div>
+          <!-- RENDER KING SIDE -->
           <div>
             <div class="print-sig-lbl">RENDER RENDER PTY LTD (RENDER KING)</div>
-            <div class="print-sig-line"></div>
+            <div class="canvas-wrap" id="tc-rk-canvas-wrap" style="height:120px;margin-bottom:10px;">
+              <canvas id="tc-rk-sig-canvas"></canvas>
+              <div class="canvas-hint" id="tc-rk-canvas-hint" style="display:none;"></div>
+            </div>
             <div class="sig-field-row">
               <label class="sig-field-label">Name</label>
               <span class="sig-field-locked">King Mannion</span>
@@ -783,108 +794,96 @@
 <div id="tab-settings" class="tab-content">
   <div class="page">
 
-    <!-- CORE BUSINESS SETTINGS -->
+    <!-- SECTION 1 — RENDER SYSTEMS SELL RATES -->
     <div class="card">
       <div class="card-header">
-        <h2>CORE BUSINESS SETTINGS</h2>
-        <span class="badge">STOP-CHECK ACTIVE</span>
+        <h2>SECTION 1 — RENDER SYSTEMS — SELL RATES ($/SQM, EX GST)</h2>
+        <span class="badge">SELL RATES</span>
       </div>
       <div class="card-body">
         <div class="settings-grid">
           <div class="settings-field">
-            <label>SUBCONTRACTOR RATE ($/SQM)</label>
-            <input type="number" id="set-subbie-rate" value="27" step="0.5" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>VARIATION RATE ($/HR)</label>
-            <input type="number" id="set-variation-rate" value="110" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>MINIMUM JOB VALUE ($)</label>
-            <input type="number" id="set-min-job" value="2200" step="100" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>SLAB LABOUR (FLAT FEE $)</label>
-            <input type="number" id="set-slab-labour" value="200" step="10" oninput="onSettingChange()">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBSTRATE BASE RATES -->
-    <div class="card">
-      <div class="card-header">
-        <h2>SUBSTRATE BASE RATES ($/SQM SELL)</h2>
-        <span class="badge">ALL PRICES EX GST</span>
-      </div>
-      <div class="card-body">
-        <div class="settings-grid">
-          <div class="settings-field">
-            <label>BRICK / HEBEL</label>
+            <label>BRICK / HEBEL ($/SQM)</label>
             <input type="number" id="set-sub-brick_hebel" value="55" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EPS / BLUEBOARD</label>
+            <label>EPS / BLUEBOARD ($/SQM)</label>
             <input type="number" id="set-sub-eps_blueboard" value="75" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>SPECIALTY / ARCHITECTURAL</label>
-            <input type="number" id="set-sub-specialty" value="110" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>HEBEL SUPPLY + INSTALL</label>
-            <input type="number" id="set-sub-hebel_supply" value="110" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>FULL HEBEL SYSTEM</label>
-            <input type="number" id="set-sub-hebel_full" value="165" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>EPS SUPPLY + INSTALL</label>
-            <input type="number" id="set-sub-eps_supply" value="85" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>FULL EPS SYSTEM</label>
-            <input type="number" id="set-sub-eps_full" value="150" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>SLAB BUILD ($/LM)</label>
-            <input type="number" id="set-sub-slab_build" value="15" step="0.5" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>SPECIALTY FINISH</label>
+            <label>SPECIALTY FINISH ($/SQM)</label>
             <input type="number" id="set-sub-specialty_finish" value="95" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EXTERNAL MICROCEMENT</label>
+            <label>SPECIALTY / ARCHITECTURAL ($/SQM)</label>
+            <input type="number" id="set-sub-specialty" value="110" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EXTERNAL MICROCEMENT ($/SQM)</label>
             <input type="number" id="set-sub-ext_microcement" value="180" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>OTHER / STANDARD FINISH</label>
+            <label>OTHER / STANDARD FINISH ($/SQM)</label>
             <input type="number" id="set-sub-other_standard" value="55" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>HEBEL / AAC INSTALL (SUPPLY+INSTALL)</label>
-            <input type="number" id="set-sub-hebel_install" value="80" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>EPS INSTALL (SUPPLY+INSTALL)</label>
-            <input type="number" id="set-sub-eps_install" value="65" step="1" oninput="onSettingChange()">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- DIFFICULTY ADD-ONS -->
+    <!-- SECTION 2 — INSTALL & FULL SYSTEMS SELL RATES -->
     <div class="card">
       <div class="card-header">
-        <h2>DIFFICULTY ADD-ONS ($/SQM)</h2>
+        <h2>SECTION 2 — INSTALL &amp; FULL SYSTEMS — SELL RATES ($/SQM, EX GST)</h2>
+        <span class="badge">SELL RATES</span>
+      </div>
+      <div class="card-body">
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label>HEBEL SUPPLY + INSTALL ($/SQM)</label>
+            <input type="number" id="set-sub-hebel_supply" value="110" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>FULL HEBEL SYSTEM ($/SQM)</label>
+            <input type="number" id="set-sub-hebel_full" value="165" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS SUPPLY + INSTALL ($/SQM)</label>
+            <input type="number" id="set-sub-eps_supply" value="85" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>FULL EPS SYSTEM ($/SQM)</label>
+            <input type="number" id="set-sub-eps_full" value="150" step="1" oninput="onSettingChange()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3 — SLAB BUILD -->
+    <div class="card">
+      <div class="card-header">
+        <h2>SECTION 3 — SLAB BUILD</h2>
+        <span class="badge">LINEAR METRE</span>
+      </div>
+      <div class="card-body">
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label>SLAB BUILD RATE ($/LM)</label>
+            <input type="number" id="set-sub-slab_build" value="15" step="0.5" oninput="onSettingChange()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4 — DIFFICULTY ADD-ONS -->
+    <div class="card">
+      <div class="card-header">
+        <h2>SECTION 4 — DIFFICULTY ADD-ONS ($/SQM)</h2>
         <span class="badge">LOCKED DEFAULTS</span>
       </div>
       <div class="card-body">
         <div class="settings-grid" style="grid-template-columns:repeat(5,1fr);">
           <div class="settings-field">
-            <label>LVL 1 — GROUND</label>
+            <label>LVL 1 — VOLUME/GROUND</label>
             <input type="number" id="set-diff-1" value="0" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
@@ -896,40 +895,91 @@
             <input type="number" id="set-diff-3" value="12" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>LVL 4 — DETAIL</label>
+            <label>LVL 4 — DETAIL/COMPLEX</label>
             <input type="number" id="set-diff-4" value="22" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>LVL 5 — LUXURY</label>
+            <label>LVL 5 — LUXURY/ARCHITECTURAL</label>
             <input type="number" id="set-diff-5" value="35" step="1" oninput="onSettingChange()">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- VOLUME BUILDER FLOOR -->
+    <!-- SECTION 5 — BACKGROUND COST RATES -->
     <div class="card">
       <div class="card-header">
-        <h2>VOLUME BUILDER FLOOR</h2>
-        <span class="badge">HARD FLOOR — NO QUOTE BELOW THIS</span>
+        <h2>SECTION 5 — INTERNAL COST RATES</h2>
+        <span class="badge" style="background:var(--red);color:#fff;">NOT VISIBLE ON QUOTES</span>
       </div>
       <div class="card-body">
-        <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="callout callout-red" style="margin-bottom:14px;">
+          <strong>INTERNAL COST RATES — NOT SELL RATES.</strong> These are background cost rates used for margin calculations only. They do not appear on quotes or client-facing documents.
+        </div>
+        <div class="settings-grid">
           <div class="settings-field">
-            <label>MIN SELL RATE ($/SQM)</label>
+            <label>SUBCONTRACTOR RENDER RATE ($/SQM)</label>
+            <input type="number" id="set-subbie-rate" value="27" step="0.5" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>HEBEL INSTALL — LABOUR ($/SQM)</label>
+            <input type="number" id="set-lab-hebel-install" value="35" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>HEBEL INSTALL — MATERIAL ($/SQM)</label>
+            <input type="number" id="set-mat-hebel-install" value="45" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS INSTALL — LABOUR ($/SQM)</label>
+            <input type="number" id="set-lab-eps-install" value="30" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS INSTALL — MATERIAL ($/SQM)</label>
+            <input type="number" id="set-mat-eps-install" value="35" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>SPECIALTY FINISH LABOUR ($/SQM)</label>
+            <input type="number" id="set-lab-specialty" value="35" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>MICROCEMENT LABOUR ($/SQM — 3 COATS)</label>
+            <input type="number" id="set-lab-microcement" value="55" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>SLAB LABOUR (FLAT FEE $)</label>
+            <input type="number" id="set-slab-labour" value="200" step="10" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>VARIATION RATE ($/HR)</label>
+            <input type="number" id="set-variation-rate" value="110" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>MINIMUM JOB VALUE ($)</label>
+            <input type="number" id="set-min-job" value="2200" step="100" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>CREW SIZE (PEOPLE)</label>
+            <input type="number" id="set-crew-size" value="3" step="1" min="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>CREW OUTPUT (SQM/DAY)</label>
+            <input type="number" id="set-crew-output" value="50" step="5" min="10" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>VOLUME BUILDER FLOOR ($/SQM)</label>
             <input type="number" id="set-vol-floor" value="47" step="1" oninput="onSettingChange()">
           </div>
         </div>
-        <div class="callout callout-red" style="margin-top:14px;">
-          <strong>HARD FLOOR:</strong> $47/sqm is the absolute minimum sell rate for any volume builder job. No quote can go below this regardless of substrate type or difficulty level.
+        <div class="callout callout-gold" style="margin-top:14px;">
+          <strong>HARD FLOOR:</strong> $47/sqm is the absolute minimum sell rate for any volume builder job.
         </div>
       </div>
     </div>
 
-    <!-- DULUX PAC CARD PRODUCT PRICES -->
+    <!-- SECTION 6 — DULUX PAC CARD -->
     <div class="card">
       <div class="card-header">
-        <h2>DULUX PAC CARD — PRODUCT PRICES</h2>
+        <h2>SECTION 6 — DULUX PAC CARD — MATERIAL COSTS ($/UNIT)</h2>
         <span class="badge">2026 STODDARTS</span>
       </div>
       <div class="card-body">
@@ -983,12 +1033,12 @@
             <input type="number" id="set-pac-blue-tape" value="4.68" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>MICROCEMENT ($/BUCKET — 25m²/COAT)</label>
+            <label>MICROCEMENT ($/BUCKET — 25m&sup2;/COAT)</label>
             <input type="number" id="set-pac-microcement-bucket" value="350" step="1" oninput="onSettingChange()">
           </div>
         </div>
         <div class="callout callout-info" style="margin-top:14px;">
-          <strong>SOURCE:</strong> Dulux Acratex 2026 PAC Card via Stoddarts + Microcement King pricing. All prices ex GST. These are the per-unit costs used in the PO Processor material calculations.
+          <strong>SOURCE:</strong> Dulux Acratex 2026 PAC Card via Stoddarts + Microcement King pricing. All prices ex GST.
         </div>
       </div>
     </div>
@@ -1064,77 +1114,6 @@
       </div>
     </div>
 
-    <!-- LABOUR RATES BY SUBSTRATE -->
-    <div class="card">
-      <div class="card-header">
-        <h2>LABOUR RATES BY SUBSTRATE</h2>
-        <span class="badge">LOCKED DEFAULTS</span>
-      </div>
-      <div class="card-body">
-        <div class="settings-grid">
-          <div class="settings-field">
-            <label>SPECIALTY FINISH ($/SQM)</label>
-            <input type="number" id="set-lab-specialty" value="35" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>EXTERNAL MICROCEMENT ($/SQM — 3 COATS)</label>
-            <input type="number" id="set-lab-microcement" value="55" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>HEBEL / AAC INSTALL ($/SQM)</label>
-            <input type="number" id="set-lab-hebel-install" value="35" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>EPS INSTALL ($/SQM)</label>
-            <input type="number" id="set-lab-eps-install" value="30" step="1" oninput="onSettingChange()">
-          </div>
-        </div>
-        <div class="callout callout-info" style="margin-top:14px;">
-          <strong>NOTE:</strong> Standard render labour ($27/sqm) is set in the Core Settings section above. These are substrate-specific labour rates for specialty work.
-        </div>
-      </div>
-    </div>
-
-    <!-- INSTALL MATERIAL RATES -->
-    <div class="card">
-      <div class="card-header">
-        <h2>INSTALL MATERIAL RATES</h2>
-        <span class="badge">SUPPLY + INSTALL</span>
-      </div>
-      <div class="card-body">
-        <div class="settings-grid">
-          <div class="settings-field">
-            <label>HEBEL / AAC PANELS ($/SQM SUPPLY)</label>
-            <input type="number" id="set-mat-hebel-install" value="45" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>EPS PANELS ($/SQM SUPPLY)</label>
-            <input type="number" id="set-mat-eps-install" value="35" step="1" oninput="onSettingChange()">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CREW PRODUCTIVITY -->
-    <div class="card">
-      <div class="card-header">
-        <h2>CREW PRODUCTIVITY</h2>
-        <span class="badge">REFERENCE</span>
-      </div>
-      <div class="card-body">
-        <div class="settings-grid">
-          <div class="settings-field">
-            <label>STANDARD CREW SIZE (PEOPLE)</label>
-            <input type="number" id="set-crew-size" value="3" step="1" min="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>OUTPUT PER CREW PER DAY (SQM)</label>
-            <input type="number" id="set-crew-output" value="50" step="5" min="10" oninput="onSettingChange()">
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- MARGIN TARGETS -->
     <div class="card">
       <div class="card-header">
@@ -1158,11 +1137,11 @@
       </div>
     </div>
 
-    <!-- MARKET RATES -->
+    <!-- SECTION 7 — MARKET RATE REFERENCE -->
     <div class="card">
       <div class="card-header">
-        <h2>MARKET RATE REFERENCE (GOLD COAST)</h2>
-        <span class="badge">2025-2026</span>
+        <h2>SECTION 7 — MARKET RATE REFERENCE (GOLD COAST 2025–2026)</h2>
+        <span class="badge">REFERENCE ONLY</span>
       </div>
       <div class="card-body">
         <div class="settings-grid">
@@ -1175,93 +1154,81 @@
             <input type="number" id="set-mkt-brick_hebel-max" value="70" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EPS/BLUEBOARD MIN</label>
+            <label>EPS/BLUEBOARD MIN ($/SQM)</label>
             <input type="number" id="set-mkt-eps_blueboard-min" value="70" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EPS/BLUEBOARD MAX</label>
+            <label>EPS/BLUEBOARD MAX ($/SQM)</label>
             <input type="number" id="set-mkt-eps_blueboard-max" value="120" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>SPECIALTY MIN</label>
+            <label>SPECIALTY / ARCH MIN ($/SQM)</label>
             <input type="number" id="set-mkt-specialty-min" value="100" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>SPECIALTY MAX</label>
+            <label>SPECIALTY / ARCH MAX ($/SQM)</label>
             <input type="number" id="set-mkt-specialty-max" value="180" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>HEBEL S+I MIN</label>
-            <input type="number" id="set-mkt-hebel_supply-min" value="90" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>HEBEL S+I MAX</label>
-            <input type="number" id="set-mkt-hebel_supply-max" value="140" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>FULL HEBEL MIN</label>
-            <input type="number" id="set-mkt-hebel_full-min" value="140" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>FULL HEBEL MAX</label>
-            <input type="number" id="set-mkt-hebel_full-max" value="200" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>EPS S+I MIN</label>
-            <input type="number" id="set-mkt-eps_supply-min" value="75" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>EPS S+I MAX</label>
-            <input type="number" id="set-mkt-eps_supply-max" value="110" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>FULL EPS MIN</label>
-            <input type="number" id="set-mkt-eps_full-min" value="120" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>FULL EPS MAX</label>
-            <input type="number" id="set-mkt-eps_full-max" value="180" step="1" oninput="onSettingChange()">
-          </div>
-          <div class="settings-field">
-            <label>SPECIALTY FINISH MIN</label>
+            <label>SPECIALTY FINISH MIN ($/SQM)</label>
             <input type="number" id="set-mkt-specialty_finish-min" value="85" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>SPECIALTY FINISH MAX</label>
+            <label>SPECIALTY FINISH MAX ($/SQM)</label>
             <input type="number" id="set-mkt-specialty_finish-max" value="140" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EXT MICROCEMENT MIN</label>
+            <label>EXT MICROCEMENT MIN ($/SQM)</label>
             <input type="number" id="set-mkt-ext_microcement-min" value="150" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EXT MICROCEMENT MAX</label>
+            <label>EXT MICROCEMENT MAX ($/SQM)</label>
             <input type="number" id="set-mkt-ext_microcement-max" value="250" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>OTHER/STANDARD MIN</label>
+            <label>OTHER/STANDARD MIN ($/SQM)</label>
             <input type="number" id="set-mkt-other_standard-min" value="40" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>OTHER/STANDARD MAX</label>
+            <label>OTHER/STANDARD MAX ($/SQM)</label>
             <input type="number" id="set-mkt-other_standard-max" value="70" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>HEBEL INSTALL MIN</label>
-            <input type="number" id="set-mkt-hebel_install-min" value="70" step="1" oninput="onSettingChange()">
+            <label>HEBEL S+I MIN ($/SQM)</label>
+            <input type="number" id="set-mkt-hebel_supply-min" value="90" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>HEBEL INSTALL MAX</label>
-            <input type="number" id="set-mkt-hebel_install-max" value="110" step="1" oninput="onSettingChange()">
+            <label>HEBEL S+I MAX ($/SQM)</label>
+            <input type="number" id="set-mkt-hebel_supply-max" value="140" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EPS INSTALL MIN</label>
-            <input type="number" id="set-mkt-eps_install-min" value="55" step="1" oninput="onSettingChange()">
+            <label>FULL HEBEL MIN ($/SQM)</label>
+            <input type="number" id="set-mkt-hebel_full-min" value="140" step="1" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>EPS INSTALL MAX</label>
-            <input type="number" id="set-mkt-eps_install-max" value="90" step="1" oninput="onSettingChange()">
+            <label>FULL HEBEL MAX ($/SQM)</label>
+            <input type="number" id="set-mkt-hebel_full-max" value="200" step="1" oninput="onSettingChange()">
           </div>
+          <div class="settings-field">
+            <label>EPS S+I MIN ($/SQM)</label>
+            <input type="number" id="set-mkt-eps_supply-min" value="75" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>EPS S+I MAX ($/SQM)</label>
+            <input type="number" id="set-mkt-eps_supply-max" value="110" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>FULL EPS MIN ($/SQM)</label>
+            <input type="number" id="set-mkt-eps_full-min" value="120" step="1" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
+            <label>FULL EPS MAX ($/SQM)</label>
+            <input type="number" id="set-mkt-eps_full-max" value="180" step="1" oninput="onSettingChange()">
+          </div>
+        </div>
+        <div style="margin-top:18px;">
+          <button id="refresh-market-rates-btn" class="add-surface-btn" onclick="refreshMarketRates()" style="width:100%;background:var(--gold);color:#000;border-color:var(--gold);font-weight:800;letter-spacing:1px;">REFRESH MARKET RATES</button>
+          <div id="market-rates-timestamp" style="text-align:center;font-size:11px;color:var(--grey-mid);margin-top:8px;">Last refreshed: —</div>
         </div>
       </div>
     </div>
@@ -1280,9 +1247,9 @@
   </div><!-- /page -->
 </div><!-- /tab-settings -->
 
-<script src="calculator.js?v=5"></script>
-<script src="quote.js?v=5"></script>
-<script src="agent.js?v=5"></script>
+<script src="calculator.js?v=6"></script>
+<script src="quote.js?v=6"></script>
+<script src="agent.js?v=6"></script>
 
 </body>
 </html>
