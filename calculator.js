@@ -642,6 +642,10 @@ function recalc() {
   var totalQty = 0;       // ALL lines (for total job cost)
   var renderQty = 0;      // Render lines only (for Total Render Area / Avg Sell Rate)
   var renderSell = 0;     // Render sell total (for Avg Sell Rate)
+  var renderCost = 0;     // Render lines cost only (for margin bands)
+  var slabQty = 0;        // Slab lm total
+  var slabCost = 0;       // Slab cost total
+  var slabSell = 0;       // Slab sell total
   var totalMatCost = 0;
   var totalLabCost = 0;
   var volFloorActive = false;
@@ -674,6 +678,14 @@ function recalc() {
     if (!l.isNonRender) {
       renderQty += l.qty;
       renderSell += l.sellAtTarget;
+      renderCost += l.lineCost;
+    }
+
+    // Track slab totals separately
+    if (l.matType === 'slab') {
+      slabQty += l.qty;
+      slabCost += l.lineCost;
+      slabSell += l.sellAtTarget;
     }
   });
 
@@ -724,8 +736,8 @@ function recalc() {
     setText('custom-margin-display', 'Enter a sell price to see your actual margin');
   }
 
-  // Margin bands (use renderQty for $/sqm display)
-  renderMarginBands(totalCost, renderQty);
+  // Margin bands — render cost only, slab shown separately
+  renderMarginBands(renderCost, renderQty, slabQty, slabCost, slabSell);
 
   // Per-line breakdown
   renderLineBreakdown(lines, tier, tierMarginTarget);
@@ -798,29 +810,60 @@ function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQt
   setHTML('rec-sell-wrap', html);
 }
 
-// ── MARGIN BANDS ───────────────────────────────────────────
-function renderMarginBands(totalCost, totalQty) {
+// ── MARGIN BANDS ───────────────────────────────────────────────────────
+// Render-only margin bands + slab add-on
+function renderMarginBands(renderCost, renderQty, slabQty, slabCost, slabSell) {
   var bands = [25,30,35,40,45,50,55];
-  var html = '<table class="margin-table"><thead><tr>' +
-    '<th>MARGIN</th><th>SELL PRICE (JOB)</th><th>$/UNIT SELL</th><th>PROFIT</th><th>STATUS</th>' +
+
+  // Callout explaining render-only basis
+  var html = '<div class="callout callout-info" style="margin-bottom:14px;">' +
+    '<strong>RENDER LINES ONLY</strong> — $/sqm rates below are based on render cost only (' + renderQty.toFixed(0) + ' sqm). Slab edge costs are shown separately below.' +
+  '</div>';
+
+  html += '<table class="margin-table"><thead><tr>' +
+    '<th>MARGIN</th><th>RENDER SELL PRICE</th><th>$/SQM SELL</th><th>RENDER PROFIT</th><th>STATUS</th>' +
     '</tr></thead><tbody>';
 
   bands.forEach(function(b) {
-    var sell = totalCost / (1 - b/100);
-    var profit = sell - totalCost;
-    var unitRate = totalQty > 0 ? sell / totalQty : 0;
+    var sell = renderCost / (1 - b/100);
+    var profit = sell - renderCost;
+    var sqmRate = renderQty > 0 ? sell / renderQty : 0;
     var cls = b >= 40 ? 'band-green' : b >= 30 ? 'band-amber' : 'band-red';
     var dot = b >= 40 ? 'green' : b >= 30 ? 'amber' : 'red';
     var label = b >= 40 ? 'TARGET' : b >= 30 ? 'MINIMUM' : 'BELOW MIN';
     html += '<tr class="' + cls + '">' +
       '<td><span class="band-dot ' + dot + '"></span><strong>' + b + '%</strong></td>' +
       '<td>' + fmt(sell) + '</td>' +
-      '<td>' + fmt(unitRate) + '/unit</td>' +
+      '<td>' + fmt(sqmRate) + '/sqm</td>' +
       '<td>' + fmt(profit) + '</td>' +
       '<td><strong>' + label + '</strong></td>' +
     '</tr>';
   });
   html += '</tbody></table>';
+
+  // Slab Edge Add-On — only shown when slab lines exist
+  if (slabQty > 0) {
+    var slabProfit = slabSell - slabCost;
+    var slabMargin = slabSell > 0 ? ((slabSell - slabCost) / slabSell * 100) : 0;
+    html += '<div style="margin-top:18px;padding:14px;background:var(--grey-darker);border:1px solid var(--border-light);border-radius:8px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<span style="font-weight:800;font-size:13px;letter-spacing:1px;color:var(--gold);">SLAB EDGE ADD-ON</span>' +
+        '<span style="font-size:11px;color:var(--grey-mid);">Charged separately — not included in render $/sqm rate above</span>' +
+      '</div>' +
+      '<table class="margin-table" style="margin-top:0;"><thead><tr>' +
+        '<th>TOTAL LM</th><th>SLAB REVENUE</th><th>SLAB COST</th><th>SLAB PROFIT</th><th>MARGIN</th>' +
+      '</tr></thead><tbody>' +
+      '<tr>' +
+        '<td><strong>' + slabQty.toFixed(0) + ' lm</strong></td>' +
+        '<td>' + fmt(slabSell) + '</td>' +
+        '<td>' + fmt(slabCost) + '</td>' +
+        '<td>' + fmt(slabProfit) + '</td>' +
+        '<td><strong>' + slabMargin.toFixed(1) + '%</strong></td>' +
+      '</tr>' +
+      '</tbody></table>' +
+    '</div>';
+  }
+
   setHTML('margin-bands-wrap', html);
 }
 
