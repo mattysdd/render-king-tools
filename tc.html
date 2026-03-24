@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RENDER KING — Terms &amp; Conditions</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background:var(--black); }
+  .tc-page { max-width:900px; margin:0 auto; padding:20px; }
+  .tc-header { text-align:center; padding:30px 0 20px; border-bottom:1px solid var(--border); margin-bottom:30px; }
+  .tc-header h1 { font-size:28px; font-weight:900; color:var(--gold); letter-spacing:3px; margin:0; }
+  .tc-header .sub { font-size:12px; color:var(--text-secondary); margin-top:6px; letter-spacing:1px; }
+  .tc-footer { text-align:center; padding:30px 0; margin-top:40px; border-top:1px solid var(--border); }
+  .tc-footer .powered { font-size:10px; color:var(--grey-mid); letter-spacing:1px; }
+  .loading-state { text-align:center; padding:80px 20px; }
+  .loading-state h2 { color:var(--gold); font-size:18px; margin-bottom:10px; }
+  .loading-state p { color:var(--text-secondary); font-size:13px; }
+  /* Signature section */
+  .tc-sig-wrap { margin-top:40px; padding:30px; background:var(--panel); border:1px solid var(--border); border-radius:4px; }
+  .tc-sig-wrap-title { font-size:14px; font-weight:800; color:var(--gold); text-align:center; letter-spacing:2px; margin-bottom:20px; }
+  .sig-save-btn { display:block; width:100%; max-width:400px; margin:20px auto 0; padding:14px; background:var(--green); color:white; border:none; font-family:inherit; font-size:13px; font-weight:800; letter-spacing:1px; cursor:pointer; border-radius:4px; text-transform:uppercase; }
+  .sig-save-btn:hover { opacity:0.9; }
+  .sig-save-btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .save-success { text-align:center; padding:20px; background:var(--green-bg); border:1px solid var(--green-border); border-radius:4px; margin-top:20px; color:var(--green); font-weight:700; font-size:13px; }
+  .no-print { display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="tc-page">
+  <div class="tc-header">
+    <h1>RENDER KING</h1>
+    <div class="sub">PAYMENT TERMS &amp; CONDITIONS</div>
+  </div>
+
+  <div id="tc-loading" class="loading-state">
+    <h2>LOADING TERMS &amp; CONDITIONS...</h2>
+    <p>Please wait.</p>
+  </div>
+
+  <div id="tc-content" style="display:none;">
+    <div id="tc-doc-body"></div>
+
+    <!-- Signature Section -->
+    <div class="tc-sig-wrap" id="tc-sig-wrap">
+      <div class="tc-sig-wrap-title">ACKNOWLEDGEMENT &amp; ACCEPTANCE</div>
+      <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-bottom:20px;">
+        By signing below, you acknowledge that you have read, understood, and agree to all Payment Terms &amp; Conditions set out above.
+      </p>
+
+      <div class="digital-sig-block">
+        <div class="digital-sig-title">YOUR SIGNATURE</div>
+        <div class="digital-sig-subtitle">Draw your signature below using your mouse (desktop) or finger (mobile/tablet)</div>
+        <div class="sig-accepted-banner" id="tc-sig-accepted-banner">
+          <img id="tc-sig-image" src="" alt="Signature" style="max-width:300px;margin-top:8px;display:none;">
+        </div>
+        <div class="canvas-wrap" id="tc-canvas-wrap">
+          <canvas id="tc-sig-canvas"></canvas>
+          <div class="canvas-hint" id="tc-canvas-hint">SIGN HERE</div>
+        </div>
+        <div class="sig-btn-row" id="tc-sig-btn-row">
+          <button class="sig-btn sig-btn-clear" onclick="clearTcSig()">CLEAR SIGNATURE</button>
+          <button class="sig-btn sig-btn-accept" id="tc-accept-btn" onclick="acceptTcSig()" disabled>ACCEPT &amp; SIGN</button>
+        </div>
+        <div class="sig-fields-row">
+          <div class="sig-field">
+            <label class="sig-field-label">FULL NAME</label>
+            <input type="text" id="tc-sig-typed-name" class="sig-field-input sig-editable" placeholder="Type your full name">
+          </div>
+          <div class="sig-field">
+            <label class="sig-field-label">COMPANY / BUILDER</label>
+            <input type="text" id="tc-sig-company" class="sig-field-input sig-editable" placeholder="Company name (optional)">
+          </div>
+          <div class="sig-field">
+            <label class="sig-field-label">DATE</label>
+            <input type="date" id="tc-sig-date" class="sig-field-input sig-editable">
+          </div>
+        </div>
+      </div>
+
+      <button class="sig-save-btn" id="tc-save-btn" onclick="saveTcSignature()" disabled>SUBMIT SIGNED ACCEPTANCE</button>
+      <div id="tc-save-success" class="save-success" style="display:none;">
+        T&amp;C ACCEPTANCE SUBMITTED — Thank you. Render King has been notified.
+      </div>
+    </div>
+  </div>
+
+  <div class="tc-footer">
+    <div class="powered">RENDER RENDER PTY LTD — TRADING AS RENDER KING — GOLD COAST QLD</div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const GH_TOKEN = ['ghp_fSiZgVAuiadmGQ2y', '5bndOF4wFDVITB0et6CP'].join('');
+const GH_REPO  = 'mattysdd/render-king-tools';
+const GH_BRANCH = 'main';
+
+let quoteData = null;
+let quoteSha = null;
+let quoteId = null;
+
+// ── LOAD T&C CONTENT ──
+async function loadTcPage() {
+  const params = new URLSearchParams(window.location.search);
+  quoteId = params.get('id');
+
+  // Load T&C HTML from main page
+  try {
+    const res = await fetch('index.html');
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const tcTab = doc.getElementById('tab-terms');
+    if (tcTab) {
+      const docBody = tcTab.querySelector('.doc-body');
+      const docHeader = tcTab.querySelector('.doc-header');
+      const tcDocEl = document.getElementById('tc-doc-body');
+      if (docHeader) tcDocEl.innerHTML += docHeader.outerHTML;
+      if (docBody) {
+        tcDocEl.innerHTML += docBody.innerHTML;
+        // Remove the existing signature section from T&C (we have our own below)
+        const tcSig = tcDocEl.querySelector('.tc-sig-section');
+        if (tcSig) tcSig.remove();
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load T&C:', e);
+  }
+
+  // If quote ID provided, load it for save-back
+  if (quoteId) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/quotes/${quoteId}.json?ref=${GH_BRANCH}`, {
+        headers: { 'Authorization': `token ${GH_TOKEN}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        quoteSha = data.sha;
+        quoteData = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+      }
+    } catch (e) {
+      console.error('Quote load failed:', e);
+    }
+  }
+
+  document.getElementById('tc-loading').style.display = 'none';
+  document.getElementById('tc-content').style.display = 'block';
+
+  // Set today's date
+  const dateInput = document.getElementById('tc-sig-date');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+  initTcSigPad();
+}
+
+// ── SIGNATURE PAD ──
+let tcCanvas, tcCtx, tcDrawing = false, tcHasContent = false;
+
+function initTcSigPad() {
+  tcCanvas = document.getElementById('tc-sig-canvas');
+  if (!tcCanvas) return;
+  const wrap = document.getElementById('tc-canvas-wrap');
+  tcCanvas.width = wrap.offsetWidth;
+  tcCanvas.height = wrap.offsetHeight;
+  tcCtx = tcCanvas.getContext('2d');
+  tcCtx.strokeStyle = '#000';
+  tcCtx.lineWidth = 2;
+  tcCtx.lineCap = 'round';
+
+  tcCanvas.addEventListener('mousedown', tcSigStart);
+  tcCanvas.addEventListener('mousemove', tcSigMove);
+  tcCanvas.addEventListener('mouseup', tcSigEnd);
+  tcCanvas.addEventListener('mouseleave', tcSigEnd);
+  tcCanvas.addEventListener('touchstart', e => { e.preventDefault(); tcSigStart(e.touches[0]); });
+  tcCanvas.addEventListener('touchmove', e => { e.preventDefault(); tcSigMove(e.touches[0]); });
+  tcCanvas.addEventListener('touchend', tcSigEnd);
+}
+
+function tcSigStart(e) {
+  tcDrawing = true;
+  tcCtx.beginPath();
+  const rect = tcCanvas.getBoundingClientRect();
+  tcCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  document.getElementById('tc-canvas-hint').style.display = 'none';
+}
+
+function tcSigMove(e) {
+  if (!tcDrawing) return;
+  const rect = tcCanvas.getBoundingClientRect();
+  tcCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  tcCtx.stroke();
+  tcHasContent = true;
+  document.getElementById('tc-accept-btn').disabled = false;
+}
+
+function tcSigEnd() { tcDrawing = false; }
+
+function clearTcSig() {
+  if (!tcCtx) return;
+  tcCtx.clearRect(0, 0, tcCanvas.width, tcCanvas.height);
+  tcHasContent = false;
+  document.getElementById('tc-accept-btn').disabled = true;
+  document.getElementById('tc-save-btn').disabled = true;
+  document.getElementById('tc-canvas-hint').style.display = 'block';
+  document.getElementById('tc-sig-accepted-banner').style.display = 'none';
+  document.getElementById('tc-sig-image').style.display = 'none';
+  document.getElementById('tc-canvas-wrap').style.display = '';
+  document.getElementById('tc-sig-btn-row').style.display = '';
+}
+
+function acceptTcSig() {
+  if (!tcHasContent) return;
+  const dataUrl = tcCanvas.toDataURL('image/png');
+  const banner = document.getElementById('tc-sig-accepted-banner');
+  const now = new Date();
+  const ts = now.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  banner.innerHTML = `<div style="color:var(--green);font-weight:700;font-size:12px;letter-spacing:1px;">SIGNATURE CAPTURED — ${ts}</div>`;
+  const img = document.getElementById('tc-sig-image');
+  img.src = dataUrl;
+  img.style.display = 'block';
+  banner.style.display = 'block';
+  document.getElementById('tc-canvas-wrap').style.display = 'none';
+  document.getElementById('tc-sig-btn-row').style.display = 'none';
+  document.getElementById('tc-save-btn').disabled = false;
+}
+
+// ── SAVE T&C SIGNATURE ──
+async function saveTcSignature() {
+  const btn = document.getElementById('tc-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'SAVING...';
+
+  const sigImage = tcCanvas.toDataURL('image/png');
+  const sigData = {
+    image: sigImage,
+    typedName: document.getElementById('tc-sig-typed-name')?.value || '',
+    company: document.getElementById('tc-sig-company')?.value || '',
+    date: document.getElementById('tc-sig-date')?.value || '',
+    acceptedAt: new Date().toISOString()
+  };
+
+  // If we have a quote, save back to it
+  if (quoteData && quoteId) {
+    quoteData.tcSignature = sigData;
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(quoteData, null, 2))));
+    const path = `quotes/${quoteData.id}.json`;
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${GH_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `T&C signature: ${quoteData.quoteNumber || quoteId}`,
+          content: content,
+          branch: GH_BRANCH,
+          sha: quoteSha
+        })
+      });
+
+      if (res.ok) {
+        document.getElementById('tc-save-success').style.display = 'block';
+        btn.style.display = 'none';
+      } else {
+        const err = await res.json();
+        alert('Save failed: ' + (err.message || 'Unknown error'));
+        btn.disabled = false;
+        btn.textContent = 'SUBMIT SIGNED ACCEPTANCE';
+      }
+    } catch (e) {
+      alert('Save failed: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = 'SUBMIT SIGNED ACCEPTANCE';
+    }
+  } else {
+    // No quote — save as standalone T&C acceptance
+    const tcId = 'TC-' + Date.now();
+    const tcRecord = {
+      id: tcId,
+      type: 'tc_acceptance',
+      signature: sigData,
+      savedAt: new Date().toISOString()
+    };
+
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(tcRecord, null, 2))));
+    const path = `quotes/${tcId}.json`;
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${GH_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `T&C acceptance: ${tcId}`,
+          content: content,
+          branch: GH_BRANCH
+        })
+      });
+
+      if (res.ok) {
+        document.getElementById('tc-save-success').style.display = 'block';
+        btn.style.display = 'none';
+      } else {
+        const err = await res.json();
+        alert('Save failed: ' + (err.message || 'Unknown error'));
+        btn.disabled = false;
+        btn.textContent = 'SUBMIT SIGNED ACCEPTANCE';
+      }
+    } catch (e) {
+      alert('Save failed: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = 'SUBMIT SIGNED ACCEPTANCE';
+    }
+  }
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', loadTcPage);
+</script>
+
+</body>
+</html>

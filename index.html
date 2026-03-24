@@ -360,61 +360,69 @@
 
       <!-- Section 9: Signature -->
       <div class="section">
-        <div class="section-hd"><div class="sec-num">9</div><h2>ACCEPTANCE</h2></div>
-        <div class="callout callout-gold" style="margin-bottom:16px;">
-          <strong>By signing below, the client accepts this quotation and agrees to the Payment Terms &amp; Conditions of Render Render Pty Ltd (trading as Render King).</strong>
+        <div class="section-hd"><div class="sec-num">9</div><h2>ACCEPTANCE &amp; SIGNATURE</h2></div>
+        <div class="callout callout-gold" style="margin-bottom:20px;">
+          <strong>HOW TO ACCEPT:</strong> Option A — sign digitally in the box below and click "Accept &amp; Sign". Option B — print this page, sign, and return. In both cases, pay the booking deposit to confirm your start date.
         </div>
 
-        <!-- Digital Signature (screen) -->
-        <div class="digital-sig-block no-print">
-          <div class="digital-sig-title">DIGITAL SIGNATURE</div>
-          <div class="digital-sig-subtitle">Draw your signature below to accept this quotation</div>
+        <!-- CLIENT DIGITAL SIGNATURE -->
+        <div class="digital-sig-block" id="q-digital-sig-block">
+          <div class="digital-sig-title">CLIENT DIGITAL SIGNATURE</div>
+          <div class="digital-sig-subtitle">Draw your signature below using your mouse (desktop) or finger (mobile/tablet)</div>
           <div class="sig-accepted-banner" id="q-sig-accepted-banner">
-            <span class="acc-label"></span>
+            <img id="q-sig-image" src="" alt="Client Signature" style="max-width:300px;margin-top:8px;display:none;">
           </div>
           <div class="canvas-wrap" id="q-canvas-wrap">
             <canvas id="q-sig-canvas"></canvas>
             <div class="canvas-hint" id="q-canvas-hint">SIGN HERE</div>
           </div>
-          <div class="sig-btn-row">
-            <button class="sig-btn sig-btn-clear" onclick="clearQuoteSig()">CLEAR</button>
+          <div class="sig-btn-row" id="q-sig-btn-row">
+            <button class="sig-btn sig-btn-clear" onclick="clearQuoteSig()">CLEAR SIGNATURE</button>
             <button class="sig-btn sig-btn-accept" id="q-accept-btn" onclick="acceptQuoteSig()" disabled>ACCEPT &amp; SIGN</button>
           </div>
-          <img id="q-sig-image" style="display:none;max-width:300px;margin:10px auto;border:1px solid var(--border);" alt="Signature">
-        </div>
-
-        <!-- Print Signature -->
-        <div class="print-sig-grid">
-          <div>
-            <div class="print-sig-lbl">CLIENT SIGNATURE</div>
-            <div class="print-sig-line"></div>
-            <div class="sig-field-row">
-              <label class="sig-field-label">Full Name</label>
-              <input type="text" class="sig-field-input" id="q-sig-client-name" placeholder="Type full name">
+          <div class="sig-fields-row">
+            <div class="sig-field">
+              <label class="sig-field-label">FULL NAME</label>
+              <input type="text" id="q-sig-typed-name" class="sig-field-input sig-editable" placeholder="Type client full name">
             </div>
-            <div class="sig-field-row">
-              <label class="sig-field-label">Date</label>
-              <input type="date" class="sig-field-input" id="q-sig-client-date">
+            <div class="sig-field">
+              <label class="sig-field-label">PRINT NAME</label>
+              <input type="text" id="q-sig-print-name" class="sig-field-input sig-editable" placeholder="Type client print name">
             </div>
-            <div class="sig-field-row">
-              <label class="sig-field-label">Print Name</label>
-              <input type="text" class="sig-field-input" id="q-sig-client-print" placeholder="Print name">
+            <div class="sig-field">
+              <label class="sig-field-label">DATE</label>
+              <input type="date" id="q-sig-date" class="sig-field-input sig-editable">
             </div>
           </div>
-          <div>
-            <div class="print-sig-lbl">RENDER RENDER PTY LTD (RENDER KING)</div>
-            <div class="print-sig-line"></div>
-            <div class="sig-field-row">
-              <label class="sig-field-label">Name</label>
-              <span class="sig-field-locked">King Mannion</span>
+        </div>
+
+        <!-- RK AUTHORISED SIGNATURE -->
+        <div class="digital-sig-block" id="q-rk-sig-block" style="margin-top:24px;">
+          <div class="digital-sig-title">RENDER RENDER PTY LTD (RENDER KING) — AUTHORISED SIGNATORY</div>
+          <div class="digital-sig-subtitle">King Mannion — Director</div>
+          <div class="sig-accepted-banner" id="q-rk-sig-accepted-banner">
+            <img id="q-rk-sig-image" src="" alt="RK Signature" style="max-width:300px;margin-top:8px;display:none;">
+          </div>
+          <div class="canvas-wrap" id="q-rk-canvas-wrap">
+            <canvas id="q-rk-sig-canvas"></canvas>
+            <div class="canvas-hint" id="q-rk-canvas-hint">RK SIGN HERE</div>
+          </div>
+          <div class="sig-btn-row" id="q-rk-sig-btn-row">
+            <button class="sig-btn sig-btn-clear" onclick="clearRkSig()">CLEAR SIGNATURE</button>
+            <button class="sig-btn sig-btn-accept" id="q-rk-accept-btn" onclick="acceptRkSig()" disabled>ACCEPT &amp; SIGN</button>
+          </div>
+          <div class="sig-fields-row">
+            <div class="sig-field">
+              <label class="sig-field-label">NAME</label>
+              <input type="text" id="q-rk-typed-name" class="sig-field-input" value="King Mannion" readonly style="color:var(--gold);">
             </div>
-            <div class="sig-field-row">
-              <label class="sig-field-label">Title</label>
-              <span class="sig-field-locked">Director</span>
+            <div class="sig-field">
+              <label class="sig-field-label">TITLE</label>
+              <input type="text" id="q-rk-typed-title" class="sig-field-input" value="Director" readonly style="color:var(--gold);">
             </div>
-            <div class="sig-field-row">
-              <label class="sig-field-label">Date</label>
-              <input type="date" class="sig-field-input" id="q-sig-rk-date">
+            <div class="sig-field">
+              <label class="sig-field-label">DATE</label>
+              <input type="date" id="q-rk-sig-date" class="sig-field-input sig-editable">
             </div>
           </div>
         </div>
@@ -429,7 +437,9 @@
   </div><!-- /doc -->
 
   <div class="quote-toolbar no-print">
-    <button class="tb-btn" onclick="saveQuoteToGitHub()">SAVE &amp; GET LINK</button>
+    <button class="tb-btn" onclick="saveAndShareQuote('client')" title="Saves quote and generates a clean client-facing link (no internal data)">SEND TO CLIENT</button>
+    <button class="tb-btn" onclick="saveAndShareQuote('tc')" title="Saves and generates a T&amp;C-only link with signature pad" style="background:var(--blue);">T&amp;C ONLY LINK</button>
+    <button class="tb-btn ghost" onclick="saveAndShareQuote('internal')" title="Full internal link with margin data">INTERNAL LINK</button>
     <button class="tb-btn ghost" onclick="window.print()">PRINT / SAVE PDF</button>
     <button class="tb-btn ghost" onclick="toggleEditMode()">EDIT MODE</button>
     <button class="tb-btn ghost" onclick="clearQuoteForm()">CLEAR FORM</button>
@@ -1247,9 +1257,9 @@
   </div><!-- /page -->
 </div><!-- /tab-settings -->
 
-<script src="calculator.js?v=6"></script>
-<script src="quote.js?v=6"></script>
-<script src="agent.js?v=6"></script>
+<script src="calculator.js?v=7"></script>
+<script src="quote.js?v=7"></script>
+<script src="agent.js?v=7"></script>
 
 </body>
 </html>

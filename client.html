@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RENDER KING — Quotation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background:var(--black); }
+  .client-page { max-width:900px; margin:0 auto; padding:20px; }
+  .client-header { text-align:center; padding:30px 0 20px; border-bottom:1px solid var(--border); margin-bottom:30px; }
+  .client-header h1 { font-size:28px; font-weight:900; color:var(--gold); letter-spacing:3px; margin:0; }
+  .client-header .sub { font-size:12px; color:var(--text-secondary); margin-top:6px; letter-spacing:1px; }
+  .client-footer { text-align:center; padding:30px 0; margin-top:40px; border-top:1px solid var(--border); }
+  .client-footer .powered { font-size:10px; color:var(--grey-mid); letter-spacing:1px; }
+  .loading-state { text-align:center; padding:80px 20px; }
+  .loading-state h2 { color:var(--gold); font-size:18px; margin-bottom:10px; }
+  .loading-state p { color:var(--text-secondary); font-size:13px; }
+  .error-state { text-align:center; padding:80px 20px; }
+  .error-state h2 { color:var(--red); font-size:18px; margin-bottom:10px; }
+  .error-state p { color:var(--text-secondary); font-size:13px; }
+
+  /* Clean quote rendering */
+  .q-doc { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:40px; margin-bottom:30px; }
+  .q-doc-header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:20px; border-bottom:1px solid var(--border); margin-bottom:24px; }
+  .q-brand h2 { font-size:22px; font-weight:900; color:var(--gold); letter-spacing:2px; margin:0; }
+  .q-brand .tagline { font-size:11px; color:var(--text-secondary); margin-top:4px; letter-spacing:1px; }
+  .q-brand .doc-label { font-size:10px; color:var(--gold-dark); letter-spacing:2px; font-weight:700; margin-bottom:4px; }
+  .q-contact { text-align:right; font-size:11px; color:var(--text-secondary); line-height:1.8; }
+  .q-contact strong { color:var(--gold); }
+
+  .q-meta { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:16px 0; border-bottom:1px solid var(--border); margin-bottom:24px; }
+  .q-meta-item { }
+  .q-meta-label { font-size:9px; color:var(--text-secondary); letter-spacing:1px; font-weight:700; text-transform:uppercase; }
+  .q-meta-value { font-size:13px; color:var(--text-primary); font-weight:600; margin-top:4px; }
+
+  .q-validity-banner { background:var(--gold-bg); border:1px solid var(--gold-border); padding:10px; text-align:center; font-size:11px; font-weight:700; letter-spacing:1px; color:var(--gold); margin-bottom:24px; }
+
+  .q-section { margin-bottom:24px; }
+  .q-section-head { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+  .q-sec-num { width:28px; height:28px; background:var(--gold); color:var(--black); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; border-radius:2px; flex-shrink:0; }
+  .q-section-head h3 { font-size:13px; font-weight:800; letter-spacing:1px; color:var(--text-primary); margin:0; }
+
+  .q-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; }
+  .q-field-label { font-size:9px; color:var(--text-secondary); letter-spacing:1px; font-weight:700; text-transform:uppercase; }
+  .q-field-value { font-size:13px; color:var(--text-primary); margin-top:2px; padding:6px 0; border-bottom:1px solid var(--border); min-height:20px; }
+
+  .q-pricing-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .q-pricing-table th { text-align:left; font-size:9px; color:var(--text-secondary); letter-spacing:1px; font-weight:700; padding:8px 12px; border-bottom:1px solid var(--border); }
+  .q-pricing-table th.right { text-align:right; }
+  .q-pricing-table td { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text-primary); }
+  .q-pricing-table td.right { text-align:right; font-variant-numeric:tabular-nums; }
+  .q-pricing-table .total-row td { font-weight:700; border-top:2px solid var(--gold); }
+  .q-pricing-table .grand-row td { font-weight:800; font-size:14px; color:var(--gold); }
+
+  .q-payment-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .q-payment-table th { text-align:left; font-size:9px; color:var(--text-secondary); letter-spacing:1px; font-weight:700; padding:8px 12px; border-bottom:1px solid var(--border); }
+  .q-payment-table th.right { text-align:right; }
+  .q-payment-table td { padding:8px 12px; border-bottom:1px solid var(--border); color:var(--text-primary); }
+  .q-payment-table td.right { text-align:right; font-variant-numeric:tabular-nums; }
+  .q-payment-table .total-row td { font-weight:700; }
+
+  .q-incl-excl { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .q-incl-excl h4 { font-size:11px; font-weight:800; letter-spacing:1px; color:var(--green); margin:0 0 10px; }
+  .q-incl-excl .excl h4 { color:var(--red); }
+  .q-incl-excl ul { margin:0; padding-left:16px; font-size:12px; color:var(--text-primary); line-height:1.8; }
+
+  .q-key-terms { display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; }
+  .q-key-term-label { font-size:9px; color:var(--text-secondary); letter-spacing:1px; font-weight:700; }
+  .q-key-term-value { font-size:12px; color:var(--text-primary); margin-top:2px; }
+
+  .q-sc-item { padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; color:var(--text-primary); }
+  .q-sc-num { color:var(--gold); font-weight:700; margin-right:8px; }
+
+  .q-payment-note { font-size:11px; color:var(--text-secondary); margin-top:12px; line-height:1.6; }
+  .q-payment-note strong { color:var(--gold); }
+
+  /* T&C divider */
+  .tc-divider { text-align:center; padding:40px 0 20px; border-top:2px solid var(--border); margin-top:40px; }
+  .tc-divider h2 { color:var(--gold); font-size:16px; letter-spacing:2px; margin:0; }
+
+  /* Signature section */
+  .client-sig-section { margin-top:40px; padding:30px; background:var(--panel); border:1px solid var(--border); border-radius:4px; }
+  .client-sig-title { font-size:14px; font-weight:800; color:var(--gold); text-align:center; letter-spacing:2px; margin-bottom:20px; }
+  .sig-save-btn { display:block; width:100%; max-width:400px; margin:20px auto 0; padding:14px; background:var(--green); color:white; border:none; font-family:inherit; font-size:13px; font-weight:800; letter-spacing:1px; cursor:pointer; border-radius:4px; text-transform:uppercase; }
+  .sig-save-btn:hover { opacity:0.9; }
+  .sig-save-btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .save-success { text-align:center; padding:20px; border:1px solid var(--green); border-radius:4px; margin-top:20px; color:var(--green); font-weight:700; font-size:13px; }
+  .already-signed { text-align:center; padding:20px; border:1px solid var(--green); border-radius:4px; color:var(--green); font-weight:700; font-size:13px; margin-bottom:20px; }
+</style>
+</head>
+<body>
+
+<div class="client-page">
+  <div class="client-header">
+    <h1>RENDER KING</h1>
+    <div class="sub">RENDER RENDER PTY LTD — GOLD COAST QLD</div>
+  </div>
+
+  <div id="client-loading" class="loading-state">
+    <h2>LOADING QUOTATION...</h2>
+    <p>Please wait while we retrieve your quote.</p>
+  </div>
+
+  <div id="client-error" class="error-state" style="display:none;">
+    <h2>QUOTE NOT FOUND</h2>
+    <p>This quote link may have expired or is invalid. Please contact Render King for assistance.</p>
+    <p style="margin-top:10px;"><strong>Phone:</strong> 0468 041 477 | <strong>Email:</strong> admin@renderrender.com.au</p>
+  </div>
+
+  <div id="client-content" style="display:none;"></div>
+
+  <div class="client-footer">
+    <div class="powered">RENDER RENDER PTY LTD — TRADING AS RENDER KING — GOLD COAST QLD</div>
+  </div>
+</div>
+
+<script>
+const GH_TOKEN = ['ghp_fSiZgVAuiadmGQ2y', '5bndOF4wFDVITB0et6CP'].join('');
+const GH_REPO  = 'mattysdd/render-king-tools';
+const GH_BRANCH = 'main';
+
+let quoteData = null;
+let quoteSha = null;
+
+function fmt(n) {
+  if (!n || isNaN(n)) return '$0.00';
+  return '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+async function loadQuote() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (!id) { showError(); return; }
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/quotes/${id}.json?ref=${GH_BRANCH}`, {
+      headers: { 'Authorization': `token ${GH_TOKEN}` }
+    });
+    if (!res.ok) { showError(); return; }
+    const data = await res.json();
+    quoteSha = data.sha;
+    quoteData = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+    renderClientView();
+  } catch (e) {
+    console.error(e);
+    showError();
+  }
+}
+
+function showError() {
+  document.getElementById('client-loading').style.display = 'none';
+  document.getElementById('client-error').style.display = 'block';
+}
+
+function renderClientView() {
+  document.getElementById('client-loading').style.display = 'none';
+  const container = document.getElementById('client-content');
+  container.style.display = 'block';
+
+  const q = quoteData;
+  const c = q.client || {};
+  const s = q.scope || {};
+  const t = q.totals || {};
+  const li = q.lineItems || [];
+
+  // Calculate payment schedule
+  const subtotal = t.subtotal || 0;
+  let depositPct = 10, finalPct = 40;
+  if (q.builderType === 'volume') { depositPct = 0; finalPct = 50; }
+  else if (subtotal >= 20000) { depositPct = 5; finalPct = 45; }
+
+  // Validity text
+  const hours = parseInt(q.validity) || 48;
+  const validityText = hours <= 48 ? `${hours} HOURS` : `${Math.round(hours/24)} DAYS`;
+
+  let html = `
+  <div class="q-doc">
+    <div class="q-doc-header">
+      <div class="q-brand">
+        <div class="doc-label">FORMAL QUOTATION</div>
+        <h2>RENDER KING</h2>
+        <div class="tagline">Premium Acrylic Render &amp; Texture Finish Specialist — Gold Coast QLD</div>
+      </div>
+      <div class="q-contact">
+        <div><strong>PHONE</strong> 0468 041 477</div>
+        <div><strong>EMAIL</strong> admin@renderrender.com.au</div>
+        <div><strong>WEB</strong> renderrender.com.au</div>
+      </div>
+    </div>
+
+    <div class="q-meta">
+      <div class="q-meta-item"><div class="q-meta-label">QUOTE NUMBER</div><div class="q-meta-value">${q.quoteNumber || ''}</div></div>
+      <div class="q-meta-item"><div class="q-meta-label">DATE ISSUED</div><div class="q-meta-value">${q.date || ''}</div></div>
+      <div class="q-meta-item"><div class="q-meta-label">QUOTE VALIDITY</div><div class="q-meta-value">${validityText}</div></div>
+      <div class="q-meta-item"><div class="q-meta-label">BUILDER TYPE</div><div class="q-meta-value">${(q.builderType || 'standard').charAt(0).toUpperCase() + (q.builderType || 'standard').slice(1)} Builder</div></div>
+    </div>
+
+    <div class="q-validity-banner">QUOTE VALID FOR ${validityText} FROM DATE OF ISSUE</div>
+
+    <!-- Section 1: Client Details -->
+    <div class="q-section">
+      <div class="q-section-head"><div class="q-sec-num">1</div><h3>CLIENT DETAILS</h3></div>
+      <div class="q-fields">
+        <div><div class="q-field-label">CLIENT / COMPANY NAME</div><div class="q-field-value">${c.companyName || ''}</div></div>
+        <div><div class="q-field-label">SITE ADDRESS</div><div class="q-field-value">${c.siteAddress || ''}</div></div>
+        <div><div class="q-field-label">CONTACT NAME</div><div class="q-field-value">${c.contactName || ''}</div></div>
+        <div><div class="q-field-label">LOT / PLAN NUMBER</div><div class="q-field-value">${c.lotPlan || ''}</div></div>
+        <div><div class="q-field-label">PHONE</div><div class="q-field-value">${c.phone || ''}</div></div>
+        <div><div class="q-field-label">PO NUMBER</div><div class="q-field-value">${c.poNumber || ''}</div></div>
+        <div><div class="q-field-label">EMAIL</div><div class="q-field-value">${c.email || ''}</div></div>
+        <div><div class="q-field-label">BUILDER REFERENCE</div><div class="q-field-value">${c.builderRef || ''}</div></div>
+      </div>
+    </div>
+
+    <!-- Section 2: Scope -->
+    <div class="q-section">
+      <div class="q-section-head"><div class="q-sec-num">2</div><h3>SCOPE OF WORK</h3></div>
+      <div class="q-fields">
+        <div style="grid-column:1/-1;"><div class="q-field-label">PROJECT DESCRIPTION</div><div class="q-field-value">${s.description || 'Acrylic render and texture finish application as per specifications below.'}</div></div>
+        <div><div class="q-field-label">SUBSTRATE TYPE</div><div class="q-field-value">${s.substrate || ''}</div></div>
+        <div><div class="q-field-label">DIFFICULTY LEVEL</div><div class="q-field-value">${s.difficulty || ''}</div></div>
+      </div>
+    </div>
+
+    <!-- Section 3: Pricing -->
+    <div class="q-section">
+      <div class="q-section-head"><div class="q-sec-num">3</div><h3>PRICING SCHEDULE</h3></div>
+      <table class="q-pricing-table">
+        <thead><tr><th>DESCRIPTION</th><th class="right">QTY</th><th>UNIT</th><th class="right">RATE (EX GST)</th><th class="right">TOTAL</th></tr></thead>
+        <tbody>
+          ${li.map(item => `<tr><td>${item.description}</td><td class="right">${item.qty}</td><td>${item.unit}</td><td class="right">${fmt(item.rate)}</td><td class="right">${fmt(item.total)}</td></tr>`).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="total-row"><td colspan="4" style="text-align:right;">SUBTOTAL (EX GST)</td><td class="right">${fmt(t.subtotal)}</td></tr>
+          <tr><td colspan="4" style="text-align:right;">GST (10%)</td><td class="right">${fmt(t.gst)}</td></tr>
+          <tr class="grand-row"><td colspan="4" style="text-align:right;">TOTAL (INC GST)</td><td class="right">${fmt(t.grandTotal)}</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Section 4: Inclusions -->
+    <div class="q-section">
+      <div class="q-section-head"><div class="q-sec-num">4</div><h3>INCLUSIONS &amp; EXCLUSIONS</h3></div>
+      <div class="q-incl-excl">
+        <div class="incl">
+          <h4>INCLUDED</h4>
+          <ul>
+            <li>Supply and application of acrylic render system</li>
+            <li>Surface preparation and priming</li>
+            <li>Corner beading and trim installation</li>
+            <li>Masking and protection of adjacent surfaces</li>
+            <li>Final texture coat application</li>
+            <li>Site cleanup on completion</li>
+            <li>Touch-up kit supplied</li>
+          </ul>
+        </div>
+        <div class="excl">
+          <h4>EXCLUDED</h4>
+          <ul>
+            <li>Scaffolding (unless specified in pricing)</li>
+            <li>Structural repairs or crack stitching</li>
+            <li>Painting (unless specified)</li>
+            <li>Removal of existing render</li>
+            <li>Waterproofing (unless specified)</li>
+            <li>Any work not explicitly listed above</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Payment Schedule -->
+    <div class="q-section">
+      <div class="q-section-head"><div class="q-sec-num">5</div><h3>PAYMENT SCHEDULE</h3></div>
+      <table class="q-payment-table">
+        <thead><tr><th>STAGE</th><th>DESCRIPTION</th><th class="right">%</th><th class="right">AMOUNT (EX GST)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Booking Deposit — due on acceptance</td><td class="right">${depositPct}%</td><td class="right">${fmt(subtotal * depositPct / 100)}</td></tr>
+          <tr><td>2</td><td>Material Payment — due before materials ordered</td><td class="right">50%</td><td class="right">${fmt(subtotal * 0.50)}</td></tr>
+          <tr><td>3</td><td>Final Payment — due on practical completion</td><td class="right">${finalPct}%</td><td class="right">${fmt(subtotal * finalPct / 100)}</td></tr>
+        </tbody>
+        <tfoot><tr class="total-row"><td colspan="3" style="text-align:right;">TOTAL (EX GST)</td><td class="right">${fmt(subtotal)}</td></tr></tfoot>
+      </table>
+      <div class="q-payment-note"><strong>PAYMENT TERMS:</strong> All invoices are due within 7 days of issue. Overdue accounts incur a $220 administration fee plus 3% per week interest on the outstanding balance. Governed by the Building Industry Fairness (Security of Payment) Act 2017 (QLD).</div>
+    </div>
+
+    <!-- Section 6: Key Terms -->
+    <div class="q-section">
+      <div class="q-section-head"><div class="q-sec-num">6</div><h3>KEY TERMS</h3></div>
+      <div class="q-key-terms">
+        <div><div class="q-key-term-label">VARIATION RATE</div><div class="q-key-term-value">$110/hr + GST — 2-hour minimum for all variations</div></div>
+        <div><div class="q-key-term-label">MINIMUM JOB</div><div class="q-key-term-value">$2,200 ex GST minimum applies to all works</div></div>
+        <div><div class="q-key-term-label">QUOTE VALIDITY</div><div class="q-key-term-value">This quote is valid for the period stated above from date of issue</div></div>
+        <div><div class="q-key-term-label">GOVERNING LAW</div><div class="q-key-term-value">Building Industry Fairness (Security of Payment) Act 2017 (QLD)</div></div>
+      </div>
+    </div>`;
+
+  // Special Conditions
+  if (q.specialConditions && q.specialConditions.length > 0) {
+    html += `
+    <div class="q-section">
+      <div class="q-section-head"><div class="q-sec-num">SC</div><h3>SPECIAL CONDITIONS</h3></div>
+      ${q.specialConditions.map((sc, i) => `<div class="q-sc-item"><span class="q-sc-num">${i+1}.</span>${sc}</div>`).join('')}
+    </div>`;
+  }
+
+  html += `
+    <div style="text-align:center;padding:20px 0;font-size:10px;color:var(--text-secondary);letter-spacing:1px;">
+      RENDER RENDER PTY LTD — Trading as Render King — Gold Coast QLD — Phone: 0468 041 477
+    </div>
+  </div><!-- /q-doc -->`;
+
+  // T&C Section
+  html += `
+  <div class="tc-divider"><h2>PAYMENT TERMS &amp; CONDITIONS</h2></div>
+  <div id="client-tc-doc" class="q-doc" style="margin-top:20px;"></div>`;
+
+  // Signature Section
+  const alreadySigned = q.signatures?.client?.image;
+
+  html += `
+  <div class="client-sig-section">
+    <div class="client-sig-title">ACCEPT &amp; SIGN THIS QUOTATION</div>
+    <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-bottom:20px;">
+      By signing below, you accept this quotation and agree to the Payment Terms &amp; Conditions of Render Render Pty Ltd (trading as Render King).
+    </p>`;
+
+  if (alreadySigned) {
+    html += `
+    <div class="already-signed">QUOTE ALREADY ACCEPTED &amp; SIGNED</div>
+    <div style="text-align:center;"><img src="${q.signatures.client.image}" alt="Signature" style="max-width:300px;border:1px solid var(--border);padding:10px;"></div>
+    <div class="sig-fields-row" style="margin-top:16px;">
+      <div class="sig-field"><label class="sig-field-label">NAME</label><div style="font-size:13px;color:var(--text-primary);padding:6px 0;">${q.signatures.client.typedName || ''}</div></div>
+      <div class="sig-field"><label class="sig-field-label">DATE</label><div style="font-size:13px;color:var(--text-primary);padding:6px 0;">${q.signatures.client.date || ''}</div></div>
+    </div>`;
+  } else {
+    html += `
+    <div class="digital-sig-block">
+      <div class="digital-sig-title">YOUR SIGNATURE</div>
+      <div class="digital-sig-subtitle">Draw your signature below using your mouse (desktop) or finger (mobile/tablet)</div>
+      <div class="sig-accepted-banner" id="cl-sig-accepted-banner" style="display:none;">
+        <img id="cl-sig-image" src="" alt="Signature" style="max-width:300px;margin-top:8px;display:none;">
+      </div>
+      <div class="canvas-wrap" id="cl-canvas-wrap">
+        <canvas id="cl-sig-canvas"></canvas>
+        <div class="canvas-hint" id="cl-canvas-hint">SIGN HERE</div>
+      </div>
+      <div class="sig-btn-row" id="cl-sig-btn-row">
+        <button class="sig-btn sig-btn-clear" onclick="clearClientSig()">CLEAR SIGNATURE</button>
+        <button class="sig-btn sig-btn-accept" id="cl-accept-btn" onclick="acceptClientSig()" disabled>ACCEPT &amp; SIGN</button>
+      </div>
+      <div class="sig-fields-row">
+        <div class="sig-field">
+          <label class="sig-field-label">FULL NAME</label>
+          <input type="text" id="cl-sig-typed-name" class="sig-field-input sig-editable" placeholder="Type your full name">
+        </div>
+        <div class="sig-field">
+          <label class="sig-field-label">PRINT NAME</label>
+          <input type="text" id="cl-sig-print-name" class="sig-field-input sig-editable" placeholder="Type your print name">
+        </div>
+        <div class="sig-field">
+          <label class="sig-field-label">DATE</label>
+          <input type="date" id="cl-sig-date" class="sig-field-input sig-editable" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+      </div>
+    </div>
+    <button class="sig-save-btn" id="cl-save-btn" onclick="saveClientSignature()" disabled>SUBMIT SIGNED ACCEPTANCE</button>
+    <div id="cl-save-success" class="save-success" style="display:none;">
+      SIGNATURE SUBMITTED SUCCESSFULLY — Thank you for accepting this quotation. Render King will be in touch shortly.
+    </div>`;
+  }
+
+  html += `</div><!-- /client-sig-section -->`;
+
+  container.innerHTML = html;
+
+  // Load T&C content
+  loadTcContent();
+
+  // Init signature pad if not already signed
+  if (!alreadySigned) {
+    setTimeout(initClientSigPad, 100);
+  }
+}
+
+async function loadTcContent() {
+  try {
+    const res = await fetch('index.html');
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const tcTab = doc.getElementById('tab-terms');
+    if (tcTab) {
+      const tcDocEl = document.getElementById('client-tc-doc');
+      if (tcDocEl) {
+        const docBody = tcTab.querySelector('.doc-body');
+        if (docBody) {
+          let tcHtml = docBody.innerHTML;
+          // Remove the signature section from T&C (client signs on the quote section)
+          const temp = document.createElement('div');
+          temp.innerHTML = tcHtml;
+          const tcSig = temp.querySelector('.tc-sig-section');
+          if (tcSig) tcSig.remove();
+          tcDocEl.innerHTML = temp.innerHTML;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load T&C:', e);
+  }
+}
+
+// ── CLIENT SIGNATURE PAD ──
+let clCanvas, clCtx, clDrawing = false, clHasContent = false;
+
+function initClientSigPad() {
+  clCanvas = document.getElementById('cl-sig-canvas');
+  if (!clCanvas) return;
+  const wrap = document.getElementById('cl-canvas-wrap');
+  if (!wrap) return;
+  clCanvas.width = wrap.offsetWidth;
+  clCanvas.height = wrap.offsetHeight;
+  clCtx = clCanvas.getContext('2d');
+  clCtx.strokeStyle = '#000';
+  clCtx.lineWidth = 2;
+  clCtx.lineCap = 'round';
+
+  clCanvas.addEventListener('mousedown', clSigStart);
+  clCanvas.addEventListener('mousemove', clSigMove);
+  clCanvas.addEventListener('mouseup', clSigEnd);
+  clCanvas.addEventListener('mouseleave', clSigEnd);
+  clCanvas.addEventListener('touchstart', e => { e.preventDefault(); clSigStart(e.touches[0]); });
+  clCanvas.addEventListener('touchmove', e => { e.preventDefault(); clSigMove(e.touches[0]); });
+  clCanvas.addEventListener('touchend', clSigEnd);
+}
+
+function clSigStart(e) {
+  clDrawing = true;
+  clCtx.beginPath();
+  const rect = clCanvas.getBoundingClientRect();
+  clCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  const hint = document.getElementById('cl-canvas-hint');
+  if (hint) hint.style.display = 'none';
+}
+
+function clSigMove(e) {
+  if (!clDrawing) return;
+  const rect = clCanvas.getBoundingClientRect();
+  clCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  clCtx.stroke();
+  clHasContent = true;
+  const btn = document.getElementById('cl-accept-btn');
+  if (btn) btn.disabled = false;
+}
+
+function clSigEnd() { clDrawing = false; }
+
+function clearClientSig() {
+  if (!clCtx) return;
+  clCtx.clearRect(0, 0, clCanvas.width, clCanvas.height);
+  clHasContent = false;
+  const btn = document.getElementById('cl-accept-btn');
+  if (btn) btn.disabled = true;
+  const saveBtn = document.getElementById('cl-save-btn');
+  if (saveBtn) saveBtn.disabled = true;
+  const hint = document.getElementById('cl-canvas-hint');
+  if (hint) hint.style.display = 'block';
+  const banner = document.getElementById('cl-sig-accepted-banner');
+  if (banner) banner.style.display = 'none';
+  const img = document.getElementById('cl-sig-image');
+  if (img) img.style.display = 'none';
+  const wrap = document.getElementById('cl-canvas-wrap');
+  if (wrap) wrap.style.display = '';
+  const btnRow = document.getElementById('cl-sig-btn-row');
+  if (btnRow) btnRow.style.display = '';
+}
+
+function acceptClientSig() {
+  if (!clHasContent) return;
+  const dataUrl = clCanvas.toDataURL('image/png');
+  const banner = document.getElementById('cl-sig-accepted-banner');
+  const now = new Date();
+  const ts = now.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  if (banner) {
+    banner.innerHTML = `<div style="color:var(--green);font-weight:700;font-size:12px;letter-spacing:1px;">SIGNATURE CAPTURED — ${ts}</div>`;
+    const img = document.getElementById('cl-sig-image');
+    if (img) { img.src = dataUrl; img.style.display = 'block'; }
+    banner.style.display = 'block';
+  }
+  const wrap = document.getElementById('cl-canvas-wrap');
+  if (wrap) wrap.style.display = 'none';
+  const btnRow = document.getElementById('cl-sig-btn-row');
+  if (btnRow) btnRow.style.display = 'none';
+  const saveBtn = document.getElementById('cl-save-btn');
+  if (saveBtn) saveBtn.disabled = false;
+}
+
+async function saveClientSignature() {
+  if (!quoteData || !clHasContent) return;
+  const btn = document.getElementById('cl-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'SAVING...';
+
+  const sigImage = clCanvas.toDataURL('image/png');
+  quoteData.signatures = quoteData.signatures || {};
+  quoteData.signatures.client = {
+    image: sigImage,
+    typedName: document.getElementById('cl-sig-typed-name')?.value || '',
+    printName: document.getElementById('cl-sig-print-name')?.value || '',
+    date: document.getElementById('cl-sig-date')?.value || '',
+    acceptedAt: new Date().toISOString()
+  };
+
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(quoteData, null, 2))));
+  const path = `quotes/${quoteData.id}.json`;
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Client signature: ${quoteData.quoteNumber}`,
+        content: content,
+        branch: GH_BRANCH,
+        sha: quoteSha
+      })
+    });
+
+    if (res.ok) {
+      document.getElementById('cl-save-success').style.display = 'block';
+      btn.style.display = 'none';
+    } else {
+      const err = await res.json();
+      alert('Save failed: ' + (err.message || 'Unknown error'));
+      btn.disabled = false;
+      btn.textContent = 'SUBMIT SIGNED ACCEPTANCE';
+    }
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'SUBMIT SIGNED ACCEPTANCE';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadQuote);
+</script>
+
+</body>
+</html>

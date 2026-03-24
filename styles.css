@@ -770,6 +770,41 @@ button { font-family:'Inter',sans-serif; }
 .sig-field-group input[readonly] { opacity:0.7; cursor:not-allowed; background:var(--panel); }
 .sig-field-group .locked-label { font-size:11px; color:var(--grey-mid); font-style:italic; }
 
+/* ═══ SIGNATURE FIELD ROWS (MCK-matching) ═══ */
+.sig-fields-row {
+  display:flex; gap:16px; margin-top:16px; flex-wrap:wrap;
+}
+.sig-field {
+  flex:1; min-width:180px;
+}
+.sig-field-label {
+  display:block; font-size:9px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.5px; color:var(--gold); margin-bottom:6px;
+}
+.sig-field-input {
+  width:100%; padding:10px 14px; background:var(--dark); border:1px solid var(--border);
+  border-radius:3px; color:var(--white); font-family:inherit; font-size:13px;
+  transition:border-color .2s;
+}
+.sig-field-input:focus {
+  outline:none; border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-dim);
+}
+.sig-field-input[readonly] {
+  cursor:default; opacity:0.85;
+}
+.sig-field-input.sig-editable {
+  border-color:#555; background:#111;
+}
+.sig-field-input.sig-editable:hover {
+  border-color:var(--gold);
+}
+.sig-field-input.sig-editable::placeholder {
+  color:#666; font-style:italic;
+}
+.sig-field-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter:invert(1); cursor:pointer;
+}
+
 /* ═══ QUOTE ATTACHMENTS ═══ */
 .quote-attachments-zone { margin-bottom:12px; }
 .upload-hint { font-size:11px; color:var(--grey-mid); margin-top:4px; }
