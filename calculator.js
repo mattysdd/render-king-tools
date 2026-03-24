@@ -891,7 +891,9 @@ function renderLineBreakdown(lines, tier, tierMarginTarget) {
     totalCost += l.lineCost;
     totalSell += l.sellAtTarget;
     var marginCls = l.marginAtTarget >= 40 ? 'color:var(--green)' : l.marginAtTarget >= 30 ? 'color:var(--amber)' : 'color:var(--red)';
-    html += '<tr>' +
+    var rowStyle = l.marginAtTarget < 20 ? ' style="background:rgba(239,68,68,0.12);"' : '';
+    var warnIcon = l.marginAtTarget < 20 ? ' <span title="Margin below 20%" style="color:var(--red);font-weight:800;">⚠</span>' : '';
+    html += '<tr' + rowStyle + '>' +
       '<td>' + l.name + '</td>' +
       '<td>' + l.substrate.name + '</td>' +
       '<td>L' + l.diffLevel + ' — ' + DIFFICULTY_LEVELS[l.diffLevel].name + '</td>' +
@@ -903,7 +905,7 @@ function renderLineBreakdown(lines, tier, tierMarginTarget) {
       '<td class="right">' + fmt(l.labCost) + '</td>' +
       '<td class="right">' + fmt(l.lineCost) + '</td>' +
       '<td class="right">' + fmt(l.sellAtTarget) + (l.floorApplied ? ' *' : '') + '</td>' +
-      '<td class="right" style="' + marginCls + ';font-weight:700;">' + l.marginAtTarget.toFixed(1) + '%</td>' +
+      '<td class="right" style="' + marginCls + ';font-weight:700;">' + l.marginAtTarget.toFixed(1) + '%' + warnIcon + '</td>' +
     '</tr>';
   });
 
@@ -916,6 +918,23 @@ function renderLineBreakdown(lines, tier, tierMarginTarget) {
     '<td class="right">' + fmt(totalSell) + '</td>' +
     '<td class="right">' + totalMargin.toFixed(1) + '%</td>' +
   '</tr></tfoot></table>';
+
+  // Margin alert banners
+  var lowMarginLines = lines.filter(function(l) { return l.marginAtTarget < 20; });
+  if (lowMarginLines.length > 0) {
+    html += '<div class="callout" style="margin-top:14px;background:rgba(239,68,68,0.1);border:1px solid var(--red);border-radius:8px;padding:12px 16px;">' +
+      '<strong style="color:var(--red);">\u26a0 LOW MARGIN WARNING:</strong> ' + lowMarginLines.length + ' line(s) below 20% margin. Review pricing before generating quote.' +
+    '</div>';
+  }
+  if (totalMargin < 15 && totalSell > 0) {
+    html += '<div class="callout" style="margin-top:10px;background:rgba(239,68,68,0.15);border:2px solid var(--red);border-radius:8px;padding:14px 16px;">' +
+      '<strong style="color:var(--red);font-size:14px;">\u26d4 QUOTE BLOCKED — OVERALL MARGIN BELOW 15%</strong><br>' +
+      '<span style="color:var(--text-secondary);font-size:12px;">Current margin: ' + totalMargin.toFixed(1) + '%. Quote generation requires override approval with reason. Use the margin override in the Quote Generator.</span>' +
+    '</div>';
+  }
+
+  // Store margin data globally for quote generator to check
+  window.__rkMarginData = { overallMargin: totalMargin, lowMarginLines: lowMarginLines.length, blocked: totalMargin < 15 && totalSell > 0 };
 
   setHTML('line-breakdown-wrap', html);
 }

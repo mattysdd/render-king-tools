@@ -21,6 +21,8 @@
     <button class="nav-tab" data-tab="terms" onclick="switchTab('terms')">TERMS &amp; CONDITIONS</button>
     <button class="nav-tab" data-tab="ai" onclick="switchTab('ai')">AI AGENT</button>
     <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">SETTINGS</button>
+    <a href="dashboard.html" class="nav-tab" style="text-decoration:none;">PIPELINE</a>
+    <a href="po-checker.html" class="nav-tab" style="text-decoration:none;">PO CHECK</a>
   </div>
 </nav>
 
@@ -188,7 +190,12 @@
         </div>
       </div>
       <div class="validity-banner" id="q-validity-banner">QUOTE VALID FOR 48 HOURS FROM DATE OF ISSUE</div>
+      <span id="q-revision-badge" style="display:none;background:var(--gold);color:#000;font-size:11px;font-weight:800;padding:2px 10px;border-radius:4px;margin-left:8px;"></span>
+      <div id="q-status-badge" style="display:none;font-size:11px;font-weight:800;padding:2px 10px;border-radius:4px;margin-top:6px;display:inline-block;"></div>
     </div>
+
+    <!-- Revision History Panel -->
+    <div id="q-revision-history" style="margin:0 24px;"></div>
 
     <!-- BODY -->
     <div class="doc-body">
@@ -198,16 +205,16 @@
         <div class="section-hd"><div class="sec-num">1</div><h2>CLIENT DETAILS</h2></div>
         <div class="g2">
           <div>
-            <div class="field"><div class="field-lbl">CLIENT / COMPANY NAME</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
-            <div class="field"><div class="field-lbl">CONTACT NAME</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
-            <div class="field"><div class="field-lbl">PHONE</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
-            <div class="field"><div class="field-lbl">EMAIL</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">CLIENT / COMPANY NAME</div><div class="field-val" contenteditable="true" id="q-client-name">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">CONTACT NAME</div><div class="field-val" contenteditable="true" id="q-contact-name">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">PHONE</div><div class="field-val" contenteditable="true" id="q-client-phone">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">EMAIL</div><div class="field-val" contenteditable="true" id="q-client-email">&nbsp;</div></div>
           </div>
           <div>
-            <div class="field"><div class="field-lbl">SITE ADDRESS</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
-            <div class="field"><div class="field-lbl">LOT / PLAN NUMBER</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
-            <div class="field"><div class="field-lbl">WORK CONTRACT / PO NUMBER</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
-            <div class="field"><div class="field-lbl">BUILDER REFERENCE</div><div class="field-val" contenteditable="true">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">SITE ADDRESS</div><div class="field-val" contenteditable="true" id="q-site-address">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">LOT / PLAN NUMBER</div><div class="field-val" contenteditable="true" id="q-lot-number">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">WORK CONTRACT / PO NUMBER</div><div class="field-val" contenteditable="true" id="q-po-number">&nbsp;</div></div>
+            <div class="field"><div class="field-lbl">BUILDER REFERENCE</div><div class="field-val" contenteditable="true" id="q-builder-ref">&nbsp;</div></div>
           </div>
         </div>
       </div>
@@ -258,6 +265,7 @@
           </table>
         </div>
         <button class="add-line-btn no-print" onclick="addQuoteLine()">+ ADD LINE ITEM</button>
+        <div id="q-margin-alert" style="display:none;"></div>
       </div>
 
       <!-- Section 4: Inclusions & Exclusions -->
@@ -443,7 +451,31 @@
     <button class="tb-btn ghost" onclick="window.print()">PRINT / SAVE PDF</button>
     <button class="tb-btn ghost" onclick="toggleEditMode()">EDIT MODE</button>
     <button class="tb-btn ghost" onclick="clearQuoteForm()">CLEAR FORM</button>
+    <button class="tb-btn" onclick="generateJobBrief()" style="background:var(--green);">JOB BRIEF</button>
+    <button class="tb-btn ghost" onclick="declineQuote()" style="border-color:var(--red);color:var(--red);">DECLINE QUOTE</button>
+    <button class="tb-btn ghost" onclick="showRevisionHistory()">REVISION HISTORY</button>
   </div>
+
+  <!-- Margin Override Panel -->
+  <div id="margin-override-panel" style="display:none;margin:16px 0;padding:16px;background:rgba(239,68,68,0.08);border:1px solid var(--red);border-radius:8px;">
+    <div style="font-weight:800;color:var(--red);font-size:13px;letter-spacing:1px;margin-bottom:8px;">MARGIN OVERRIDE REQUIRED</div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Overall margin is below 15%. Provide a reason and your name to override and generate the quote.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:10px;color:var(--text-secondary);letter-spacing:1px;">OVERRIDE REASON</label><input type="text" id="margin-override-reason" class="form-input" placeholder="e.g. Volume builder locked rate"></div>
+      <div><label style="font-size:10px;color:var(--text-secondary);letter-spacing:1px;">APPROVED BY</label><input type="text" id="margin-override-by" class="form-input" placeholder="e.g. King Mannion"></div>
+    </div>
+    <button class="tb-btn" onclick="approveMarginOverride()" style="background:var(--red);">APPROVE OVERRIDE &amp; SAVE</button>
+  </div>
+
+  <!-- Revision History Panel -->
+  <div id="revision-history-panel" style="display:none;margin:16px 0;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+    <div style="font-weight:800;color:var(--gold);font-size:13px;letter-spacing:1px;margin-bottom:12px;">REVISION HISTORY</div>
+    <div id="revision-history-list"></div>
+  </div>
+
+  <!-- Status Badge -->
+  <div id="quote-status-badge" style="display:none;margin:16px 0;"></div>
+
 </div><!-- /tab-quote -->
 
 
@@ -1257,9 +1289,46 @@
   </div><!-- /page -->
 </div><!-- /tab-settings -->
 
-<script src="calculator.js?v=7"></script>
-<script src="quote.js?v=7"></script>
-<script src="agent.js?v=7"></script>
+<!-- Share Modal -->
+<div id="share-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;"></div>
+
+<!-- Job Brief Modal -->
+<div id="job-brief-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;"></div>
+
+<style>
+  .share-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.7);}
+  .share-modal-content{position:relative;z-index:1;background:var(--panel,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:8px;max-width:560px;width:90%;padding:0;}
+  .share-modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border,#2a2a2a);}
+  .share-modal-header h3{font-size:14px;letter-spacing:1px;color:var(--gold,#c8a84e);margin:0;}
+  .share-modal-close{background:none;border:none;color:var(--text-secondary,#888);font-size:24px;cursor:pointer;}
+  .share-modal-body{padding:20px;}
+  .share-link-row{margin-bottom:12px;}
+  .share-link-row label{font-size:10px;letter-spacing:1px;color:var(--text-secondary,#888);font-weight:700;display:block;margin-bottom:4px;}
+  .share-link-input-row{display:flex;gap:8px;}
+  .share-link-input-row input{flex:1;padding:8px 10px;background:var(--black,#0f0f0f);border:1px solid var(--border,#2a2a2a);border-radius:4px;color:var(--text-primary,#e0e0e0);font-size:12px;}
+  .btn-gold{background:var(--gold,#c8a84e);color:#000;border:none;border-radius:4px;font-weight:700;cursor:pointer;}
+  .btn-sm{padding:6px 12px;font-size:11px;letter-spacing:1px;}
+  .share-actions-row{display:flex;gap:12px;margin-top:16px;}
+  .share-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:1px;text-decoration:none;text-align:center;}
+  .share-email{background:#2563eb;color:#fff;}
+  .share-whatsapp{background:#25d366;color:#fff;}
+  .share-icon{font-size:16px;}
+  /* Job Brief */
+  .job-brief-content{position:relative;z-index:1;background:#fff;color:#111;border-radius:8px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;padding:0;}
+  .job-brief-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #ddd;background:#f5f5f5;}
+  .job-brief-header h3{font-size:16px;font-weight:800;letter-spacing:1px;margin:0;}
+  .job-brief-body{padding:24px;font-size:13px;line-height:1.7;}
+  .job-brief-body h4{font-size:14px;font-weight:800;margin:16px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px;}
+  .job-brief-body table{width:100%;border-collapse:collapse;margin:8px 0 16px;}
+  .job-brief-body th{text-align:left;font-size:10px;letter-spacing:1px;padding:6px 8px;border-bottom:2px solid #333;}
+  .job-brief-body td{padding:6px 8px;border-bottom:1px solid #ddd;}
+  .job-brief-print-btn{display:block;margin:16px auto;padding:10px 24px;background:#333;color:#fff;border:none;border-radius:4px;font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer;}
+  @media print{.job-brief-body{max-height:none;overflow:visible;}.share-modal-backdrop,.job-brief-header button,.job-brief-print-btn{display:none !important;}}
+</style>
+
+<script src="calculator.js?v=9"></script>
+<script src="quote.js?v=9"></script>
+<script src="agent.js?v=9"></script>
 
 </body>
 </html>

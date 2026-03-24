@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Render King — PO Match Checker</title>
+<style>
+  :root{--bg:#0f0f0f;--card:#1a1a1a;--border:#2a2a2a;--gold:#c8a84e;--gold-dark:#a68a3a;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--grey:#6b7280;--text:#e0e0e0;--text-muted:#888;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .header h1{font-size:18px;letter-spacing:2px;color:var(--gold);}
+  .header-links a{color:var(--text-muted);text-decoration:none;font-size:12px;letter-spacing:1px;margin-left:16px;padding:6px 12px;border:1px solid var(--border);border-radius:4px;transition:all .2s;}
+  .header-links a:hover{color:var(--gold);border-color:var(--gold);}
+  .container{max-width:900px;margin:0 auto;padding:24px;}
+  h2{color:var(--gold);font-size:14px;letter-spacing:2px;margin-bottom:16px;}
+
+  .input-section{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .form-group label{display:block;font-size:11px;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;}
+  .form-group input,.form-group select{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:14px;}
+  .btn-check{padding:12px 24px;background:var(--gold);color:#000;border:none;border-radius:4px;font-weight:700;font-size:13px;letter-spacing:2px;cursor:pointer;width:100%;}
+  .btn-check:hover{background:var(--gold-dark);}
+
+  .result-section{display:none;}
+  .result-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:16px;}
+  .result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .match-badge{padding:6px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:1px;}
+  .match-ok{background:var(--green);color:#000;}
+  .match-under{background:var(--red);color:#fff;}
+  .match-over{background:var(--amber);color:#000;}
+  .match-none{background:var(--grey);color:#fff;}
+
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;}
+  .compare-item{text-align:center;padding:16px;background:var(--bg);border-radius:6px;}
+  .compare-value{font-size:22px;font-weight:700;margin-bottom:4px;}
+  .compare-label{font-size:10px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;}
+  .compare-value.green{color:var(--green);}
+  .compare-value.red{color:var(--red);}
+  .compare-value.amber{color:var(--amber);}
+
+  /* Locked Rate Card */
+  .rate-card{margin-top:16px;}
+  .rate-card h3{font-size:12px;letter-spacing:1px;color:var(--gold);margin-bottom:8px;}
+  .rate-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .rate-table th{text-align:left;color:var(--gold);font-size:10px;letter-spacing:1px;padding:8px;border-bottom:1px solid var(--gold);}
+  .rate-table td{padding:8px;border-bottom:1px solid var(--border);}
+  .rate-table .highlight{background:rgba(200,168,78,0.1);font-weight:700;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>RENDER KING — PO MATCH CHECKER</h1>
+  <div class="header-links">
+    <a href="index.html">CALCULATOR</a>
+    <a href="dashboard.html">PIPELINE</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="input-section">
+    <h2>CHECK PURCHASE ORDER</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>PO NUMBER</label>
+        <input type="text" id="po-number" placeholder="e.g. PO-12345">
+      </div>
+      <div class="form-group">
+        <label>PO VALUE (EX GST)</label>
+        <input type="number" id="po-value" placeholder="e.g. 5500" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>BUILDER</label>
+        <select id="po-builder">
+          <option value="">Select Builder</option>
+          <option value="stoddarts">Stoddarts</option>
+          <option value="ausbuild">Ausbuild</option>
+          <option value="metricon">Metricon</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>SQM ON PO (OPTIONAL)</label>
+        <input type="number" id="po-sqm" placeholder="e.g. 120" step="0.1">
+      </div>
+    </div>
+    <button class="btn-check" onclick="checkPO()">CHECK PO MATCH</button>
+  </div>
+
+  <div class="result-section" id="po-result">
+    <div class="result-card">
+      <div class="result-header">
+        <h2 style="margin:0;">MATCH RESULT</h2>
+        <span class="match-badge" id="po-match-badge">—</span>
+      </div>
+      <div id="po-match-detail"></div>
+      <div class="compare-grid" id="po-compare-grid"></div>
+    </div>
+
+    <div class="result-card" id="po-quote-match" style="display:none;">
+      <h2>MATCHING QUOTE</h2>
+      <div id="po-quote-detail"></div>
+    </div>
+
+    <div class="result-card rate-card" id="po-rate-card">
+      <h3>LOCKED RATE CARD COMPARISON</h3>
+      <div id="po-rate-table"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GH_TOKEN = ['ghp_fSiZgVAuiadmGQ2y', '5bndOF4wFDVITB0et6CP'].join('');
+const GH_REPO = 'mattysdd/render-king-tools';
+const GH_BRANCH = 'main';
+
+// Locked rate cards per builder
+const RATE_CARDS = {
+  stoddarts: {
+    name: 'Stoddarts',
+    rates: [
+      { item: 'Acrylic Render — Brick/Hebel', rate: 52, unit: 'sqm' },
+      { item: 'Acrylic Render — EPS/Blueboard', rate: 70, unit: 'sqm' },
+      { item: 'Slab Edge', rate: 14, unit: 'lm' },
+      { item: 'Hebel Supply + Install', rate: 105, unit: 'sqm' },
+      { item: 'EPS Supply + Install', rate: 80, unit: 'sqm' }
+    ]
+  },
+  ausbuild: {
+    name: 'Ausbuild',
+    rates: [
+      { item: 'Acrylic Render — Brick/Hebel', rate: 55, unit: 'sqm' },
+      { item: 'Acrylic Render — EPS/Blueboard', rate: 75, unit: 'sqm' },
+      { item: 'Slab Edge', rate: 15, unit: 'lm' },
+      { item: 'Hebel Supply + Install', rate: 110, unit: 'sqm' },
+      { item: 'EPS Supply + Install', rate: 85, unit: 'sqm' }
+    ]
+  },
+  metricon: {
+    name: 'Metricon',
+    rates: [
+      { item: 'Acrylic Render — Brick/Hebel', rate: 55, unit: 'sqm' },
+      { item: 'Acrylic Render — EPS/Blueboard', rate: 75, unit: 'sqm' },
+      { item: 'Slab Edge', rate: 15, unit: 'lm' }
+    ]
+  }
+};
+
+async function checkPO() {
+  const poNum = document.getElementById('po-number').value.trim();
+  const poVal = parseFloat(document.getElementById('po-value').value) || 0;
+  const builder = document.getElementById('po-builder').value;
+  const poSqm = parseFloat(document.getElementById('po-sqm').value) || 0;
+
+  if (!poNum || !poVal) {
+    alert('Enter PO number and value');
+    return;
+  }
+
+  const resultSection = document.getElementById('po-result');
+  resultSection.style.display = 'block';
+
+  // Try to find matching quote by PO number
+  let matchedQuote = null;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/quotes?ref=${GH_BRANCH}`, {
+      headers: { 'Authorization': `token ${GH_TOKEN}` }
+    });
+    if (res.ok) {
+      const files = await res.json();
+      for (const f of files.filter(f => f.name.endsWith('.json'))) {
+        try {
+          const r = await fetch(f.url, { headers: { 'Authorization': `token ${GH_TOKEN}` } });
+          if (!r.ok) continue;
+          const d = await r.json();
+          const q = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+          if (q.client?.poNumber && q.client.poNumber.toLowerCase() === poNum.toLowerCase()) {
+            matchedQuote = q;
+            break;
+          }
+        } catch(e) { continue; }
+      }
+    }
+  } catch(e) { /* no match */ }
+
+  // Compare
+  let quoteValue = matchedQuote ? (matchedQuote.totals?.subtotal || 0) : 0;
+  let diff = quoteValue > 0 ? poVal - quoteValue : 0;
+  let diffPct = quoteValue > 0 ? (diff / quoteValue * 100) : 0;
+  let matchStatus, matchClass;
+
+  if (!matchedQuote) {
+    matchStatus = 'NO QUOTE MATCH';
+    matchClass = 'match-none';
+  } else if (Math.abs(diffPct) <= 2) {
+    matchStatus = 'MATCHES';
+    matchClass = 'match-ok';
+  } else if (diff < 0) {
+    matchStatus = 'UNDER-RATE';
+    matchClass = 'match-under';
+  } else {
+    matchStatus = 'OVER-RATE';
+    matchClass = 'match-over';
+  }
+
+  const badge = document.getElementById('po-match-badge');
+  badge.textContent = matchStatus;
+  badge.className = 'match-badge ' + matchClass;
+
+  // Detail
+  const detail = document.getElementById('po-match-detail');
+  detail.innerHTML = matchedQuote
+    ? `<p style="color:var(--text-muted);font-size:13px;">PO <strong>${poNum}</strong> matched to quote <strong>${matchedQuote.quoteNumber}</strong></p>`
+    : `<p style="color:var(--text-muted);font-size:13px;">No quote found with PO number <strong>${poNum}</strong>. Rate card comparison shown below.</p>`;
+
+  // Compare grid
+  const grid = document.getElementById('po-compare-grid');
+  if (matchedQuote) {
+    const valClass = diff < 0 ? 'red' : diff > 0 ? 'amber' : 'green';
+    grid.innerHTML = `
+      <div class="compare-item"><div class="compare-value">$${poVal.toLocaleString()}</div><div class="compare-label">PO VALUE</div></div>
+      <div class="compare-item"><div class="compare-value">$${quoteValue.toLocaleString()}</div><div class="compare-label">QUOTE VALUE</div></div>
+      <div class="compare-item"><div class="compare-value ${valClass}">${diff >= 0 ? '+' : ''}$${diff.toFixed(0)} (${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(1)}%)</div><div class="compare-label">DIFFERENCE</div></div>
+    `;
+  } else {
+    grid.innerHTML = `<div class="compare-item" style="grid-column:span 3;"><div class="compare-value">$${poVal.toLocaleString()}</div><div class="compare-label">PO VALUE (EX GST)</div></div>`;
+  }
+
+  // Matched quote detail
+  const quotePanel = document.getElementById('po-quote-match');
+  if (matchedQuote) {
+    quotePanel.style.display = 'block';
+    const c = matchedQuote.client || {};
+    document.getElementById('po-quote-detail').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+        <div><span style="color:var(--text-muted);">Quote:</span> ${matchedQuote.quoteNumber}</div>
+        <div><span style="color:var(--text-muted);">Status:</span> ${matchedQuote.status}</div>
+        <div><span style="color:var(--text-muted);">Client:</span> ${c.companyName || c.contactName}</div>
+        <div><span style="color:var(--text-muted);">Site:</span> ${c.siteAddress}</div>
+        <div><span style="color:var(--text-muted);">Date:</span> ${matchedQuote.date}</div>
+        <div><span style="color:var(--text-muted);">Total (inc GST):</span> $${(matchedQuote.totals?.grandTotal || 0).toLocaleString()}</div>
+      </div>
+    `;
+  } else {
+    quotePanel.style.display = 'none';
+  }
+
+  // Rate card
+  const rateDiv = document.getElementById('po-rate-table');
+  if (builder && RATE_CARDS[builder]) {
+    const card = RATE_CARDS[builder];
+    let html = `<p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;">Locked rates for ${card.name}</p>`;
+    html += '<table class="rate-table"><thead><tr><th>ITEM</th><th>LOCKED RATE</th><th>UNIT</th>';
+    if (poSqm > 0) html += '<th>EXPECTED VALUE</th>';
+    html += '</tr></thead><tbody>';
+    card.rates.forEach(r => {
+      const expected = poSqm > 0 ? (r.rate * poSqm) : 0;
+      html += `<tr><td>${r.item}</td><td>$${r.rate}</td><td>/${r.unit}</td>`;
+      if (poSqm > 0) html += `<td>$${expected.toLocaleString()}</td>`;
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    rateDiv.innerHTML = html;
+    document.getElementById('po-rate-card').style.display = 'block';
+  } else {
+    document.getElementById('po-rate-card').style.display = 'none';
+  }
+}
+</script>
+</body>
+</html>

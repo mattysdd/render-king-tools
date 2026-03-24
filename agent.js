@@ -18,8 +18,8 @@ function addAgentSection(defaults) {
     ['slab_build',       'Slab Build (Linear Metre)'],
     ['brick_hebel',      'Brick / Hebel'],
     ['eps_blueboard',    'EPS / Blueboard'],
-    ['specialty_finish', 'Specialty Finish'],
     ['specialty',        'Specialty / Architectural'],
+    ['specialty_finish', 'Specialty Finish'],
     ['ext_microcement',  'External Microcement'],
     ['other_standard',   'Other / Standard Finish']
   ];

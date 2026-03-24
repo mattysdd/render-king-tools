@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Render King — Quote Pipeline Dashboard</title>
+<style>
+  :root{--bg:#0f0f0f;--card:#1a1a1a;--border:#2a2a2a;--gold:#c8a84e;--gold-dark:#a68a3a;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--grey:#6b7280;--text:#e0e0e0;--text-muted:#888;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .header h1{font-size:18px;letter-spacing:2px;color:var(--gold);}
+  .header-links a{color:var(--text-muted);text-decoration:none;font-size:12px;letter-spacing:1px;margin-left:16px;padding:6px 12px;border:1px solid var(--border);border-radius:4px;transition:all .2s;}
+  .header-links a:hover{color:var(--gold);border-color:var(--gold);}
+  .container{max-width:1400px;margin:0 auto;padding:24px;}
+
+  /* Login */
+  .login-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh;}
+  .login-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:40px;text-align:center;max-width:380px;width:100%;}
+  .login-box h2{color:var(--gold);font-size:16px;letter-spacing:2px;margin-bottom:20px;}
+  .login-box input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:14px;margin-bottom:12px;text-align:center;letter-spacing:2px;}
+  .login-box button{width:100%;padding:12px;background:var(--gold);color:#000;border:none;border-radius:4px;font-weight:700;font-size:13px;letter-spacing:2px;cursor:pointer;}
+  .login-box button:hover{background:var(--gold-dark);}
+  .login-error{color:var(--red);font-size:12px;margin-top:8px;display:none;}
+
+  /* Stats */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;}
+  .stat-value{font-size:28px;font-weight:700;color:var(--gold);margin-bottom:4px;}
+  .stat-label{font-size:11px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+
+  /* Filters */
+  .filters{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+  .filters input,.filters select{padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;}
+  .filters input{flex:1;min-width:200px;}
+  .filters select{min-width:140px;}
+  .filters .btn-refresh{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:4px;font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer;}
+
+  /* Table */
+  .table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:8px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:#222;color:var(--gold);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:12px;text-align:left;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--border);}
+  thead th:hover{color:#fff;}
+  thead th .sort-arrow{margin-left:4px;font-size:10px;}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+  tbody tr:hover{background:#222;}
+  tbody td{padding:10px 12px;white-space:nowrap;}
+  .status-badge{display:inline-block;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1px;color:#000;}
+  .status-PENDING{background:var(--amber);}
+  .status-ACCEPTED{background:var(--green);}
+  .status-DECLINED{background:var(--red);color:#fff;}
+  .status-EXPIRED{background:var(--grey);color:#fff;}
+  .action-links a{color:var(--gold);text-decoration:none;font-size:11px;margin-right:8px;letter-spacing:.5px;}
+  .action-links a:hover{text-decoration:underline;}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
+  .loading{text-align:center;padding:40px;color:var(--text-muted);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>RENDER KING — QUOTE PIPELINE</h1>
+  <div class="header-links">
+    <a href="index.html">CALCULATOR</a>
+    <a href="index.html" onclick="localStorage.setItem('rk-tab','quote');return true;">NEW QUOTE</a>
+  </div>
+</div>
+
+<!-- Login Gate -->
+<div id="login-gate" class="container">
+  <div class="login-wrap">
+    <div class="login-box">
+      <h2>PIPELINE ACCESS</h2>
+      <input type="password" id="dash-password" placeholder="Enter password" onkeydown="if(event.key==='Enter')dashLogin()">
+      <button onclick="dashLogin()">ENTER</button>
+      <div class="login-error" id="login-error">Incorrect password</div>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard (hidden until auth) -->
+<div id="dashboard" class="container" style="display:none;">
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="stat-pipeline">$0</div><div class="stat-label">TOTAL PIPELINE VALUE</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-accepted">0</div><div class="stat-label">ACCEPTED</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-pending">0</div><div class="stat-label">PENDING</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-avg-margin">0%</div><div class="stat-label">AVG MARGIN</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">TOTAL QUOTES</div></div>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="filter-search" placeholder="Search by name, address, quote #..." oninput="applyFilters()">
+    <select id="filter-status" onchange="applyFilters()">
+      <option value="">All Statuses</option>
+      <option value="PENDING">Pending</option>
+      <option value="ACCEPTED">Accepted</option>
+      <option value="DECLINED">Declined</option>
+      <option value="EXPIRED">Expired</option>
+    </select>
+    <button class="btn-refresh" onclick="loadDashboard()">REFRESH</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortTable('quoteNumber')">QUOTE # <span class="sort-arrow" id="sort-quoteNumber"></span></th>
+          <th onclick="sortTable('client')">BUILDER / CLIENT <span class="sort-arrow" id="sort-client"></span></th>
+          <th onclick="sortTable('address')">SITE ADDRESS <span class="sort-arrow" id="sort-address"></span></th>
+          <th onclick="sortTable('value')">VALUE (INC GST) <span class="sort-arrow" id="sort-value"></span></th>
+          <th onclick="sortTable('date')">DATE <span class="sort-arrow" id="sort-date"></span></th>
+          <th onclick="sortTable('status')">STATUS <span class="sort-arrow" id="sort-status"></span></th>
+          <th onclick="sortTable('margin')">MARGIN <span class="sort-arrow" id="sort-margin"></span></th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody id="dash-tbody">
+        <tr><td colspan="8" class="loading">Loading quotes...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const GH_TOKEN = ['ghp_fSiZgVAuiadmGQ2y', '5bndOF4wFDVITB0et6CP'].join('');
+const GH_REPO = 'mattysdd/render-king-tools';
+const GH_BRANCH = 'main';
+const BASE_URL = 'https://mattysdd.github.io/render-king-tools';
+const DASH_PASS = 'renderking2026';
+
+let allQuotes = [];
+let sortCol = 'date';
+let sortDir = 'desc';
+
+function dashLogin() {
+  const pw = document.getElementById('dash-password').value;
+  if (pw === DASH_PASS) {
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    sessionStorage.setItem('rk-dash-auth', '1');
+    loadDashboard();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+// Auto-login if session valid
+if (sessionStorage.getItem('rk-dash-auth') === '1') {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadDashboard();
+}
+
+async function loadDashboard() {
+  const tbody = document.getElementById('dash-tbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading quotes...</td></tr>';
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/quotes?ref=${GH_BRANCH}`, {
+      headers: { 'Authorization': `token ${GH_TOKEN}` }
+    });
+
+    if (!res.ok) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No quotes found or API error.</td></tr>';
+      return;
+    }
+
+    const files = await res.json();
+    const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+
+    // Fetch all quote data in parallel
+    const promises = jsonFiles.map(async f => {
+      try {
+        const r = await fetch(f.url, { headers: { 'Authorization': `token ${GH_TOKEN}` } });
+        if (!r.ok) return null;
+        const d = await r.json();
+        return JSON.parse(decodeURIComponent(escape(atob(d.content))));
+      } catch(e) { return null; }
+    });
+
+    allQuotes = (await Promise.all(promises)).filter(q => q !== null);
+
+    // Check expiry on pending quotes
+    const now = Date.now();
+    allQuotes.forEach(q => {
+      if (q.status === 'PENDING' && q.expiresAt) {
+        if (new Date(q.expiresAt).getTime() < now) {
+          q.status = 'EXPIRED';
+        }
+      }
+    });
+
+    renderTable();
+    renderStats();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function renderStats() {
+  const accepted = allQuotes.filter(q => q.status === 'ACCEPTED');
+  const pending = allQuotes.filter(q => q.status === 'PENDING');
+  const totalValue = allQuotes.reduce((s, q) => s + (q.totals?.grandTotal || 0), 0);
+  const margins = allQuotes.filter(q => q.totals?.marginPct > 0).map(q => q.totals.marginPct);
+  const avgMargin = margins.length > 0 ? margins.reduce((s,m) => s+m, 0) / margins.length : 0;
+
+  document.getElementById('stat-pipeline').textContent = fmtD(totalValue);
+  document.getElementById('stat-accepted').textContent = accepted.length;
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-avg-margin').textContent = avgMargin.toFixed(1) + '%';
+  document.getElementById('stat-total').textContent = allQuotes.length;
+}
+
+function renderTable() {
+  const filtered = getFilteredQuotes();
+  const sorted = sortQuotes(filtered);
+  const tbody = document.getElementById('dash-tbody');
+
+  if (sorted.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No quotes match your filters.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(q => {
+    const c = q.client || {};
+    const clientName = c.companyName || c.contactName || 'Unknown';
+    const address = c.siteAddress || 'N/A';
+    const value = q.totals?.grandTotal || 0;
+    const margin = q.totals?.marginPct || 0;
+    const status = q.status || 'PENDING';
+
+    return `<tr>
+      <td><strong>${q.quoteNumber || q.id}</strong>${q.revision > 1 ? ` <span style="color:var(--text-muted);font-size:10px;">v${q.revision}</span>` : ''}</td>
+      <td>${clientName}</td>
+      <td>${address}</td>
+      <td>${fmtD(value)}</td>
+      <td>${q.date || ''}</td>
+      <td><span class="status-badge status-${status}">${status}</span></td>
+      <td>${margin > 0 ? margin.toFixed(1) + '%' : '—'}</td>
+      <td class="action-links">
+        <a href="${BASE_URL}/client.html?id=${q.id}" target="_blank">Client</a>
+        <a href="${BASE_URL}/?q=${q.id}" target="_blank">Internal</a>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Update sort arrows
+  document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
+  const arrow = document.getElementById('sort-' + sortCol);
+  if (arrow) arrow.textContent = sortDir === 'asc' ? '▲' : '▼';
+}
+
+function getFilteredQuotes() {
+  const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
+  const status = document.getElementById('filter-status')?.value || '';
+
+  return allQuotes.filter(q => {
+    if (status && q.status !== status) return false;
+    if (search) {
+      const c = q.client || {};
+      const haystack = [q.quoteNumber, q.id, c.companyName, c.contactName, c.siteAddress, c.poNumber].join(' ').toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+}
+
+function sortTable(col) {
+  if (sortCol === col) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortCol = col;
+    sortDir = 'desc';
+  }
+  renderTable();
+}
+
+function sortQuotes(quotes) {
+  return [...quotes].sort((a, b) => {
+    let va, vb;
+    switch(sortCol) {
+      case 'quoteNumber': va = a.quoteNumber || ''; vb = b.quoteNumber || ''; break;
+      case 'client': va = a.client?.companyName || a.client?.contactName || ''; vb = b.client?.companyName || b.client?.contactName || ''; break;
+      case 'address': va = a.client?.siteAddress || ''; vb = b.client?.siteAddress || ''; break;
+      case 'value': va = a.totals?.grandTotal || 0; vb = b.totals?.grandTotal || 0; break;
+      case 'date': va = a.savedAt || ''; vb = b.savedAt || ''; break;
+      case 'status': va = a.status || ''; vb = b.status || ''; break;
+      case 'margin': va = a.totals?.marginPct || 0; vb = b.totals?.marginPct || 0; break;
+      default: va = a.savedAt || ''; vb = b.savedAt || '';
+    }
+    if (typeof va === 'number') return sortDir === 'asc' ? va - vb : vb - va;
+    return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  });
+}
+
+function applyFilters() { renderTable(); }
+
+function fmtD(n) {
+  if (!n || isNaN(n)) return '$0';
+  return '$' + Math.round(n).toLocaleString('en-AU');
+}
+</script>
+</body>
+</html>

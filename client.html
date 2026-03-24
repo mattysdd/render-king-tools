@@ -88,6 +88,12 @@
   .sig-save-btn:disabled { opacity:0.4; cursor:not-allowed; }
   .save-success { text-align:center; padding:20px; border:1px solid var(--green); border-radius:4px; margin-top:20px; color:var(--green); font-weight:700; font-size:13px; }
   .already-signed { text-align:center; padding:20px; border:1px solid var(--green); border-radius:4px; color:var(--green); font-weight:700; font-size:13px; margin-bottom:20px; }
+  .expiry-banner { background:#ef4444; color:#fff; text-align:center; padding:20px; border-radius:4px; margin-bottom:24px; font-weight:700; font-size:14px; letter-spacing:1px; }
+  .expiry-banner .phone { font-size:18px; margin-top:8px; display:block; }
+  .status-banner { text-align:center; padding:12px; border-radius:4px; margin-bottom:16px; font-weight:700; font-size:12px; letter-spacing:1px; }
+  .status-ACCEPTED { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid #22c55e; }
+  .status-DECLINED { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid #ef4444; }
+  .status-EXPIRED { background:rgba(107,114,128,0.15); color:#6b7280; border:1px solid #6b7280; }
 </style>
 </head>
 <body>
@@ -165,6 +171,16 @@ function renderClientView() {
   const t = q.totals || {};
   const li = q.lineItems || [];
 
+  // Check expiry
+  let isExpired = false;
+  if (q.status === 'EXPIRED') {
+    isExpired = true;
+  } else if (q.status === 'PENDING' && q.expiresAt) {
+    isExpired = new Date(q.expiresAt).getTime() < Date.now();
+  }
+  const isDeclined = q.status === 'DECLINED';
+  const isAccepted = q.status === 'ACCEPTED' || !!q.signatures?.client?.image;
+
   // Calculate payment schedule
   const subtotal = t.subtotal || 0;
   let depositPct = 10, finalPct = 40;
@@ -175,7 +191,18 @@ function renderClientView() {
   const hours = parseInt(q.validity) || 48;
   const validityText = hours <= 48 ? `${hours} HOURS` : `${Math.round(hours/24)} DAYS`;
 
-  let html = `
+  let html = '';
+
+  // Expiry banner
+  if (isExpired) {
+    html += `<div class="expiry-banner">THIS QUOTE HAS EXPIRED<br>Please contact us for a current quote.<span class="phone">0468 041 477</span></div>`;
+  } else if (isDeclined) {
+    html += `<div class="status-banner status-DECLINED">THIS QUOTE HAS BEEN DECLINED</div>`;
+  } else if (isAccepted) {
+    html += `<div class="status-banner status-ACCEPTED">QUOTE ACCEPTED</div>`;
+  }
+
+  html += `
   <div class="q-doc">
     <div class="q-doc-header">
       <div class="q-brand">
@@ -318,6 +345,7 @@ function renderClientView() {
 
   // Signature Section
   const alreadySigned = q.signatures?.client?.image;
+  const canSign = !isExpired && !isDeclined && !alreadySigned;
 
   html += `
   <div class="client-sig-section">
@@ -326,7 +354,11 @@ function renderClientView() {
       By signing below, you accept this quotation and agree to the Payment Terms &amp; Conditions of Render Render Pty Ltd (trading as Render King).
     </p>`;
 
-  if (alreadySigned) {
+  if (isExpired) {
+    html += `<p style="text-align:center;color:var(--text-secondary);font-size:13px;">This quote has expired and can no longer be signed. Please contact Render King on <strong>0468 041 477</strong> for a current quote.</p>`;
+  } else if (isDeclined) {
+    html += `<p style="text-align:center;color:var(--text-secondary);font-size:13px;">This quote has been declined.</p>`;
+  } else if (alreadySigned) {
     html += `
     <div class="already-signed">QUOTE ALREADY ACCEPTED &amp; SIGNED</div>
     <div style="text-align:center;"><img src="${q.signatures.client.image}" alt="Signature" style="max-width:300px;border:1px solid var(--border);padding:10px;"></div>
@@ -334,7 +366,7 @@ function renderClientView() {
       <div class="sig-field"><label class="sig-field-label">NAME</label><div style="font-size:13px;color:var(--text-primary);padding:6px 0;">${q.signatures.client.typedName || ''}</div></div>
       <div class="sig-field"><label class="sig-field-label">DATE</label><div style="font-size:13px;color:var(--text-primary);padding:6px 0;">${q.signatures.client.date || ''}</div></div>
     </div>`;
-  } else {
+  } else if (canSign) {
     html += `
     <div class="digital-sig-block">
       <div class="digital-sig-title">YOUR SIGNATURE</div>
@@ -378,8 +410,8 @@ function renderClientView() {
   // Load T&C content
   loadTcContent();
 
-  // Init signature pad if not already signed
-  if (!alreadySigned) {
+  // Init signature pad if signing is available
+  if (canSign) {
     setTimeout(initClientSigPad, 100);
   }
 }
@@ -504,13 +536,15 @@ async function saveClientSignature() {
 
   const sigImage = clCanvas.toDataURL('image/png');
   quoteData.signatures = quoteData.signatures || {};
-  quoteData.signatures.client = {
+    quoteData.signatures.client = {
     image: sigImage,
     typedName: document.getElementById('cl-sig-typed-name')?.value || '',
     printName: document.getElementById('cl-sig-print-name')?.value || '',
     date: document.getElementById('cl-sig-date')?.value || '',
     acceptedAt: new Date().toISOString()
   };
+  quoteData.status = 'ACCEPTED';
+  quoteData.statusUpdatedAt = new Date().toISOString();
 
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(quoteData, null, 2))));
   const path = `quotes/${quoteData.id}.json`;
