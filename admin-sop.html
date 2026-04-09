@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Render King — Admin Weekly SOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:    #C9A84C;
+      --gold-lt: #e0c47a;
+      --gold-dk: #a07a2a;
+      --black:   #0A0A0A;
+      --grey-dk: #141414;
+      --grey-md: #1e1e1e;
+      --grey-lt: #2a2a2a;
+      --border:  #2e2e2e;
+      --white:   #FFFFFF;
+      --text:    #e8e8e8;
+      --muted:   #888888;
+      --green:   #2ecc71;
+      --yellow:  #f1c40f;
+      --red:     #e74c3c;
+      --radius:  8px;
+      --shadow:  0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    .site-header {
+      background: var(--grey-dk);
+      border-bottom: 2px solid var(--gold);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.8);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-crown {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .brand-text p {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .header-meta {
+      text-align: right;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .header-meta a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    /* ===== HERO BANNER ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--grey-dk) 0%, var(--grey-md) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .hero-inner { max-width: 800px; margin: 0 auto; }
+
+    .hero h2 {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--white);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .hero h2 span { color: var(--gold); }
+
+    .hero p {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-badges {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-auto   { background: rgba(46,204,113,0.15); border: 1px solid rgba(46,204,113,0.4); color: #2ecc71; }
+    .badge-assist { background: rgba(241,196,15,0.15); border: 1px solid rgba(241,196,15,0.4); color: #f1c40f; }
+    .badge-human  { background: rgba(231,76,60,0.15);  border: 1px solid rgba(231,76,60,0.4);  color: #e74c3c; }
+
+    /* ===== LEGEND ===== */
+    .legend-bar {
+      background: var(--grey-lt);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+    }
+
+    .legend-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .legend-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .icon-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .icon-auto   { background: rgba(46,204,113,0.2);  border: 1.5px solid #2ecc71; }
+    .icon-assist { background: rgba(241,196,15,0.2);  border: 1.5px solid #f1c40f; }
+    .icon-human  { background: rgba(231,76,60,0.2);   border: 1.5px solid #e74c3c; }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ===== NAV TABS ===== */
+    .day-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+
+    .day-nav a {
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      background: var(--grey-md);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .day-nav a:hover,
+    .day-nav a.active {
+      background: var(--gold);
+      color: var(--black);
+      border-color: var(--gold);
+    }
+
+    /* ===== SECTION ===== */
+    .sop-section {
+      margin-bottom: 48px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .section-day-badge {
+      background: var(--gold);
+      color: var(--black);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ===== TASK CARD ===== */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-card {
+      background: var(--grey-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: 36px 36px 1fr;
+      gap: 12px;
+      align-items: start;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    .task-card:hover {
+      border-color: var(--gold-dk);
+      background: var(--grey-lt);
+    }
+
+    .task-card.completed {
+      opacity: 0.55;
+      background: var(--grey-dk);
+    }
+
+    .task-card.completed .task-title {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    /* Checkbox */
+    .task-check {
+      display: flex;
+      align-items: flex-start;
+      padding-top: 2px;
+    }
+
+    .task-check input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      background: var(--grey-dk);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .task-check input[type="checkbox"]:checked {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .task-check input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 6px;
+      height: 10px;
+      border: 2px solid var(--black);
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+
+    /* Icon pill in card */
+    .task-icon-wrap {
+      display: flex;
+      align-items: flex-start;
+      padding-top: 1px;
+    }
+
+    .task-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .task-icon.auto   { background: rgba(46,204,113,0.18); border: 1.5px solid rgba(46,204,113,0.5); }
+    .task-icon.assist { background: rgba(241,196,15,0.18);  border: 1.5px solid rgba(241,196,15,0.5); }
+    .task-icon.human  { background: rgba(231,76,60,0.18);   border: 1.5px solid rgba(231,76,60,0.5); }
+
+    /* Task body */
+    .task-body {}
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.4;
+    }
+
+    .task-auto-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+      padding: 3px 9px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .tag-auto   { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+    .tag-assist { background: rgba(241,196,15,0.12);  color: #f1c40f; border: 1px solid rgba(241,196,15,0.3); }
+    .tag-human  { background: rgba(231,76,60,0.12);   color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+
+    .task-note {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-wrap {
+      background: var(--grey-lt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .progress-bar-outer {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dk), var(--gold));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .progress-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    /* ===== INFO PANELS ===== */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .info-panel {
+      background: var(--grey-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .info-panel-header {
+      background: var(--grey-lt);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-panel-header h3 {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .info-panel-body {
+      padding: 16px 18px;
+    }
+
+    .contact-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contact-row:last-child { border-bottom: none; }
+
+    .contact-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .contact-role {
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .contact-detail {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .contact-detail a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .contact-detail a:hover { color: var(--gold); }
+
+    /* ===== FOLDER TREE ===== */
+    .folder-tree {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--text);
+    }
+
+    .folder-tree .folder {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .folder-tree .subfolder {
+      color: var(--text);
+      padding-left: 20px;
+    }
+
+    .folder-tree .file {
+      color: var(--muted);
+      padding-left: 40px;
+      font-size: 12px;
+    }
+
+    /* ===== RULES PANEL ===== */
+    .rules-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rules-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .rules-list li::before {
+      content: '▸';
+      color: var(--gold);
+      font-size: 12px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ===== ESCALATION ===== */
+    .escalation-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .esc-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .esc-step:last-child { border-bottom: none; }
+
+    .esc-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--black);
+      font-size: 14px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .esc-body h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .esc-body p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ===== CALLOUT ===== */
+    .callout {
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-left: 4px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .callout strong { color: var(--gold); }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
+      background: var(--grey-dk);
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .site-footer span { color: var(--gold); }
+
+    /* ===== AUTOMATION SUMMARY STATS ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--grey-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: center;
+    }
+
+    .stat-card .stat-icon { font-size: 24px; margin-bottom: 6px; }
+    .stat-card .stat-num  { font-size: 28px; font-weight: 900; color: var(--white); }
+    .stat-card .stat-lbl  { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+    .stat-card.auto-card   { border-top: 3px solid #2ecc71; }
+    .stat-card.assist-card { border-top: 3px solid #f1c40f; }
+    .stat-card.human-card  { border-top: 3px solid #e74c3c; }
+
+    /* ===== PRINT ===== */
+    @media print {
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { background: #fff; color: #000; font-size: 12px; }
+      .site-header { position: static; background: #000; }
+      .brand-text h1 { color: #C9A84C; }
+      .hero { background: #f5f5f5; padding: 24px; }
+      .hero h2 { color: #000; font-size: 22px; }
+      .hero h2 span { color: #C9A84C; }
+      .hero p, .section-subtitle, .task-note { color: #555; }
+      .day-nav { display: none; }
+      .main-wrap { padding: 20px; }
+      .task-card { background: #f9f9f9; border: 1px solid #ddd; break-inside: avoid; }
+      .task-title { color: #000; }
+      .task-icon.auto   { background: #e8f8f0; border-color: #2ecc71; }
+      .task-icon.assist { background: #fefae8; border-color: #f1c40f; }
+      .task-icon.human  { background: #fdf0ee; border-color: #e74c3c; }
+      .tag-auto   { background: #e8f8f0; color: #1a7a44; }
+      .tag-assist { background: #fefae8; color: #8a6d00; }
+      .tag-human  { background: #fdf0ee; color: #8a1a0a; }
+      .section-header { border-bottom: 2px solid #C9A84C; }
+      .section-day-badge { background: #C9A84C; color: #000; }
+      .section-title { color: #000; }
+      .legend-bar { background: #f0f0f0; border-bottom: 1px solid #ddd; }
+      .info-panel { background: #f9f9f9; border: 1px solid #ddd; }
+      .info-panel-header { background: #f0f0f0; }
+      .info-panel-header h3 { color: #C9A84C; }
+      .contact-name { color: #000; }
+      .contact-role { color: #C9A84C; }
+      .folder-tree .folder { color: #a07a2a; }
+      .esc-num { background: #C9A84C; color: #000; }
+      .esc-body h4 { color: #000; }
+      .callout { background: #fffbf0; border-color: #C9A84C; }
+      .progress-wrap { display: none; }
+      .stat-card { background: #f9f9f9; border: 1px solid #ddd; }
+      .stat-card .stat-num { color: #000; }
+      .site-footer { background: #f0f0f0; color: #555; }
+      .task-check input[type="checkbox"] { border-color: #999; background: #fff; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .header-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .header-meta { text-align: left; }
+      .hero h2 { font-size: 22px; }
+      .stats-row { grid-template-columns: 1fr; }
+      .task-card { grid-template-columns: 32px 32px 1fr; gap: 8px; padding: 12px 14px; }
+      .section-title { font-size: 16px; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-crown">👑</div>
+      <div class="brand-text">
+        <h1>Render King</h1>
+        <p>Administration — Weekly SOP</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div>📞 <a href="tel:0468041477">0468 041 477</a></div>
+      <div>✉ <a href="mailto:admin@renderrender.com.au">admin@renderrender.com.au</a></div>
+      <div>Version 1.0 &nbsp;|&nbsp; Queensland, Australia</div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <h2>Admin <span>Operations</span> Manual</h2>
+    <p>The complete weekly, daily, and monthly administration backbone for Render King. Every task. Every week. No exceptions.</p>
+    <div class="hero-badges">
+      <span class="badge badge-auto">🤖 Fully Automated</span>
+      <span class="badge badge-assist">🤝 AI-Assisted</span>
+      <span class="badge badge-human">👤 Human Only</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LEGEND ===== -->
+<div class="legend-bar">
+  <div class="legend-inner">
+    <span class="legend-label">Legend:</span>
+    <div class="legend-item">
+      <div class="icon-pill icon-auto">🤖</div>
+      <span style="color:#2ecc71; font-weight:600;">FULLY AUTOMATED</span>
+      <span style="color:var(--muted);">— AI agent handles 100%, no human input required</span>
+    </div>
+    <div class="legend-item">
+      <div class="icon-pill icon-assist">🤝</div>
+      <span style="color:#f1c40f; font-weight:600;">AI-ASSISTED</span>
+      <span style="color:var(--muted);">— AI does the work, human reviews &amp; approves</span>
+    </div>
+    <div class="legend-item">
+      <div class="icon-pill icon-human">👤</div>
+      <span style="color:#e74c3c; font-weight:600;">HUMAN ONLY</span>
+      <span style="color:var(--muted);">— Requires human judgment, relationship, or physical action</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<main class="main-wrap">
+
+  <!-- NAV -->
+  <nav class="day-nav" aria-label="Jump to section">
+    <a href="#monday">Monday</a>
+    <a href="#tuesday">Tuesday</a>
+    <a href="#wednesday">Wednesday</a>
+    <a href="#thursday">Thursday</a>
+    <a href="#friday">Friday</a>
+    <a href="#daily">Daily</a>
+    <a href="#monthly">Monthly</a>
+    <a href="#contacts">Contacts</a>
+    <a href="#drive">Drive</a>
+    <a href="#escalation">Escalation</a>
+    <a href="#rules">Rules</a>
+  </nav>
+
+  <!-- AUTOMATION STATS -->
+  <div class="stats-row" id="stats">
+    <div class="stat-card auto-card">
+      <div class="stat-icon">🤖</div>
+      <div class="stat-num" id="count-auto">—</div>
+      <div class="stat-lbl">Fully Automated Tasks</div>
+    </div>
+    <div class="stat-card assist-card">
+      <div class="stat-icon">🤝</div>
+      <div class="stat-num" id="count-assist">—</div>
+      <div class="stat-lbl">AI-Assisted Tasks</div>
+    </div>
+    <div class="stat-card human-card">
+      <div class="stat-icon">👤</div>
+      <div class="stat-num" id="count-human">—</div>
+      <div class="stat-lbl">Human Only Tasks</div>
+    </div>
+  </div>
+
+  <!-- ===================== MONDAY ===================== -->
+  <section class="sop-section" id="monday">
+    <div class="section-header">
+      <span class="section-day-badge">Day 1</span>
+      <div>
+        <div class="section-title">Monday — Week Setup</div>
+        <div class="section-subtitle">Set the week in motion. Confirm jobs, crew, and pipeline before 9am.</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="prog-monday">
+      <span class="progress-label">Monday Progress</span>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="bar-monday"></div></div>
+      <span class="progress-count" id="cnt-monday">0 / 6</span>
+    </div>
+
+    <div class="task-list" data-section="monday">
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Review and confirm all jobs scheduled for the week — check Google Sheets pipeline</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI reads the Google Sheets pipeline, flags any gaps or conflicts, and generates a summary for admin to review and confirm.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Send crew weekly job briefings — addresses, start times, and job details</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI drafts individual briefing messages per crew member from the job tracker; admin reviews and sends via email or WhatsApp.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Follow up any outstanding quotes from the previous week</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI identifies all quotes sent 5+ days ago with no response and drafts follow-up emails; admin reviews and sends.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Check all subcontractor availability confirmed for the week's jobs</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI cross-references the job schedule against confirmed subcontractor availability records and flags any unconfirmed slots automatically.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Review any builder emails or POs received over the weekend</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI scans both inboxes every Monday at 7am, categorises new POs and builder emails, and presents a structured summary in the dashboard.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Update job status in tracking system</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI auto-updates job statuses in Google Sheets based on email confirmations, PO receipts, and crew briefing acknowledgements.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== TUESDAY ===================== -->
+  <section class="sop-section" id="tuesday">
+    <div class="section-header">
+      <span class="section-day-badge">Day 2</span>
+      <div>
+        <div class="section-title">Tuesday — Admin Processing</div>
+        <div class="section-subtitle">Process incoming documents, chase overdue money, and confirm materials.</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="prog-tuesday">
+      <span class="progress-label">Tuesday Progress</span>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="bar-tuesday"></div></div>
+      <span class="progress-count" id="cnt-tuesday">0 / 4</span>
+    </div>
+
+    <div class="task-list" data-section="tuesday">
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Process any new POs or work orders received from builders</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI extracts PO details (job address, scope, value, builder) and pre-fills the job tracker entry; admin reviews, confirms, and files to Google Drive.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Follow up on all outstanding invoices sent to builders — 30+ days overdue</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI generates an aged debtors report and drafts follow-up emails for each overdue invoice; admin reviews tone and sends.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Check materials orders — confirm deliveries scheduled for all active jobs</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI cross-checks active job list against materials order log and flags any jobs without a confirmed delivery date, alerting admin via dashboard.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon human">👤</div></div>
+        <div class="task-body">
+          <div class="task-title">Update crew schedule if any changes have occurred</div>
+          <span class="task-auto-tag tag-human">👤 Human Only</span>
+          <div class="task-note">Schedule changes require direct communication with crew and subcontractors — relationship and real-time judgment required.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== WEDNESDAY ===================== -->
+  <section class="sop-section" id="wednesday">
+    <div class="section-header">
+      <span class="section-day-badge">Day 3</span>
+      <div>
+        <div class="section-title">Wednesday — Mid-Week Check</div>
+        <div class="section-subtitle">Confirm active jobs are on track. Send quotes. Chase pipeline leads.</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="prog-wednesday">
+      <span class="progress-label">Wednesday Progress</span>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="bar-wednesday"></div></div>
+      <span class="progress-count" id="cnt-wednesday">0 / 4</span>
+    </div>
+
+    <div class="task-list" data-section="wednesday">
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Mid-week job status check — confirm all active jobs are on track</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI compiles a mid-week status snapshot from the job tracker and flags any at-risk jobs; admin reviews and takes action where needed.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Chase any missing subcontractor invoices for the current week</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI identifies subcontractors with active jobs but no invoice received, and sends automated chase emails every Wednesday at 9am.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Send any quotes that are ready to go out</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI formats and packages completed quotes into branded PDFs; admin does a final review of pricing and scope before sending.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Follow up leads in the pipeline</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI identifies pipeline leads with no activity for 5+ days and drafts follow-up messages; admin reviews and sends.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== THURSDAY ===================== -->
+  <section class="sop-section" id="thursday">
+    <div class="section-header">
+      <span class="section-day-badge">Day 4</span>
+      <div>
+        <div class="section-title">Thursday — Invoice Collection &amp; Approval</div>
+        <div class="section-subtitle">Collect all subcontractor invoices. Compile report. Send to Micky for approval.</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="prog-thursday">
+      <span class="progress-label">Thursday Progress</span>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="bar-thursday"></div></div>
+      <span class="progress-count" id="cnt-thursday">0 / 5</span>
+    </div>
+
+    <div class="task-list" data-section="thursday">
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Collect all subcontractor invoices received this week — Goldstar, Just Uniq / Mase Faatoe, Ben Johnson, and any others</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI scans both inboxes every Thursday at midnight, extracts all subcontractor invoice attachments, and files them to the correct Google Drive folder automatically.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Compile weekly subcontractor invoice report</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI compiles all collected invoices into a numbered, formatted report (subcontractor name, invoice number, amount ex GST, job reference) ready for approval.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Send approval email to micky@renderrender.com.au with numbered invoice list for approval to pay</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI drafts the approval email with the compiled invoice list attached; admin reviews the total and sends to Micky by 12pm Thursday.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Chase any missing invoices from subcontractors</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI identifies subcontractors with completed jobs but no invoice submitted and sends automated chase messages every Thursday at 8am.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Prepare weekly operations report</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI pulls data from the job tracker, invoice log, and pipeline to generate a draft operations report; admin reviews figures and adds any notes before Friday distribution.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== FRIDAY ===================== -->
+  <section class="sop-section" id="friday">
+    <div class="section-header">
+      <span class="section-day-badge">Day 5</span>
+      <div>
+        <div class="section-title">Friday — Close-Out &amp; Next Week Prep</div>
+        <div class="section-subtitle">Payments, reporting, filing, and next week locked in before 3pm.</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="prog-friday">
+      <span class="progress-label">Friday Progress</span>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="bar-friday"></div></div>
+      <span class="progress-count" id="cnt-friday">0 / 6</span>
+    </div>
+
+    <div class="task-list" data-section="friday">
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon human">👤</div></div>
+        <div class="task-body">
+          <div class="task-title">Confirm Micky has approved all invoices before processing payments</div>
+          <span class="task-auto-tag tag-human">👤 Human Only</span>
+          <div class="task-note">Approval confirmation must be verified directly — do not process any payments without explicit written approval from Micky.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon human">👤</div></div>
+        <div class="task-body">
+          <div class="task-title">Process approved subcontractor payments — manual bank transfer at 12pm Friday</div>
+          <span class="task-auto-tag tag-human">👤 Human Only</span>
+          <div class="task-note">Bank payments require human authorisation and execution. Operations Manager processes all approved payments at 12pm every Friday.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Send weekly report summary to King</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI compiles the final weekly summary (jobs completed, revenue, invoices paid, pipeline status); admin reviews and sends to King by 2pm Friday.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Confirm next week's jobs are scheduled and crew briefings are ready to send Monday</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI pre-builds next week's crew briefing drafts from the pipeline; admin reviews job details and confirms schedule is locked.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">File all invoices and documents to Google Drive</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI automatically files all processed invoices and documents to the correct Google Drive folder structure every Friday at 3pm.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon human">👤</div></div>
+        <div class="task-body">
+          <div class="task-title">Bank reconciliation check</div>
+          <span class="task-auto-tag tag-human">👤 Human Only</span>
+          <div class="task-note">Reconciliation requires cross-checking bank statements against payment records — requires human review and sign-off by the Operations Manager.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== DAILY ===================== -->
+  <section class="sop-section" id="daily">
+    <div class="section-header">
+      <span class="section-day-badge">Every Day</span>
+      <div>
+        <div class="section-title">Daily Tasks — Non-Negotiable</div>
+        <div class="section-subtitle">These three tasks must be completed every single working day without exception.</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>CRITICAL:</strong> The inbox must be monitored and actioned within <strong>2 hours</strong> during business hours (8am–5pm AEST). Failure to respond within 2 hours is a breach of this SOP.
+    </div>
+
+    <div class="task-list" data-section="daily">
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Check admin@renderrender.com.au and operations@renderrender.com.au — respond or action within 2 hours</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI monitors both inboxes in real time, categorises emails by urgency and type, and drafts suggested responses; admin reviews and sends within the 2-hour window.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Update job tracker with any status changes</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI auto-updates the job tracker in Google Sheets based on email activity, PO receipts, and confirmed completions throughout the day.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Log any new leads or enquiries received</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI captures all inbound enquiries from email and web forms, creates a lead record, and adds them to the pipeline tracker automatically.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== MONTHLY ===================== -->
+  <section class="sop-section" id="monthly">
+    <div class="section-header">
+      <span class="section-day-badge">Monthly</span>
+      <div>
+        <div class="section-title">Monthly Admin Tasks — End of Month</div>
+        <div class="section-subtitle">Complete by the last business day of each month without exception.</div>
+      </div>
+    </div>
+
+    <div class="task-list" data-section="monthly">
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">BAS preparation data — compile all income and expense records for the month</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI pulls all invoice and payment data for the month and formats it into a BAS-ready summary; admin reviews figures and forwards to accountant.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon auto">🤖</div></div>
+        <div class="task-body">
+          <div class="task-title">Subcontractor payment summary — total paid to each subcontractor for the month</div>
+          <span class="task-auto-tag tag-auto">🤖 Fully Automated</span>
+          <div class="task-note">Momentrix AI generates a monthly payment summary per subcontractor from the payment log and files it to Google Drive automatically on the last Friday of the month.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Revenue vs target review — compare actual invoiced revenue against monthly target</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI generates the revenue comparison report; admin and King review together to assess performance and adjust pipeline strategy.</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="toggleTask(this)">
+        <div class="task-check"><input type="checkbox" onclick="event.stopPropagation(); toggleTask(this.closest('.task-card'))" /></div>
+        <div class="task-icon-wrap"><div class="task-icon assist">🤝</div></div>
+        <div class="task-body">
+          <div class="task-title">Outstanding debts review — full aged debtors report, all amounts ex GST</div>
+          <span class="task-auto-tag tag-assist">🤝 AI-Assisted</span>
+          <div class="task-note">Momentrix AI generates a full aged debtors report sorted by days overdue; admin reviews and escalates any 60+ day debts to King immediately.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== CONTACTS ===================== -->
+  <section class="sop-section" id="contacts">
+    <div class="section-header">
+      <span class="section-day-badge">Reference</span>
+      <div>
+        <div class="section-title">Key Contacts</div>
+        <div class="section-subtitle">Internal team, key subcontractors, and key builders. All amounts ex GST unless stated.</div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+
+      <div class="info-panel">
+        <div class="info-panel-header">
+          <span>👑</span>
+          <h3>Internal Team</h3>
+        </div>
+        <div class="info-panel-body">
+          <div class="contact-row">
+            <div class="contact-name">King (Matty Mannion)</div>
+            <div class="contact-role">Founder / Director</div>
+            <div class="contact-detail"><a href="tel:0468041477">0468 041 477</a></div>
+            <div class="contact-detail">First point of escalation for all issues</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-name">Micky</div>
+            <div class="contact-role">Operations Manager</div>
+            <div class="contact-detail"><a href="mailto:micky@renderrender.com.au">micky@renderrender.com.au</a></div>
+            <div class="contact-detail">Invoice approvals, payment processing, scheduling</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-name">Admin Team</div>
+            <div class="contact-role">Administration</div>
+            <div class="contact-detail"><a href="mailto:admin@renderrender.com.au">admin@renderrender.com.au</a></div>
+            <div class="contact-detail"><a href="mailto:operations@renderrender.com.au">operations@renderrender.com.au</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <div class="info-panel-header">
+          <span>🔧</span>
+          <h3>Key Subcontractors</h3>
+        </div>
+        <div class="info-panel-body">
+          <div class="contact-row">
+            <div class="contact-name">Goldstar</div>
+            <div class="contact-role">Subcontractor — Rendering</div>
+            <div class="contact-detail">Invoices due by Thursday each week</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-name">Just Uniq / Mase Faatoe</div>
+            <div class="contact-role">Subcontractor — Rendering</div>
+            <div class="contact-detail">Invoices due by Thursday each week</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-name">Ben Johnson</div>
+            <div class="contact-role">Subcontractor — Rendering</div>
+            <div class="contact-detail">Invoices due by Thursday each week</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-name">Additional Subcontractors</div>
+            <div class="contact-role">As engaged per job</div>
+            <div class="contact-detail">Same invoice deadline applies — Thursday</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <div class="info-panel-header">
+          <span>🏗️</span>
+          <h3>Key Builders</h3>
+        </div>
+        <div class="info-panel-body">
+          <div class="contact-row">
+            <div class="contact-name">Builder Contacts</div>
+            <div class="contact-role">Maintained in Google Sheets CRM</div>
+            <div class="contact-detail">All POs and work orders filed to Google Drive</div>
+            <div class="contact-detail">All correspondence via operations@renderrender.com.au</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-name">New Builder Enquiries</div>
+            <div class="contact-role">Inbound via admin inbox</div>
+            <div class="contact-detail">Log in pipeline tracker immediately on receipt</div>
+            <div class="contact-detail">Respond within 2 hours — no exceptions</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== GOOGLE DRIVE ===================== -->
+  <section class="sop-section" id="drive">
+    <div class="section-header">
+      <span class="section-day-badge">Reference</span>
+      <div>
+        <div class="section-title">Google Drive Folder Structure</div>
+        <div class="section-subtitle">This structure must be maintained at all times. Never delete. Always file originals.</div>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-panel-header">
+        <span>📁</span>
+        <h3>Render King — Master Drive Structure</h3>
+      </div>
+      <div class="info-panel-body">
+        <div class="folder-tree">
+          <div class="folder">📁 RENDER KING — MASTER</div>
+          <div class="subfolder">📁 01 — JOBS</div>
+          <div class="file">📁 [Year] → [Builder Name] → [Job Address]</div>
+          <div class="file">📄 PO / Work Order</div>
+          <div class="file">📄 Quote Sent</div>
+          <div class="file">📄 Invoice Issued</div>
+          <div class="file">📄 Job Photos</div>
+          <div class="file">📄 Completion Sign-Off</div>
+          <div class="subfolder">📁 02 — SUBCONTRACTOR INVOICES</div>
+          <div class="file">📁 [Year] → [Month] → [Subcontractor Name]</div>
+          <div class="file">📄 Invoice (original, never delete)</div>
+          <div class="file">📄 Weekly Invoice Report</div>
+          <div class="subfolder">📁 03 — BUILDER INVOICES ISSUED</div>
+          <div class="file">📁 [Year] → [Builder Name]</div>
+          <div class="file">📄 Invoice (original)</div>
+          <div class="file">📄 Payment Confirmation</div>
+          <div class="subfolder">📁 04 — QUOTES</div>
+          <div class="file">📁 [Year] → [Builder / Client Name]</div>
+          <div class="file">📄 Quote Sent (PDF)</div>
+          <div class="file">📄 Quote Accepted / Declined log</div>
+          <div class="subfolder">📁 05 — FINANCIAL REPORTS</div>
+          <div class="file">📁 [Year] → [Month]</div>
+          <div class="file">📄 Weekly Operations Report</div>
+          <div class="file">📄 Monthly Revenue vs Target</div>
+          <div class="file">📄 Aged Debtors Report</div>
+          <div class="file">📄 BAS Preparation Data</div>
+          <div class="file">📄 Subcontractor Payment Summary</div>
+          <div class="subfolder">📁 06 — COMPLIANCE &amp; ADMIN</div>
+          <div class="file">📄 Subcontractor Agreements</div>
+          <div class="file">📄 Insurance Certificates</div>
+          <div class="file">📄 Licences</div>
+          <div class="file">📄 SWMS / Safety Documents</div>
+          <div class="subfolder">📁 07 — SOPs &amp; TEMPLATES</div>
+          <div class="file">📄 Admin Weekly SOP (this document)</div>
+          <div class="file">📄 Email Templates</div>
+          <div class="file">📄 Invoice Templates</div>
+          <div class="file">📄 Quote Templates</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ESCALATION ===================== -->
+  <section class="sop-section" id="escalation">
+    <div class="section-header">
+      <span class="section-day-badge">Protocol</span>
+      <div>
+        <div class="section-title">Escalation Path — What To Do When Something Goes Wrong</div>
+        <div class="section-subtitle">Follow this path in order. Do not skip steps. Do not guess. Escalate immediately.</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>RULE:</strong> If you are unsure about anything — a payment, a decision, a dispute, a missing document — stop and escalate. Do not act on assumptions. Escalate to <strong>King first</strong>, then Micky.
+    </div>
+
+    <div class="info-panel">
+      <div class="info-panel-body">
+        <div class="escalation-steps">
+
+          <div class="esc-step">
+            <div class="esc-num">1</div>
+            <div class="esc-body">
+              <h4>Attempt to resolve using this SOP</h4>
+              <p>Check if the situation is covered in this document. If the answer is here, follow the documented process exactly.</p>
+            </div>
+          </div>
+
+          <div class="esc-step">
+            <div class="esc-num">2</div>
+            <div class="esc-body">
+              <h4>Escalate to King (Matty Mannion) — First Contact</h4>
+              <p>Call or message King directly on <strong>0468 041 477</strong>. Provide a clear, brief summary: what happened, what you need, what the deadline is. King is always the first escalation point.</p>
+            </div>
+          </div>
+
+          <div class="esc-step">
+            <div class="esc-num">3</div>
+            <div class="esc-body">
+              <h4>Escalate to Micky — Operations Manager</h4>
+              <p>If King is unavailable, contact Micky at <strong>micky@renderrender.com.au</strong>. Micky handles operational decisions, payment approvals, and scheduling conflicts.</p>
+            </div>
+          </div>
+
+          <div class="esc-step">
+            <div class="esc-num">4</div>
+            <div class="esc-body">
+              <h4>Document the issue immediately</h4>
+              <p>Log the issue in writing — what happened, when, who was involved, and what action was taken. File the record to the <strong>06 — COMPLIANCE &amp; ADMIN</strong> folder in Google Drive.</p>
+            </div>
+          </div>
+
+          <div class="esc-step">
+            <div class="esc-num">5</div>
+            <div class="esc-body">
+              <h4>Do not proceed until authorised</h4>
+              <p>If the issue involves a payment, a dispute, a missing document, or a builder complaint — do not take further action until you have explicit written authorisation from King or Micky.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <div class="info-grid">
+        <div class="info-panel">
+          <div class="info-panel-header"><span>⚡</span><h3>Common Escalation Triggers</h3></div>
+          <div class="info-panel-body">
+            <ul class="rules-list">
+              <li>A builder disputes an invoice or refuses to pay</li>
+              <li>A subcontractor invoice amount does not match the agreed rate</li>
+              <li>A job is cancelled or delayed by a builder without notice</li>
+              <li>A payment has been made to the wrong account</li>
+              <li>A subcontractor raises a complaint or dispute</li>
+              <li>Any document is lost, deleted, or cannot be located</li>
+              <li>An email from a builder contains a legal threat or formal complaint</li>
+              <li>Any amount over $5,000 that is not part of the normal weekly payment run</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-panel">
+          <div class="info-panel-header"><span>🚫</span><h3>Never Do These Without Authorisation</h3></div>
+          <div class="info-panel-body">
+            <ul class="rules-list">
+              <li>Process any payment not on the approved weekly invoice list</li>
+              <li>Delete any file, email, or document — ever</li>
+              <li>Agree to a variation or scope change on behalf of the business</li>
+              <li>Issue a credit note or refund without King's approval</li>
+              <li>Share financial information with any external party</li>
+              <li>Respond to a legal letter or formal complaint without King's direction</li>
+              <li>Change a subcontractor's rate or payment terms</li>
+              <li>Commit to a new job or contract without a signed PO</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RULES ===================== -->
+  <section class="sop-section" id="rules">
+    <div class="section-header">
+      <span class="section-day-badge">Non-Negotiable</span>
+      <div>
+        <div class="section-title">Admin Rules — Always Apply</div>
+        <div class="section-subtitle">These rules apply to every task, every day, without exception.</div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-panel">
+        <div class="info-panel-header"><span>📋</span><h3>Document &amp; Filing Rules</h3></div>
+        <div class="info-panel-body">
+          <ul class="rules-list">
+            <li><strong>Never delete anything.</strong> Archive, do not delete. If in doubt, ask King.</li>
+            <li>Always file original documents — never overwrite or replace an original.</li>
+            <li>Every invoice, PO, and work order must be filed to Google Drive on the day it is received.</li>
+            <li>All document names must include: date, builder/subcontractor name, and document type.</li>
+            <li>PDFs only for all filed documents — no screenshots, no photos of documents.</li>
+            <li>The Google Drive folder structure must be maintained exactly as documented above.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="info-panel">
+        <div class="info-panel-header"><span>💰</span><h3>Financial Rules</h3></div>
+        <div class="info-panel-body">
+          <ul class="rules-list">
+            <li><strong>All amounts are ex GST unless explicitly stated otherwise.</strong></li>
+            <li>No payment is processed without Micky's written approval — no exceptions.</li>
+            <li>All invoices must be cross-checked against the job tracker before approval is sent.</li>
+            <li>Aged debtors must be reviewed weekly — any 60+ day debt escalated to King immediately.</li>
+            <li>No credit notes, refunds, or adjustments without King's written authorisation.</li>
+            <li>All financial records must be retained for a minimum of 7 years.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="info-panel">
+        <div class="info-panel-header"><span>📧</span><h3>Communication Rules</h3></div>
+        <div class="info-panel-body">
+          <ul class="rules-list">
+            <li>Both inboxes must be checked and actioned within 2 hours during business hours.</li>
+            <li>All external communications must be professional, on-brand, and reviewed before sending.</li>
+            <li>Never make commitments on behalf of the business without authorisation from King or Micky.</li>
+            <li>All builder and subcontractor communications must be via the official email addresses only.</li>
+            <li>Personal email or phone must never be used for business communications.</li>
+            <li>All sent emails relating to jobs, invoices, or payments must be filed to Google Drive.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="info-panel">
+        <div class="info-panel-header"><span>🔒</span><h3>Access &amp; Security Rules</h3></div>
+        <div class="info-panel-body">
+          <ul class="rules-list">
+            <li>Google Drive access is for Render King team members only — never share externally.</li>
+            <li>Do not forward internal documents, reports, or financial data to personal email addresses.</li>
+            <li>Report any suspicious emails or phishing attempts to King immediately.</li>
+            <li>All passwords must be stored in the approved password manager — never in email or notes.</li>
+            <li>If you leave the business, all access must be revoked on your final day — notify King.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <p><span>RENDER KING</span> — Administration Weekly SOP &nbsp;|&nbsp; Version 1.0 &nbsp;|&nbsp; Queensland, Australia &nbsp;|&nbsp; All amounts ex GST unless stated</p>
+  <p style="margin-top:6px;">📞 <a href="tel:0468041477" style="color:var(--muted);">0468 041 477</a> &nbsp;|&nbsp; ✉ <a href="mailto:admin@renderrender.com.au" style="color:var(--muted);">admin@renderrender.com.au</a> &nbsp;|&nbsp; ✉ <a href="mailto:operations@renderrender.com.au" style="color:var(--muted);">operations@renderrender.com.au</a></p>
+  <p style="margin-top:6px; font-size:10px; color:#444;">Powered by Momentrix AI &nbsp;|&nbsp; This document is confidential and for internal use only</p>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+  // ---- Checkbox / task completion ----
+  function toggleTask(card) {
+    const cb = card.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    card.classList.toggle('completed', cb.checked);
+    updateProgress();
+    updateStats();
+  }
+
+  // ---- Progress bars ----
+  const sections = ['monday','tuesday','wednesday','thursday','friday','daily','monthly'];
+
+  function updateProgress() {
+    sections.forEach(function(sec) {
+      const list = document.querySelector('[data-section="' + sec + '"]');
+      if (!list) return;
+      const total = list.querySelectorAll('.task-card').length;
+      const done  = list.querySelectorAll('.task-card.completed').length;
+      const bar   = document.getElementById('bar-' + sec);
+      const cnt   = document.getElementById('cnt-' + sec);
+      if (bar) bar.style.width = (total > 0 ? (done / total * 100) : 0) + '%';
+      if (cnt) cnt.textContent = done + ' / ' + total;
+    });
+  }
+
+  // ---- Automation stats ----
+  function updateStats() {
+    var auto   = document.querySelectorAll('.task-icon.auto').length;
+    var assist = document.querySelectorAll('.task-icon.assist').length;
+    var human  = document.querySelectorAll('.task-icon.human').length;
+    document.getElementById('count-auto').textContent   = auto;
+    document.getElementById('count-assist').textContent = assist;
+    document.getElementById('count-human').textContent  = human;
+  }
+
+  // ---- Nav active state on scroll ----
+  const navLinks = document.querySelectorAll('.day-nav a');
+  const allSections = document.querySelectorAll('.sop-section');
+
+  window.addEventListener('scroll', function() {
+    let current = '';
+    allSections.forEach(function(s) {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(function(a) {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+
+  // ---- Init ----
+  document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+    updateStats();
+  });
+</script>
+
+</body>
+</html>
