@@ -48,7 +48,7 @@ var LOCKED_DEFAULTS = {
   // Dulux PAC Card product prices
   'set-pac-low-build': 14.86,
   'set-pac-medium-build': 11.60,
-  'set-pac-high-build': 11.60,
+  'set-pac-high-build': 22.10,
   'set-pac-p400': 21.10,
   'set-pac-joint-skim': 27.13,
   'set-pac-powerfinish': 73.57,
@@ -101,6 +101,8 @@ var LOCKED_DEFAULTS = {
   'set-mkt-hebel_install-max': 110,
   'set-mkt-eps_install-min': 55,
   'set-mkt-eps_install-max': 90,
+  // Accessories / Miscellaneous
+  'set-accessories-rate': 1.50,
   // Crew productivity
   'set-crew-size': 3,
   'set-crew-output': 50,
@@ -617,12 +619,17 @@ function recalc() {
         labCost = qty * getSettingVal('set-subbie-rate');
       }
 
+      // Accessories / Miscellaneous — $X/sqm for tape, plastic, glue (sqm lines only)
+      var accessoriesRate = getSettingVal('set-accessories-rate');
+      var accessoriesCost = (unit === 'sqm') ? qty * accessoriesRate : 0;
+
       lines.push({
         id: id, name: name, subKey: subKey, substrate: substrate,
         diffLevel: diffLevel, diffAddon: diffAddon,
         baseRate: baseRate, totalRate: totalRate, qty: qty, unit: unit,
         matType: matType, textureType: textureType,
-        materials: materials, matCost: matCost, labCost: labCost
+        materials: materials, matCost: matCost, labCost: labCost,
+        accessoriesCost: accessoriesCost
       });
     }
   });
@@ -652,8 +659,10 @@ function recalc() {
   var totalLabCost = 0;
   var volFloorActive = false;
 
+  var totalAccessoriesCost = 0;
   lines.forEach(function(l) {
-    l.lineCost = l.matCost + l.labCost;
+    l.lineCost = l.matCost + l.labCost + (l.accessoriesCost || 0);
+    totalAccessoriesCost += (l.accessoriesCost || 0);
     l.costPerUnit = l.qty > 0 ? l.lineCost / l.qty : 0;
     l.isNonRender = !!(SUBSTRATE_KEYS[l.subKey] && SUBSTRATE_KEYS[l.subKey].nonRender);
 
@@ -725,6 +734,9 @@ function recalc() {
     labSubParts.push('Subbie @ ' + fmt(subbieRate) + '/sqm');
   }
   setText('r-lab-sub', labSubParts.length > 0 ? labSubParts.join(' | ') : '@ ' + fmt(subbieRate) + '/sqm subbie rate');
+  // Show accessories cost
+  setText('r-acc-cost', fmt(totalAccessoriesCost));
+  setText('r-acc-sub', 'Tape, plastic, glue @ $' + getSettingVal('set-accessories-rate').toFixed(2) + '/sqm');
   setText('r-job-cost', fmt(totalCost));
   setText('r-sqm-cost', fmt(costPerUnit) + '/unit blended cost');
 
@@ -770,8 +782,15 @@ function setHTML(id, html) {
 // ── RECOMMENDED SELL PRICE ─────────────────────────────────
 function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQty, renderQty, renderSell) {
   var totalSell = lines.reduce(function(s, l) { return s + l.sellAtTarget; }, 0);
-  // AVG SELL RATE based on render lines only
-  var avgRate = renderQty > 0 ? renderSell / renderQty : 0;
+  // AVG SELL RATE — blended across ALL lines (render + slabs + installs)
+  // Convert slab LM to equivalent sqm contribution by using their sell/cost ratio
+  var allSellableQty = 0;
+  var allSellTotal = 0;
+  lines.forEach(function(l) {
+    allSellableQty += l.qty;
+    allSellTotal += l.sellAtTarget;
+  });
+  var avgRate = allSellableQty > 0 ? allSellTotal / allSellableQty : 0;
   var profit = totalSell - totalCost;
   var margin = totalSell > 0 ? ((totalSell - totalCost) / totalSell) * 100 : 0;
   var minJob = getSettingVal('set-min-job');
@@ -794,8 +813,8 @@ function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQt
     '</div>' +
     '<div class="stat-card">' +
       '<div class="stat-label">AVG SELL RATE</div>' +
-      '<div class="stat-value">' + fmt(avgRate) + '/sqm</div>' +
-      '<div class="stat-sub">Render lines only — blended rate</div>' +
+      '<div class="stat-value">' + fmt(avgRate) + '/unit</div>' +
+      '<div class="stat-sub">Blended rate \u2014 all lines incl. slabs</div>' +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="stat-label">GROSS PROFIT</div>' +
@@ -814,6 +833,73 @@ function renderRecommendedSell(lines, tier, tierMarginTarget, totalCost, totalQt
       '<strong>MINIMUM JOB VALUE APPLIED:</strong> The calculated sell price was below the $' + minJob.toLocaleString() + ' minimum. The recommended sell has been set to the minimum job value.' +
     '</div>';
   }
+
+  // ═══ MARGIN MATH TRANSPARENCY — OPERATING COST BREAKDOWN ═══
+  var overheadAmount = finalSell - totalCost - finalProfit;
+  // The margin formula: Sell = Cost / (1 - margin%)
+  // So: Sell - Cost = Gross Profit, which includes operating overhead coverage
+  // Break down what the margin covers:
+  var marginDollar = finalSell - totalCost;
+  var operatingPct = tierMarginTarget * 100;
+  // Estimated overhead split (industry standard for trade businesses)
+  var vehicleToolsPct = 5;
+  var insuranceCompliancePct = 3;
+  var adminOfficePct = 4;
+  var wasteContingencyPct = 3;
+  var netProfitPct = operatingPct - vehicleToolsPct - insuranceCompliancePct - adminOfficePct - wasteContingencyPct;
+  if (netProfitPct < 0) netProfitPct = 0;
+
+  var vehicleTools = finalSell * (vehicleToolsPct / 100);
+  var insuranceCompliance = finalSell * (insuranceCompliancePct / 100);
+  var adminOffice = finalSell * (adminOfficePct / 100);
+  var wasteContingency = finalSell * (wasteContingencyPct / 100);
+  var netProfit = finalSell * (netProfitPct / 100);
+
+  html += '<div style="margin-top:18px;padding:18px;background:#111;border:1px solid var(--border);border-radius:8px;">' +
+    '<div style="font-weight:800;font-size:12px;letter-spacing:1.5px;color:var(--gold);margin-bottom:14px;">HOW THE RECOMMENDED SELL PRICE IS CALCULATED</div>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+    '<tbody>' +
+    '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:8px 0;color:var(--text-secondary);">Total Job Cost (Materials + Labour)</td>' +
+      '<td style="padding:8px 0;text-align:right;font-weight:700;">' + fmt(totalCost) + '</td>' +
+      '<td style="padding:8px 0;text-align:right;color:var(--grey-mid);font-size:11px;">Base cost</td>' +
+    '</tr>' +
+    '<tr style="border-bottom:1px solid var(--border);background:rgba(201,168,76,0.04);">' +
+      '<td style="padding:8px 0;color:var(--text-secondary);">+ Vehicle, Tools &amp; Equipment</td>' +
+      '<td style="padding:8px 0;text-align:right;font-weight:600;">' + fmt(vehicleTools) + '</td>' +
+      '<td style="padding:8px 0;text-align:right;color:var(--grey-mid);font-size:11px;">~' + vehicleToolsPct + '% of sell</td>' +
+    '</tr>' +
+    '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:8px 0;color:var(--text-secondary);">+ Insurance &amp; Compliance</td>' +
+      '<td style="padding:8px 0;text-align:right;font-weight:600;">' + fmt(insuranceCompliance) + '</td>' +
+      '<td style="padding:8px 0;text-align:right;color:var(--grey-mid);font-size:11px;">~' + insuranceCompliancePct + '% of sell</td>' +
+    '</tr>' +
+    '<tr style="border-bottom:1px solid var(--border);background:rgba(201,168,76,0.04);">' +
+      '<td style="padding:8px 0;color:var(--text-secondary);">+ Admin &amp; Office Overhead</td>' +
+      '<td style="padding:8px 0;text-align:right;font-weight:600;">' + fmt(adminOffice) + '</td>' +
+      '<td style="padding:8px 0;text-align:right;color:var(--grey-mid);font-size:11px;">~' + adminOfficePct + '% of sell</td>' +
+    '</tr>' +
+    '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:8px 0;color:var(--text-secondary);">+ Waste &amp; Contingency</td>' +
+      '<td style="padding:8px 0;text-align:right;font-weight:600;">' + fmt(wasteContingency) + '</td>' +
+      '<td style="padding:8px 0;text-align:right;color:var(--grey-mid);font-size:11px;">~' + wasteContingencyPct + '% of sell</td>' +
+    '</tr>' +
+    '<tr style="border-bottom:1px solid var(--border);background:rgba(201,168,76,0.04);">' +
+      '<td style="padding:8px 0;color:var(--green);font-weight:700;">= Net Profit</td>' +
+      '<td style="padding:8px 0;text-align:right;font-weight:700;color:var(--green);">' + fmt(netProfit) + '</td>' +
+      '<td style="padding:8px 0;text-align:right;color:var(--grey-mid);font-size:11px;">~' + netProfitPct.toFixed(1) + '% of sell</td>' +
+    '</tr>' +
+    '<tr style="border-top:2px solid var(--gold);">' +
+      '<td style="padding:10px 0;color:var(--gold);font-weight:800;">RECOMMENDED SELL PRICE</td>' +
+      '<td style="padding:10px 0;text-align:right;font-weight:800;color:var(--gold);font-size:14px;">' + fmt(finalSell) + '</td>' +
+      '<td style="padding:10px 0;text-align:right;color:var(--gold);font-size:11px;font-weight:700;">' + finalMargin.toFixed(1) + '% gross margin</td>' +
+    '</tr>' +
+    '</tbody></table>' +
+    '<div style="margin-top:10px;font-size:11px;color:var(--grey-mid);line-height:1.6;">' +
+      '<strong style="color:var(--text-secondary);">FORMULA:</strong> Sell Price = Job Cost &divide; (1 - ' + operatingPct.toFixed(0) + '%) = ' + fmt(totalCost) + ' &divide; ' + (1 - tierMarginTarget).toFixed(2) + ' = ' + fmt(totalCost / (1 - tierMarginTarget)) +
+      '<br><strong style="color:var(--text-secondary);">OVERHEAD SPLIT:</strong> Operating costs are estimated at ~' + (operatingPct - netProfitPct).toFixed(0) + '% of sell price, leaving ~' + netProfitPct.toFixed(1) + '% net profit after overheads.' +
+    '</div>' +
+  '</div>';
 
   setHTML('rec-sell-wrap', html);
 }
@@ -1077,7 +1163,8 @@ function renderMaterialBreakdown(lines) {
 
   // Grand total
   var totalLab = lines.reduce(function(s, l) { return s + l.labCost; }, 0);
-  html += '<div style="margin-top:18px;padding:14px;background:var(--grey-darker);border:1px solid var(--gold);border-radius:8px;">' +
+  var totalAcc = lines.reduce(function(s, l) { return s + (l.accessoriesCost || 0); }, 0);
+  html += '<div style="margin-top:18px;padding:14px;background:#111;border:1px solid var(--gold);border-radius:8px;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;">' +
       '<span style="font-weight:700;font-size:14px;letter-spacing:1px;">TOTAL MATERIAL COST</span>' +
       '<span style="font-weight:800;font-size:18px;color:var(--gold);">' + fmt(grandTotal) + '</span>' +
@@ -1086,13 +1173,32 @@ function renderMaterialBreakdown(lines) {
       '<span style="font-weight:700;font-size:14px;letter-spacing:1px;">TOTAL LABOUR COST</span>' +
       '<span style="font-weight:800;font-size:18px;">' + fmt(totalLab) + '</span>' +
     '</div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">' +
+      '<span style="font-weight:700;font-size:14px;letter-spacing:1px;">ACCESSORIES / MISC</span>' +
+      '<span style="font-weight:800;font-size:18px;">' + fmt(totalAcc) + '</span>' +
+    '</div>' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--gold);">' +
       '<span style="font-weight:700;font-size:14px;letter-spacing:1px;">TOTAL JOB COST</span>' +
-      '<span style="font-weight:900;font-size:20px;color:var(--gold);">' + fmt(grandTotal + totalLab) + '</span>' +
+      '<span style="font-weight:900;font-size:20px;color:var(--gold);">' + fmt(grandTotal + totalLab + totalAcc) + '</span>' +
     '</div>' +
   '</div>';
 
   setHTML('material-wrap', html);
+
+  // ═══ EXPORT MATERIALS TO LOCALSTORAGE FOR PO PROCESSOR ═══
+  var poExportLines = [];
+  lines.forEach(function(l) {
+    l.materials.forEach(function(m) {
+      poExportLines.push({ name: m.name, qty: m.qty, unit: m.unit, unitPrice: m.unitPrice, total: m.total });
+    });
+  });
+  var poJobRef = '';
+  if (lines.length > 0) {
+    poJobRef = lines.map(function(l) { return l.name; }).join(', ');
+  }
+  try {
+    localStorage.setItem('rk_po_materials', JSON.stringify({ lines: poExportLines, jobRef: poJobRef, exportedAt: new Date().toISOString() }));
+  } catch(e) { /* ignore */ }
 }
 
 // ── MARKET RATE COMPARISON ─────────────────────────────────
@@ -1153,7 +1259,7 @@ function renderMarketComparison(lines, tierMarginTarget) {
 
 // ── CLEAR RESULTS ──────────────────────────────────────────
 function clearResults() {
-  ['r-mat-cost','r-lab-cost','r-job-cost','r-sqm-cost','r-mat-sub','r-lab-sub','r-total-sqm'].forEach(function(id) {
+  ['r-mat-cost','r-lab-cost','r-acc-cost','r-job-cost','r-sqm-cost','r-mat-sub','r-lab-sub','r-acc-sub','r-total-sqm'].forEach(function(id) {
     setText(id, '—');
   });
   ['rec-sell-wrap','margin-bands-wrap','line-breakdown-wrap','material-wrap','market-check-wrap'].forEach(function(id) {

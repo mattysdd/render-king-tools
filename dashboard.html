@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Render King — Quote Pipeline Dashboard</title>
 <style>
-  :root{--bg:#0f0f0f;--card:#1a1a1a;--border:#2a2a2a;--gold:#c8a84e;--gold-dark:#a68a3a;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--grey:#6b7280;--text:#e0e0e0;--text-muted:#888;}
+  :root{--bg:#0f0f0f;--card:#1a1a1a;--border:#2a2a2a;--gold:#c9a84c;--gold-dark:#a68a3e;--gold-dim:rgba(201,168,76,0.15);--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--grey:#6b7280;--text:#e0e0e0;--text-muted:#888;--dark:#111;}
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  body{font-family:Calibri,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
   .header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
-  .header h1{font-size:18px;letter-spacing:2px;color:var(--gold);}
+  .header h1{font-size:18px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
   .header-links a{color:var(--text-muted);text-decoration:none;font-size:12px;letter-spacing:1px;margin-left:16px;padding:6px 12px;border:1px solid var(--border);border-radius:4px;transition:all .2s;}
   .header-links a:hover{color:var(--gold);border-color:var(--gold);}
   .container{max-width:1400px;margin:0 auto;padding:24px;}
@@ -17,27 +17,34 @@
   /* Login */
   .login-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh;}
   .login-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:40px;text-align:center;max-width:380px;width:100%;}
-  .login-box h2{color:var(--gold);font-size:16px;letter-spacing:2px;margin-bottom:20px;}
-  .login-box input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:14px;margin-bottom:12px;text-align:center;letter-spacing:2px;}
-  .login-box button{width:100%;padding:12px;background:var(--gold);color:#000;border:none;border-radius:4px;font-weight:700;font-size:13px;letter-spacing:2px;cursor:pointer;}
+  .login-box h2{color:var(--gold);font-size:16px;letter-spacing:2px;margin-bottom:20px;text-transform:uppercase;}
+  .login-box input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:14px;margin-bottom:12px;text-align:center;letter-spacing:2px;font-family:inherit;}
+  .login-box button{width:100%;padding:12px;background:var(--gold);color:#000;border:none;border-radius:4px;font-weight:700;font-size:13px;letter-spacing:2px;cursor:pointer;font-family:inherit;}
   .login-box button:hover{background:var(--gold-dark);}
   .login-error{color:var(--red);font-size:12px;margin-top:8px;display:none;}
 
   /* Stats */
-  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
   .stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;}
   .stat-value{font-size:28px;font-weight:700;color:var(--gold);margin-bottom:4px;}
   .stat-label{font-size:11px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
 
   /* Filters */
   .filters{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
-  .filters input,.filters select{padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;}
+  .filters input,.filters select{padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;font-family:inherit;}
   .filters input{flex:1;min-width:200px;}
   .filters select{min-width:140px;}
-  .filters .btn-refresh{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:4px;font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer;}
+  .filters .btn-refresh{padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:4px;font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer;font-family:inherit;}
+
+  /* Section headers */
+  .section-header{display:flex;align-items:center;gap:10px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .section-header h3{font-size:13px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;font-weight:700;}
+  .section-header .count{font-size:11px;color:var(--text-muted);background:var(--card);padding:2px 8px;border-radius:3px;border:1px solid var(--border);}
+  .section-header .toggle-btn{margin-left:auto;background:none;border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:3px;font-size:11px;cursor:pointer;letter-spacing:1px;font-family:inherit;}
+  .section-header .toggle-btn:hover{color:var(--gold);border-color:var(--gold);}
 
   /* Table */
-  .table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:8px;}
+  .table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;}
   table{width:100%;border-collapse:collapse;font-size:13px;}
   thead th{background:#222;color:var(--gold);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:12px;text-align:left;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:1px solid var(--border);}
   thead th:hover{color:#fff;}
@@ -50,11 +57,28 @@
   .status-ACCEPTED{background:var(--green);}
   .status-DECLINED{background:var(--red);color:#fff;}
   .status-EXPIRED{background:var(--grey);color:#fff;}
-  .action-links a{color:var(--gold);text-decoration:none;font-size:11px;margin-right:8px;letter-spacing:.5px;}
-  .action-links a:hover{text-decoration:underline;}
+  .status-COMPLETED{background:#2563eb;color:#fff;}
+  .action-links{display:flex;gap:6px;align-items:center;}
+  .action-links a,.action-links button{color:var(--gold);text-decoration:none;font-size:11px;letter-spacing:.5px;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;}
+  .action-links a:hover,.action-links button:hover{text-decoration:underline;}
+  .action-links .close-btn{color:var(--green);font-weight:700;}
+  .action-links .close-btn:hover{color:#16a34a;}
 
   .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
   .loading{text-align:center;padding:40px;color:var(--text-muted);}
+
+  /* Closed section collapsed */
+  .closed-section{transition:max-height .3s ease;}
+  .closed-section.collapsed .table-wrap{display:none;}
+
+  /* Time ago */
+  .time-ago{font-size:10px;color:var(--text-muted);display:block;margin-top:2px;}
+
+  @media(max-width:768px){
+    .header{flex-direction:column;gap:10px;}
+    .filters{flex-direction:column;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+  }
 </style>
 </head>
 <body>
@@ -64,6 +88,7 @@
   <div class="header-links">
     <a href="index.html">CALCULATOR</a>
     <a href="index.html" onclick="localStorage.setItem('rk-tab','quote');return true;">NEW QUOTE</a>
+    <a href="po-checker.html">PO PROCESSOR</a>
   </div>
 </div>
 
@@ -83,9 +108,10 @@
 <div id="dashboard" class="container" style="display:none;">
 
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-value" id="stat-pipeline">$0</div><div class="stat-label">TOTAL PIPELINE VALUE</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-pipeline">$0</div><div class="stat-label">ACTIVE PIPELINE</div></div>
     <div class="stat-card"><div class="stat-value" id="stat-accepted">0</div><div class="stat-label">ACCEPTED</div></div>
     <div class="stat-card"><div class="stat-value" id="stat-pending">0</div><div class="stat-label">PENDING</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-completed">0</div><div class="stat-label">COMPLETED</div></div>
     <div class="stat-card"><div class="stat-value" id="stat-avg-margin">0%</div><div class="stat-label">AVG MARGIN</div></div>
     <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">TOTAL QUOTES</div></div>
   </div>
@@ -96,31 +122,66 @@
       <option value="">All Statuses</option>
       <option value="PENDING">Pending</option>
       <option value="ACCEPTED">Accepted</option>
+      <option value="COMPLETED">Completed</option>
       <option value="DECLINED">Declined</option>
       <option value="EXPIRED">Expired</option>
     </select>
     <button class="btn-refresh" onclick="loadDashboard()">REFRESH</button>
   </div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th onclick="sortTable('quoteNumber')">QUOTE # <span class="sort-arrow" id="sort-quoteNumber"></span></th>
-          <th onclick="sortTable('client')">BUILDER / CLIENT <span class="sort-arrow" id="sort-client"></span></th>
-          <th onclick="sortTable('address')">SITE ADDRESS <span class="sort-arrow" id="sort-address"></span></th>
-          <th onclick="sortTable('value')">VALUE (INC GST) <span class="sort-arrow" id="sort-value"></span></th>
-          <th onclick="sortTable('date')">DATE <span class="sort-arrow" id="sort-date"></span></th>
-          <th onclick="sortTable('status')">STATUS <span class="sort-arrow" id="sort-status"></span></th>
-          <th onclick="sortTable('margin')">MARGIN <span class="sort-arrow" id="sort-margin"></span></th>
-          <th>ACTIONS</th>
-        </tr>
-      </thead>
-      <tbody id="dash-tbody">
-        <tr><td colspan="8" class="loading">Loading quotes...</td></tr>
-      </tbody>
-    </table>
+  <!-- ACTIVE QUOTES SECTION -->
+  <div id="active-section">
+    <div class="section-header">
+      <h3>ACTIVE QUOTES</h3>
+      <span class="count" id="active-count">0</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('quoteNumber')">QUOTE # <span class="sort-arrow" id="sort-quoteNumber"></span></th>
+            <th onclick="sortTable('client')">BUILDER / CLIENT <span class="sort-arrow" id="sort-client"></span></th>
+            <th onclick="sortTable('address')">SITE ADDRESS <span class="sort-arrow" id="sort-address"></span></th>
+            <th onclick="sortTable('value')">VALUE (INC GST) <span class="sort-arrow" id="sort-value"></span></th>
+            <th onclick="sortTable('date')">DATE <span class="sort-arrow" id="sort-date"></span></th>
+            <th onclick="sortTable('status')">STATUS <span class="sort-arrow" id="sort-status"></span></th>
+            <th onclick="sortTable('margin')">MARGIN <span class="sort-arrow" id="sort-margin"></span></th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="active-tbody">
+          <tr><td colspan="8" class="loading">Loading quotes...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
+  <!-- COMPLETED / CLOSED SECTION -->
+  <div id="closed-section" class="closed-section">
+    <div class="section-header">
+      <h3>COMPLETED / CLOSED</h3>
+      <span class="count" id="closed-count">0</span>
+      <button class="toggle-btn" id="toggle-closed" onclick="toggleClosed()">SHOW</button>
+    </div>
+    <div class="table-wrap" id="closed-table-wrap" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>QUOTE #</th>
+            <th>BUILDER / CLIENT</th>
+            <th>SITE ADDRESS</th>
+            <th>VALUE (INC GST)</th>
+            <th>DATE</th>
+            <th>STATUS</th>
+            <th>MARGIN</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="closed-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -133,6 +194,44 @@ const DASH_PASS = 'renderking2026';
 let allQuotes = [];
 let sortCol = 'date';
 let sortDir = 'desc';
+let closedVisible = false;
+
+// Completed quotes stored in localStorage
+const COMPLETED_KEY = 'rk_completed_quotes';
+
+function getCompletedIds() {
+  try {
+    return JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]');
+  } catch(e) { return []; }
+}
+
+function setCompletedIds(ids) {
+  localStorage.setItem(COMPLETED_KEY, JSON.stringify(ids));
+}
+
+function markCompleted(quoteId) {
+  if (!confirm('Mark this quote as COMPLETED? It will move to the closed section.')) return;
+  const ids = getCompletedIds();
+  if (!ids.includes(quoteId)) {
+    ids.push(quoteId);
+    setCompletedIds(ids);
+  }
+  // Update in-memory
+  const q = allQuotes.find(function(q) { return q.id === quoteId; });
+  if (q) q.status = 'COMPLETED';
+  renderAll();
+}
+
+function reopenQuote(quoteId) {
+  const ids = getCompletedIds().filter(function(id) { return id !== quoteId; });
+  setCompletedIds(ids);
+  const q = allQuotes.find(function(q) { return q.id === quoteId; });
+  if (q) {
+    // Restore original status
+    q.status = q._originalStatus || 'ACCEPTED';
+  }
+  renderAll();
+}
 
 function dashLogin() {
   const pw = document.getElementById('dash-password').value;
@@ -154,109 +253,161 @@ if (sessionStorage.getItem('rk-dash-auth') === '1') {
 }
 
 async function loadDashboard() {
-  const tbody = document.getElementById('dash-tbody');
-  tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading quotes...</td></tr>';
+  document.getElementById('active-tbody').innerHTML = '<tr><td colspan="8" class="loading">Loading quotes...</td></tr>';
 
   try {
-    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/quotes?ref=${GH_BRANCH}`, {
-      headers: { 'Authorization': `token ${GH_TOKEN}` }
+    const res = await fetch('https://api.github.com/repos/' + GH_REPO + '/contents/quotes?ref=' + GH_BRANCH, {
+      headers: { 'Authorization': 'token ' + GH_TOKEN }
     });
 
     if (!res.ok) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No quotes found or API error.</td></tr>';
+      document.getElementById('active-tbody').innerHTML = '<tr><td colspan="8" class="empty-state">No quotes found or API error.</td></tr>';
       return;
     }
 
     const files = await res.json();
-    const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+    const jsonFiles = files.filter(function(f) { return f.name.endsWith('.json'); });
 
     // Fetch all quote data in parallel
-    const promises = jsonFiles.map(async f => {
+    const promises = jsonFiles.map(async function(f) {
       try {
-        const r = await fetch(f.url, { headers: { 'Authorization': `token ${GH_TOKEN}` } });
+        const r = await fetch(f.url, { headers: { 'Authorization': 'token ' + GH_TOKEN } });
         if (!r.ok) return null;
         const d = await r.json();
         return JSON.parse(decodeURIComponent(escape(atob(d.content))));
       } catch(e) { return null; }
     });
 
-    allQuotes = (await Promise.all(promises)).filter(q => q !== null);
+    allQuotes = (await Promise.all(promises)).filter(function(q) { return q !== null; });
 
     // Check expiry on pending quotes
     const now = Date.now();
-    allQuotes.forEach(q => {
+    const completedIds = getCompletedIds();
+
+    allQuotes.forEach(function(q) {
+      q._originalStatus = q.status || 'PENDING';
       if (q.status === 'PENDING' && q.expiresAt) {
         if (new Date(q.expiresAt).getTime() < now) {
           q.status = 'EXPIRED';
+          q._originalStatus = 'EXPIRED';
         }
+      }
+      // Apply completed status from localStorage
+      if (completedIds.includes(q.id)) {
+        q.status = 'COMPLETED';
       }
     });
 
-    renderTable();
-    renderStats();
+    renderAll();
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Error: ${e.message}</td></tr>`;
+    document.getElementById('active-tbody').innerHTML = '<tr><td colspan="8" class="empty-state">Error: ' + e.message + '</td></tr>';
   }
 }
 
-function renderStats() {
-  const accepted = allQuotes.filter(q => q.status === 'ACCEPTED');
-  const pending = allQuotes.filter(q => q.status === 'PENDING');
-  const totalValue = allQuotes.reduce((s, q) => s + (q.totals?.grandTotal || 0), 0);
-  const margins = allQuotes.filter(q => q.totals?.marginPct > 0).map(q => q.totals.marginPct);
-  const avgMargin = margins.length > 0 ? margins.reduce((s,m) => s+m, 0) / margins.length : 0;
+function renderAll() {
+  renderStats();
+  renderTables();
+}
 
-  document.getElementById('stat-pipeline').textContent = fmtD(totalValue);
+function renderStats() {
+  const active = allQuotes.filter(function(q) { return q.status === 'PENDING' || q.status === 'ACCEPTED'; });
+  const accepted = allQuotes.filter(function(q) { return q.status === 'ACCEPTED'; });
+  const pending = allQuotes.filter(function(q) { return q.status === 'PENDING'; });
+  const completed = allQuotes.filter(function(q) { return q.status === 'COMPLETED'; });
+  const activeValue = active.reduce(function(s, q) { return s + (q.totals?.grandTotal || 0); }, 0);
+  const margins = allQuotes.filter(function(q) { return q.totals?.marginPct > 0; }).map(function(q) { return q.totals.marginPct; });
+  const avgMargin = margins.length > 0 ? margins.reduce(function(s,m) { return s+m; }, 0) / margins.length : 0;
+
+  document.getElementById('stat-pipeline').textContent = fmtD(activeValue);
   document.getElementById('stat-accepted').textContent = accepted.length;
   document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-completed').textContent = completed.length;
   document.getElementById('stat-avg-margin').textContent = avgMargin.toFixed(1) + '%';
   document.getElementById('stat-total').textContent = allQuotes.length;
 }
 
-function renderTable() {
+function renderTables() {
   const filtered = getFilteredQuotes();
-  const sorted = sortQuotes(filtered);
-  const tbody = document.getElementById('dash-tbody');
 
-  if (sorted.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No quotes match your filters.</td></tr>';
-    return;
+  // Split into active and closed
+  var activeQuotes = [];
+  var closedQuotes = [];
+
+  filtered.forEach(function(q) {
+    if (q.status === 'COMPLETED' || q.status === 'DECLINED' || q.status === 'EXPIRED') {
+      closedQuotes.push(q);
+    } else {
+      activeQuotes.push(q);
+    }
+  });
+
+  // Sort: PENDING first (most recent), then ACCEPTED (most recent)
+  // Active quotes: PENDING first, then ACCEPTED, each sorted by date desc
+  activeQuotes = sortQuotes(activeQuotes);
+  closedQuotes = sortQuotes(closedQuotes);
+
+  // Render active table
+  const activeTbody = document.getElementById('active-tbody');
+  document.getElementById('active-count').textContent = activeQuotes.length;
+
+  if (activeQuotes.length === 0) {
+    activeTbody.innerHTML = '<tr><td colspan="8" class="empty-state">No active quotes.</td></tr>';
+  } else {
+    activeTbody.innerHTML = activeQuotes.map(function(q) { return buildRow(q, true); }).join('');
   }
 
-  tbody.innerHTML = sorted.map(q => {
-    const c = q.client || {};
-    const clientName = c.companyName || c.contactName || 'Unknown';
-    const address = c.siteAddress || 'N/A';
-    const value = q.totals?.grandTotal || 0;
-    const margin = q.totals?.marginPct || 0;
-    const status = q.status || 'PENDING';
+  // Render closed table
+  const closedTbody = document.getElementById('closed-tbody');
+  document.getElementById('closed-count').textContent = closedQuotes.length;
 
-    return `<tr>
-      <td><strong>${q.quoteNumber || q.id}</strong>${q.revision > 1 ? ` <span style="color:var(--text-muted);font-size:10px;">v${q.revision}</span>` : ''}</td>
-      <td>${clientName}</td>
-      <td>${address}</td>
-      <td>${fmtD(value)}</td>
-      <td>${q.date || ''}</td>
-      <td><span class="status-badge status-${status}">${status}</span></td>
-      <td>${margin > 0 ? margin.toFixed(1) + '%' : '—'}</td>
-      <td class="action-links">
-        <a href="${BASE_URL}/client.html?id=${q.id}" target="_blank">Client</a>
-        <a href="${BASE_URL}/?q=${q.id}" target="_blank">Internal</a>
-      </td>
-    </tr>`;
-  }).join('');
+  if (closedQuotes.length === 0) {
+    closedTbody.innerHTML = '<tr><td colspan="8" class="empty-state">No completed or closed quotes.</td></tr>';
+  } else {
+    closedTbody.innerHTML = closedQuotes.map(function(q) { return buildRow(q, false); }).join('');
+  }
 
   // Update sort arrows
-  document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
-  const arrow = document.getElementById('sort-' + sortCol);
-  if (arrow) arrow.textContent = sortDir === 'asc' ? '▲' : '▼';
+  document.querySelectorAll('.sort-arrow').forEach(function(el) { el.textContent = ''; });
+  var arrow = document.getElementById('sort-' + sortCol);
+  if (arrow) arrow.textContent = sortDir === 'asc' ? '\u25B2' : '\u25BC';
+}
+
+function buildRow(q, isActive) {
+  const c = q.client || {};
+  const clientName = c.companyName || c.contactName || 'Unknown';
+  const address = c.siteAddress || 'N/A';
+  const value = q.totals?.grandTotal || 0;
+  const margin = q.totals?.marginPct || 0;
+  const status = q.status || 'PENDING';
+  const timeAgo = getTimeAgo(q.savedAt);
+
+  let actions = '<a href="' + BASE_URL + '/client.html?id=' + q.id + '" target="_blank">Client</a>' +
+    '<a href="' + BASE_URL + '/?q=' + q.id + '" target="_blank">Internal</a>';
+
+  if (isActive && (status === 'ACCEPTED' || status === 'PENDING')) {
+    actions += '<button class="close-btn" onclick="markCompleted(\'' + q.id + '\')">\u2713 CLOSE</button>';
+  }
+  if (status === 'COMPLETED') {
+    actions += '<button onclick="reopenQuote(\'' + q.id + '\')" style="color:var(--amber);">REOPEN</button>';
+  }
+
+  return '<tr>' +
+    '<td><strong>' + (q.quoteNumber || q.id) + '</strong>' + (q.revision > 1 ? ' <span style="color:var(--text-muted);font-size:10px;">v' + q.revision + '</span>' : '') + '</td>' +
+    '<td>' + clientName + '</td>' +
+    '<td>' + address + '</td>' +
+    '<td>' + fmtD(value) + '</td>' +
+    '<td>' + (q.date || '') + '<span class="time-ago">' + timeAgo + '</span></td>' +
+    '<td><span class="status-badge status-' + status + '">' + status + '</span></td>' +
+    '<td>' + (margin > 0 ? margin.toFixed(1) + '%' : '\u2014') + '</td>' +
+    '<td class="action-links">' + actions + '</td>' +
+  '</tr>';
 }
 
 function getFilteredQuotes() {
   const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
   const status = document.getElementById('filter-status')?.value || '';
 
-  return allQuotes.filter(q => {
+  return allQuotes.filter(function(q) {
     if (status && q.status !== status) return false;
     if (search) {
       const c = q.client || {};
@@ -274,19 +425,29 @@ function sortTable(col) {
     sortCol = col;
     sortDir = 'desc';
   }
-  renderTable();
+  renderTables();
 }
 
 function sortQuotes(quotes) {
-  return [...quotes].sort((a, b) => {
-    let va, vb;
+  return quotes.slice().sort(function(a, b) {
+    // Primary sort: PENDING before ACCEPTED before others (for active section)
+    var statusOrder = { 'PENDING': 0, 'ACCEPTED': 1, 'COMPLETED': 2, 'DECLINED': 3, 'EXPIRED': 4 };
+    var statusA = statusOrder[a.status] !== undefined ? statusOrder[a.status] : 5;
+    var statusB = statusOrder[b.status] !== undefined ? statusOrder[b.status] : 5;
+
+    // If sorting by status column, use pure status sort
+    if (sortCol === 'status') {
+      if (statusA !== statusB) return sortDir === 'asc' ? statusA - statusB : statusB - statusA;
+    }
+
+    // Secondary: by selected column
+    var va, vb;
     switch(sortCol) {
       case 'quoteNumber': va = a.quoteNumber || ''; vb = b.quoteNumber || ''; break;
       case 'client': va = a.client?.companyName || a.client?.contactName || ''; vb = b.client?.companyName || b.client?.contactName || ''; break;
       case 'address': va = a.client?.siteAddress || ''; vb = b.client?.siteAddress || ''; break;
       case 'value': va = a.totals?.grandTotal || 0; vb = b.totals?.grandTotal || 0; break;
       case 'date': va = a.savedAt || ''; vb = b.savedAt || ''; break;
-      case 'status': va = a.status || ''; vb = b.status || ''; break;
       case 'margin': va = a.totals?.marginPct || 0; vb = b.totals?.marginPct || 0; break;
       default: va = a.savedAt || ''; vb = b.savedAt || '';
     }
@@ -295,11 +456,33 @@ function sortQuotes(quotes) {
   });
 }
 
-function applyFilters() { renderTable(); }
+function applyFilters() { renderTables(); }
+
+function toggleClosed() {
+  closedVisible = !closedVisible;
+  document.getElementById('closed-table-wrap').style.display = closedVisible ? 'block' : 'none';
+  document.getElementById('toggle-closed').textContent = closedVisible ? 'HIDE' : 'SHOW';
+}
+
+function getTimeAgo(dateStr) {
+  if (!dateStr) return '';
+  try {
+    var d = new Date(dateStr);
+    var now = new Date();
+    var diff = now - d;
+    var mins = Math.floor(diff / 60000);
+    var hours = Math.floor(diff / 3600000);
+    var days = Math.floor(diff / 86400000);
+    if (mins < 60) return mins + 'm ago';
+    if (hours < 24) return hours + 'h ago';
+    if (days < 30) return days + 'd ago';
+    return Math.floor(days / 30) + 'mo ago';
+  } catch(e) { return ''; }
+}
 
 function fmtD(n) {
   if (!n || isNaN(n)) return '$0';
-  return '$' + Math.round(n).toLocaleString('en-AU');
+  return '$' + Math.ceil(n).toLocaleString('en-AU');
 }
 </script>
 </body>

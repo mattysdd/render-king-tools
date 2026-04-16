@@ -22,7 +22,7 @@
     <button class="nav-tab" data-tab="ai" onclick="switchTab('ai')">AI AGENT</button>
     <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">SETTINGS</button>
     <a href="dashboard.html" class="nav-tab" style="text-decoration:none;">PIPELINE</a>
-    <a href="po-checker.html" class="nav-tab" style="text-decoration:none;">PO CHECK</a>
+    <a href="po-checker.html" class="nav-tab" style="text-decoration:none;">PO PROCESSOR</a>
   </div>
 </nav>
 
@@ -86,7 +86,10 @@
             <div class="stat-card"><div class="stat-label">TOTAL RENDER AREA</div><div class="stat-value" id="r-total-sqm">—</div><div class="stat-sub" id="r-total-sqm-sub">Render lines only (excl. slabs & installs)</div></div>
             <div class="stat-card"><div class="stat-label">TOTAL MATERIAL COST</div><div class="stat-value" id="r-mat-cost">—</div><div class="stat-sub" id="r-mat-sub">Dulux system estimate</div></div>
             <div class="stat-card"><div class="stat-label">TOTAL LABOUR COST</div><div class="stat-value" id="r-lab-cost">—</div><div class="stat-sub" id="r-lab-sub">—</div></div>
-            <div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">TOTAL JOB COST</div><div class="stat-value gold" id="r-job-cost">—</div><div class="stat-sub" id="r-sqm-cost">—</div></div>
+            <div class="stat-card"><div class="stat-label">ACCESSORIES / MISC</div><div class="stat-value" id="r-acc-cost">—</div><div class="stat-sub" id="r-acc-sub">Tape, plastic, glue</div></div>
+          </div>
+          <div class="results-grid four" style="margin-top:16px;">
+            <div class="stat-card" style="border-color:var(--gold);grid-column:span 4;"><div class="stat-label">TOTAL JOB COST</div><div class="stat-value gold" id="r-job-cost">—</div><div class="stat-sub" id="r-sqm-cost">—</div></div>
           </div>
         </div>
       </div>
@@ -923,26 +926,31 @@
         <span class="badge">LOCKED DEFAULTS</span>
       </div>
       <div class="card-body">
-        <div class="settings-grid" style="grid-template-columns:repeat(5,1fr);">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;">
           <div class="settings-field">
-            <label>LVL 1 — VOLUME/GROUND</label>
+            <label>LVL 1 — VOLUME</label>
             <input type="number" id="set-diff-1" value="0" step="1" oninput="onSettingChange()">
+            <span style="font-size:9px;color:var(--text-secondary);margin-top:2px;">Ground / Easy</span>
           </div>
           <div class="settings-field">
             <label>LVL 2 — LOWER</label>
             <input type="number" id="set-diff-2" value="5" step="1" oninput="onSettingChange()">
+            <span style="font-size:9px;color:var(--text-secondary);margin-top:2px;">Minor Scaffold</span>
           </div>
           <div class="settings-field">
             <label>LVL 3 — UPPER</label>
             <input type="number" id="set-diff-3" value="12" step="1" oninput="onSettingChange()">
+            <span style="font-size:9px;color:var(--text-secondary);margin-top:2px;">Full Scaffold</span>
           </div>
           <div class="settings-field">
-            <label>LVL 4 — DETAIL/COMPLEX</label>
+            <label>LVL 4 — DETAIL</label>
             <input type="number" id="set-diff-4" value="22" step="1" oninput="onSettingChange()">
+            <span style="font-size:9px;color:var(--text-secondary);margin-top:2px;">Complex / Curves</span>
           </div>
           <div class="settings-field">
-            <label>LVL 5 — LUXURY/ARCHITECTURAL</label>
+            <label>LVL 5 — LUXURY</label>
             <input type="number" id="set-diff-5" value="35" step="1" oninput="onSettingChange()">
+            <span style="font-size:9px;color:var(--text-secondary);margin-top:2px;">Architectural</span>
           </div>
         </div>
       </div>
@@ -1008,6 +1016,10 @@
             <input type="number" id="set-crew-output" value="50" step="5" min="10" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
+            <label>ACCESSORIES / MISC ($/SQM)</label>
+            <input type="number" id="set-accessories-rate" value="1.50" step="0.10" oninput="onSettingChange()">
+          </div>
+          <div class="settings-field">
             <label>VOLUME BUILDER FLOOR ($/SQM)</label>
             <input type="number" id="set-vol-floor" value="47" step="1" oninput="onSettingChange()">
           </div>
@@ -1035,8 +1047,8 @@
             <input type="number" id="set-pac-medium-build" value="11.60" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
-            <label>HIGH BUILD — COARSE 2002 ($/BAG)</label>
-            <input type="number" id="set-pac-high-build" value="11.60" step="0.01" oninput="onSettingChange()">
+            <label>HIGH BUILD — ACRABUILD COARSE 2002 ($/BAG)</label>
+            <input type="number" id="set-pac-high-build" value="22.10" step="0.01" oninput="onSettingChange()">
           </div>
           <div class="settings-field">
             <label>ACRAPRO P400 ($/BAG)</label>
