@@ -16,9 +16,9 @@
 <nav class="topnav">
   <div class="nav-brand">RENDER KING</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" data-tab="calculator" onclick="switchTab('calculator')">MARGIN CALCULATOR</button>
-    <button class="nav-tab" data-tab="quote" onclick="switchTab('quote')">QUOTE GENERATOR</button>
-    <button class="nav-tab" data-tab="terms" onclick="switchTab('terms')">TERMS &amp; CONDITIONS</button>
+    <button class="nav-tab active" data-tab="quote" onclick="switchTab('quote')">QUOTE</button>
+    <button class="nav-tab" data-tab="calculator" onclick="switchTab('calculator')">MARGIN</button>
+    <button class="nav-tab" data-tab="terms" onclick="switchTab('terms')">TERMS</button>
     <button class="nav-tab" data-tab="ai" onclick="switchTab('ai')">AI AGENT</button>
     <button class="nav-tab" data-tab="settings" onclick="switchTab('settings')">SETTINGS</button>
     <a href="dashboard.html" class="nav-tab" style="text-decoration:none;">PIPELINE</a>
@@ -29,7 +29,7 @@
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- TAB 1: MARGIN CALCULATOR                                    -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<div id="tab-calculator" class="tab-content active">
+<div id="tab-calculator" class="tab-content">
   <div class="page">
 
     <!-- SURFACE LINES -->
@@ -144,7 +144,7 @@
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- TAB 2: QUOTE GENERATOR                                      -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<div id="tab-quote" class="tab-content">
+<div id="tab-quote" class="tab-content active">
   <div class="doc">
 
     <!-- HEADER -->
@@ -448,13 +448,15 @@
   </div><!-- /doc -->
 
   <div class="quote-toolbar no-print">
+    <button class="tb-btn" onclick="pushQuoteToMargin()" title="Push quote data into the Margin Calculator" style="background:var(--gold);color:#000;">PUSH TO MARGIN &rarr;</button>
+    <button class="tb-btn" onclick="pushQuoteToTerms()" title="Push client details into Terms &amp; Conditions" style="background:var(--green);">PUSH TO TERMS &rarr;</button>
     <button class="tb-btn" onclick="saveAndShareQuote('client')" title="Saves quote and generates a clean client-facing link (no internal data)">SEND TO CLIENT</button>
     <button class="tb-btn" onclick="saveAndShareQuote('tc')" title="Saves and generates a T&amp;C-only link with signature pad" style="background:var(--blue);">T&amp;C ONLY LINK</button>
     <button class="tb-btn ghost" onclick="saveAndShareQuote('internal')" title="Full internal link with margin data">INTERNAL LINK</button>
     <button class="tb-btn ghost" onclick="window.print()">PRINT / SAVE PDF</button>
     <button class="tb-btn ghost" onclick="toggleEditMode()">EDIT MODE</button>
     <button class="tb-btn ghost" onclick="clearQuoteForm()">CLEAR FORM</button>
-    <button class="tb-btn" onclick="generateJobBrief()" style="background:var(--green);">JOB BRIEF</button>
+    <button class="tb-btn" onclick="generateJobBrief()" style="background:var(--amber);">JOB BRIEF</button>
     <button class="tb-btn ghost" onclick="declineQuote()" style="border-color:var(--red);color:var(--red);">DECLINE QUOTE</button>
     <button class="tb-btn ghost" onclick="showRevisionHistory()">REVISION HISTORY</button>
   </div>
@@ -608,7 +610,7 @@
         </div>
         <div style="margin-bottom:20px;">
           <div class="field-lbl" style="margin-bottom:4px;">PROJECT / QUOTE REFERENCE</div>
-          <div class="field-val" contenteditable="true">&nbsp;</div>
+          <div class="field-val" contenteditable="true" id="tc-quote-ref">&nbsp;</div>
         </div>
         <div class="print-sig-grid">
           <!-- CLIENT SIDE -->
@@ -827,6 +829,26 @@
     <div class="agent-actions">
       <button class="agent-populate-btn" onclick="populateQuoteFromAgent()">POPULATE QUOTE &amp; CALCULATOR</button>
       <button class="agent-clear-btn" onclick="clearAgentForm()">CLEAR FORM</button>
+    </div>
+
+    <!-- AI CHAT ASSISTANT -->
+    <div class="card" style="margin-top:24px;">
+      <div class="card-header"><h2>AI ASSISTANT</h2><span class="badge">GPT-4.1 POWERED</span></div>
+      <div class="card-body">
+        <div class="callout callout-gold" style="margin-bottom:14px;">
+          <strong>ASK ANYTHING:</strong> Pricing help, scope clarification, material estimates, quoting advice, builder negotiation tips. The AI has full context of Render King's rates, systems, and business rules.
+        </div>
+        <div class="ai-chat-area" id="ai-chat-messages">
+          <div class="ai-message ai-system">RENDER KING AI ASSISTANT — Ready to help with quoting, pricing, materials, and scope.</div>
+        </div>
+        <div class="ai-input-area">
+          <textarea id="ai-input" rows="3" placeholder="Ask about pricing, materials, scope, builder negotiations..."></textarea>
+          <div class="ai-btn-row">
+            <button class="agent-populate-btn" onclick="sendAiMessage()" style="flex:1;">SEND</button>
+            <button class="agent-clear-btn" onclick="clearAiChat()" style="flex:0 0 auto;padding:10px 20px;">CLEAR CHAT</button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div><!-- /page -->
@@ -1287,6 +1309,31 @@
       </div>
     </div>
 
+    <!-- AI CONFIGURATION -->
+    <div class="card">
+      <div class="card-header"><h2>AI ASSISTANT CONFIGURATION</h2><span class="badge">GPT-4.1</span></div>
+      <div class="card-body">
+        <div class="callout callout-gold" style="margin-bottom:14px;">
+          <strong>SETUP:</strong> Enter your OpenAI API key to enable the AI Assistant. Key is stored locally in your browser only — never sent to our servers. Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--gold);">platform.openai.com/api-keys</a>
+        </div>
+        <div class="settings-grid" style="grid-template-columns:1fr;">
+          <div class="settings-field">
+            <label>OPENAI API KEY</label>
+            <div style="display:flex;gap:8px;">
+              <input type="password" id="set-ai-key" placeholder="sk-..." style="flex:1;" oninput="saveAiKey()">
+              <button class="add-surface-btn" onclick="toggleAiKeyVisibility()" style="padding:8px 14px;flex:0 0 auto;">SHOW</button>
+              <button class="add-surface-btn" onclick="testAiKey()" style="padding:8px 14px;flex:0 0 auto;background:var(--gold);color:#000;border-color:var(--gold);">TEST</button>
+            </div>
+            <div id="ai-key-status" style="font-size:11px;color:var(--grey-mid);margin-top:6px;"></div>
+          </div>
+          <div class="settings-field">
+            <label>AI PROXY URL <span style="font-weight:400;color:var(--grey-mid);">(OPTIONAL — for Cloudflare Worker proxy)</span></label>
+            <input type="text" id="set-ai-proxy" placeholder="https://your-worker.workers.dev" oninput="saveAiProxy()">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- RESET BUTTON -->
     <div class="card">
       <div class="card-header"><h2>RESET TO LOCKED DEFAULTS</h2></div>
@@ -1338,9 +1385,9 @@
   @media print{.job-brief-body{max-height:none;overflow:visible;}.share-modal-backdrop,.job-brief-header button,.job-brief-print-btn{display:none !important;}}
 </style>
 
-<script src="calculator.js?v=9"></script>
-<script src="quote.js?v=9"></script>
-<script src="agent.js?v=9"></script>
+<script src="calculator.js?v=10"></script>
+<script src="quote.js?v=10"></script>
+<script src="agent.js?v=10"></script>
 
 </body>
 </html>

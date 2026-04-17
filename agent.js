@@ -1,7 +1,206 @@
 // ═══════════════════════════════════════════════════════════
-// RENDER KING — AI AGENT (GUIDED JOB CAPTURE FORM)
+// RENDER KING — AI AGENT + SHARED DATA STORE + AI CHAT
 // Voice-to-text, smart defaults, auto-populate quote + calc
+// Cross-tab data flow: Quote → Margin → Terms
+// AI Chat powered by GPT-4.1-mini
 // ═══════════════════════════════════════════════════════════
+
+// ── SHARED DATA STORE ────────────────────────────────────
+// Central state that syncs across Quote, Margin, and Terms
+var rkSharedData = {
+  quoteNumber: '',
+  clientName: '',
+  contactName: '',
+  phone: '',
+  email: '',
+  siteAddress: '',
+  lotPlan: '',
+  poNumber: '',
+  builderRef: '',
+  builderType: 'standard',
+  scope: '',
+  substrate: '',
+  difficulty: '',
+  sections: [],
+  colour: '',
+  startDate: '',
+  duration: '',
+  validity: '48'
+};
+
+// Save shared data to localStorage for cross-page access
+function saveSharedData() {
+  try { localStorage.setItem('rk_shared_data', JSON.stringify(rkSharedData)); } catch(e) {}
+}
+
+function loadSharedData() {
+  try {
+    var d = JSON.parse(localStorage.getItem('rk_shared_data'));
+    if (d) Object.assign(rkSharedData, d);
+  } catch(e) {}
+}
+
+// ── PUSH QUOTE → MARGIN ──────────────────────────────────
+// Reads the Quote Generator tab and pushes data into the Margin Calculator
+function pushQuoteToMargin() {
+  // Collect client details from quote
+  var clientFields = document.querySelectorAll('#tab-quote .section:first-child .field-val');
+  if (clientFields.length >= 8) {
+    rkSharedData.clientName = clientFields[0].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.contactName = clientFields[1].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.phone = clientFields[2].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.email = clientFields[3].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.siteAddress = clientFields[4].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.lotPlan = clientFields[5].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.poNumber = clientFields[6].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.builderRef = clientFields[7].textContent.trim().replace(/\u00A0/g, '');
+  }
+  rkSharedData.quoteNumber = (document.getElementById('q-quote-number')?.textContent || '').trim();
+  rkSharedData.builderType = document.getElementById('q-builder-type')?.value || 'standard';
+
+  // Collect line items from quote pricing table
+  var quoteLines = [];
+  document.querySelectorAll('#q-pricing-body tr').forEach(function(tr) {
+    var descInput = tr.querySelector('input.desc');
+    var numInputs = tr.querySelectorAll('input[type="number"]');
+    var unitInput = tr.querySelectorAll('input[type="text"]');
+    if (descInput && numInputs.length >= 2) {
+      var qty = parseFloat(numInputs[0].value) || 0;
+      var rate = parseFloat(numInputs[1].value) || 0;
+      var unit = unitInput[1]?.value || 'sqm';
+      var desc = descInput.value || '';
+      quoteLines.push({ description: desc, qty: qty, rate: rate, unit: unit });
+    }
+  });
+
+  // Clear existing calculator lines
+  var surfaceLines = document.getElementById('surface-lines');
+  if (surfaceLines) surfaceLines.innerHTML = '';
+  lineCount = 0;
+
+  // Map quote lines to calculator lines
+  quoteLines.forEach(function(ql) {
+    // Try to detect substrate from description
+    var subKey = detectSubstrateFromDesc(ql.description);
+    var diffLevel = detectDifficultyFromRate(subKey, ql.rate);
+
+    addSurfaceLine(subKey, diffLevel);
+    var lineId = lineCount;
+    var qtyEl = document.getElementById('qty-' + lineId);
+    if (qtyEl) qtyEl.value = ql.qty;
+    var nameEl = document.getElementById('name-' + lineId);
+    if (nameEl) nameEl.value = ql.description;
+  });
+
+  // Set builder tier
+  var tierBtns = document.querySelectorAll('#tier-grid .tier-option');
+  tierBtns.forEach(function(btn) {
+    btn.classList.remove('active');
+    if (btn.getAttribute('data-key') === rkSharedData.builderType) {
+      btn.classList.add('active');
+    }
+  });
+  currentTier = rkSharedData.builderType;
+
+  // Trigger recalc
+  recalc();
+  saveSharedData();
+
+  // Switch to calculator tab
+  switchTab('calculator');
+  window.scrollTo(0, 0);
+
+  // Show confirmation
+  showFlashBanner('QUOTE DATA PUSHED TO MARGIN CALCULATOR', 'gold');
+}
+
+// ── PUSH QUOTE → TERMS ──────────────────────────────────
+function pushQuoteToTerms() {
+  // Collect from quote
+  var clientFields = document.querySelectorAll('#tab-quote .section:first-child .field-val');
+  var quoteNum = (document.getElementById('q-quote-number')?.textContent || '').trim();
+
+  if (clientFields.length >= 8) {
+    rkSharedData.clientName = clientFields[0].textContent.trim().replace(/\u00A0/g, '');
+    rkSharedData.contactName = clientFields[1].textContent.trim().replace(/\u00A0/g, '');
+  }
+  rkSharedData.quoteNumber = quoteNum;
+
+  // Populate T&C fields
+  var tcQuoteRef = document.getElementById('tc-quote-ref');
+  if (tcQuoteRef) tcQuoteRef.textContent = quoteNum + ' — ' + rkSharedData.clientName;
+
+  var tcClientName = document.getElementById('tc-sig-client-name');
+  if (tcClientName) tcClientName.value = rkSharedData.contactName || rkSharedData.clientName;
+
+  var tcClientDate = document.getElementById('tc-sig-client-date');
+  if (tcClientDate) tcClientDate.value = new Date().toISOString().split('T')[0];
+
+  var tcRkDate = document.getElementById('tc-sig-rk-date');
+  if (tcRkDate) tcRkDate.value = new Date().toISOString().split('T')[0];
+
+  saveSharedData();
+
+  // Switch to terms tab
+  switchTab('terms');
+  window.scrollTo(0, 0);
+
+  showFlashBanner('CLIENT DATA PUSHED TO TERMS & CONDITIONS', 'green');
+}
+
+// ── SUBSTRATE DETECTION FROM DESCRIPTION ──────────────────
+function detectSubstrateFromDesc(desc) {
+  if (!desc) return 'brick_hebel';
+  var d = desc.toLowerCase();
+  if (d.indexOf('slab') !== -1) return 'slab_build';
+  if (d.indexOf('eps') !== -1 || d.indexOf('blueboard') !== -1) {
+    if (d.indexOf('full') !== -1 || d.indexOf('system') !== -1) return 'eps_full';
+    if (d.indexOf('supply') !== -1 || d.indexOf('install') !== -1) return 'eps_supply';
+    return 'eps_blueboard';
+  }
+  if (d.indexOf('hebel') !== -1 || d.indexOf('aac') !== -1) {
+    if (d.indexOf('full') !== -1 || d.indexOf('system') !== -1) return 'hebel_full';
+    if (d.indexOf('supply') !== -1 || d.indexOf('install') !== -1) return 'hebel_supply';
+    return 'brick_hebel';
+  }
+  if (d.indexOf('microcement') !== -1) return 'ext_microcement';
+  if (d.indexOf('specialty') !== -1 || d.indexOf('architectural') !== -1) return 'specialty';
+  if (d.indexOf('specialty finish') !== -1) return 'specialty_finish';
+  return 'brick_hebel';
+}
+
+function detectDifficultyFromRate(subKey, rate) {
+  // Try to reverse-engineer difficulty from the sell rate
+  var baseRate = getSubstrateBaseRate(subKey);
+  var diff = rate - baseRate;
+  if (diff <= 0) return 1;
+  // Check each difficulty addon
+  for (var i = 5; i >= 1; i--) {
+    var addon = getDiffAddon(i);
+    if (Math.abs(diff - addon) < 3) return i;
+  }
+  return 1;
+}
+
+// ── FLASH BANNER ──────────────────────────────────────────
+function showFlashBanner(msg, color) {
+  var existing = document.getElementById('rk-flash-banner');
+  if (existing) existing.remove();
+
+  var colors = {
+    gold: 'background:var(--gold);color:#000;',
+    green: 'background:var(--green);color:#fff;',
+    red: 'background:var(--red);color:#fff;',
+    blue: 'background:var(--blue);color:#fff;'
+  };
+
+  var banner = document.createElement('div');
+  banner.id = 'rk-flash-banner';
+  banner.style.cssText = (colors[color] || colors.gold) + 'position:fixed;top:60px;left:50%;transform:translateX(-50%);padding:14px 32px;font-weight:800;font-size:13px;letter-spacing:1.5px;border-radius:8px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);text-align:center;';
+  banner.textContent = msg;
+  document.body.appendChild(banner);
+  setTimeout(function() { banner.remove(); }, 4000);
+}
 
 // ── AGENT SECTION MANAGEMENT ──────────────────────────────
 var agentSectionCount = 0;
@@ -166,7 +365,6 @@ function smartClean(text, type) {
   if (!text) return '';
 
   if (type === 'email') {
-    // Convert spoken email to actual email
     var e = text.toLowerCase().trim();
     e = e.replace(/\s+at\s+/gi, '@');
     e = e.replace(/\s+dot\s+/gi, '.');
@@ -175,7 +373,6 @@ function smartClean(text, type) {
   }
 
   if (type === 'phone') {
-    // Strip non-numeric, format as XXXX XXX XXX
     var digits = text.replace(/\D/g, '');
     if (digits.length === 10) {
       return digits.substring(0, 4) + ' ' + digits.substring(4, 7) + ' ' + digits.substring(7);
@@ -193,7 +390,6 @@ function handleAgentFiles(fileList) {
     agentFiles.push(file);
     renderAgentFileList();
   }
-  // Reset the input so the same file can be re-selected
   document.getElementById('ag-file-input').value = '';
 }
 
@@ -259,6 +455,21 @@ function populateQuoteFromAgent() {
   var preparedBy  = document.getElementById('ag-prepared-by').value.trim() || 'King Mannion';
   var validity    = document.getElementById('ag-validity').value;
 
+  // Update shared data
+  rkSharedData.quoteNumber = quoteNum;
+  rkSharedData.clientName = clientName;
+  rkSharedData.contactName = siteContact;
+  rkSharedData.phone = phone;
+  rkSharedData.email = email;
+  rkSharedData.siteAddress = address;
+  rkSharedData.builderRef = builderName;
+  rkSharedData.builderType = builderType;
+  rkSharedData.scope = scope;
+  rkSharedData.colour = colour;
+  rkSharedData.startDate = startDate;
+  rkSharedData.duration = duration;
+  rkSharedData.validity = validity;
+
   // Collect sections
   var sections = [];
   var sectionEls = document.querySelectorAll('.agent-section');
@@ -278,64 +489,53 @@ function populateQuoteFromAgent() {
     return;
   }
 
+  rkSharedData.sections = sections;
+
   // ── POPULATE QUOTE GENERATOR ────────────────────────────
-  // Set quote number
   var qnEl = document.getElementById('q-quote-number');
   if (qnEl) qnEl.textContent = quoteNum;
 
-  // Set validity
   var validitySelect = document.getElementById('q-validity-select');
   if (validitySelect) {
     validitySelect.value = validity;
     updateQuoteValidity();
   }
 
-  // Set builder type
   var btSelect = document.getElementById('q-builder-type');
   if (btSelect) btSelect.value = builderType;
 
-  // Set client details (contenteditable fields)
-  var clientFields = document.querySelectorAll('#tab-quote .section:first-child .field-val');
-  if (clientFields.length >= 8) {
-    clientFields[0].textContent = clientName;       // Client/Company Name
-    clientFields[1].textContent = siteContact;      // Contact Name
-    clientFields[2].textContent = phone;            // Phone
-    clientFields[3].textContent = email;            // Email
-    clientFields[4].textContent = address;          // Site Address
-    clientFields[5].textContent = '';               // Lot/Plan - leave blank
-    clientFields[6].textContent = quoteNum;         // Work Contract / PO
-    clientFields[7].textContent = builderName;      // Builder Reference
+  // Set client details
+  var clientFieldsQ = document.querySelectorAll('#tab-quote .section:first-child .field-val');
+  if (clientFieldsQ.length >= 8) {
+    clientFieldsQ[0].textContent = clientName;
+    clientFieldsQ[1].textContent = siteContact;
+    clientFieldsQ[2].textContent = phone;
+    clientFieldsQ[3].textContent = email;
+    clientFieldsQ[4].textContent = address;
+    clientFieldsQ[5].textContent = '';
+    clientFieldsQ[6].textContent = quoteNum;
+    clientFieldsQ[7].textContent = builderName;
   }
 
-  // Set scope of work
+  // Set scope
   var scopeFields = document.querySelectorAll('#tab-quote .doc-body .section');
   if (scopeFields.length >= 2) {
-    var scopeSection = scopeFields[1]; // Section 2: Scope of Work
+    var scopeSection = scopeFields[1];
     var scopeDesc = scopeSection.querySelector('.field-val.tall');
     if (scopeDesc) scopeDesc.textContent = scope;
 
-    // Set substrate type and difficulty level
     var scopeFieldVals = scopeSection.querySelectorAll('.g2 .field-val');
     if (scopeFieldVals.length >= 2) {
-      // Build a combined substrate/difficulty description from all sections
       var subNames = [];
       sections.forEach(function(s) {
-        var subKey = s.substrate;
         var subName = {
-          'brick_hebel': 'Brick/Hebel',
-          'eps_blueboard': 'EPS/Blueboard',
-          'specialty': 'Specialty/Architectural',
-          'hebel_supply': 'Hebel Supply + Install',
-          'hebel_full': 'Full Hebel System',
-          'eps_supply': 'EPS Supply + Install',
-          'eps_full': 'Full EPS System',
-          'slab_build': 'Slab Build',
-          'specialty_finish': 'Specialty Finish',
-          'ext_microcement': 'External Microcement',
-          'other_standard': 'Other / Standard Finish',
-          'hebel_install': 'Hebel / AAC Install',
-          'eps_install': 'EPS Install'
-        }[subKey] || subKey;
+          'brick_hebel': 'Brick/Hebel', 'eps_blueboard': 'EPS/Blueboard',
+          'specialty': 'Specialty/Architectural', 'hebel_supply': 'Hebel Supply + Install',
+          'hebel_full': 'Full Hebel System', 'eps_supply': 'EPS Supply + Install',
+          'eps_full': 'Full EPS System', 'slab_build': 'Slab Build',
+          'specialty_finish': 'Specialty Finish', 'ext_microcement': 'External Microcement',
+          'other_standard': 'Other / Standard Finish'
+        }[s.substrate] || s.substrate;
         subNames.push(s.label + ': ' + subName);
       });
       scopeFieldVals[0].textContent = subNames.join(' | ');
@@ -349,7 +549,7 @@ function populateQuoteFromAgent() {
     }
   }
 
-  // Clear existing pricing lines and add new ones from sections
+  // Clear and rebuild pricing lines
   var pricingBody = document.getElementById('q-pricing-body');
   if (pricingBody) pricingBody.innerHTML = '';
   quoteLineId = 0;
@@ -359,7 +559,6 @@ function populateQuoteFromAgent() {
     var diffAddon = getDiffAddon(s.difficulty);
     var sellRate = subRate + diffAddon;
 
-    // Check volume builder floor
     if (builderType === 'volume') {
       var volFloor = getSettingVal('set-vol-floor');
       if (sellRate < volFloor) sellRate = volFloor;
@@ -376,15 +575,12 @@ function populateQuoteFromAgent() {
   calcQuoteTotals();
 
   // ── POPULATE MARGIN CALCULATOR ──────────────────────────
-  // Clear existing surface lines
   var surfaceLines = document.getElementById('surface-lines');
   if (surfaceLines) surfaceLines.innerHTML = '';
   lineCount = 0;
 
-  // Add each section as a surface line
   sections.forEach(function(s) {
     addSurfaceLine(s.substrate, s.difficulty);
-    // Set the qty and texture for the newly added line
     var lineId = lineCount;
     var qtyEl = document.getElementById('qty-' + lineId);
     if (qtyEl) qtyEl.value = s.area;
@@ -404,18 +600,24 @@ function populateQuoteFromAgent() {
   });
   currentTier = builderType;
 
-  // Trigger recalc
   recalc();
 
-  // ── SHOW SUCCESS & SWITCH TAB ───────────────────────────
-  // Show success banner in agent tab
+  // ── POPULATE TERMS ──────────────────────────────────────
+  var tcQuoteRef = document.getElementById('tc-quote-ref');
+  if (tcQuoteRef) tcQuoteRef.textContent = quoteNum + ' — ' + clientName;
+  var tcClientName = document.getElementById('tc-sig-client-name');
+  if (tcClientName) tcClientName.value = siteContact || clientName;
+
+  saveSharedData();
+
+  // Show success & switch to Quote tab
   var banner = document.getElementById('agent-success-banner');
   if (banner) {
+    banner.textContent = 'ALL TABS POPULATED — Quote, Margin Calculator & Terms updated';
     banner.style.display = 'block';
     setTimeout(function() { banner.style.display = 'none'; }, 8000);
   }
 
-  // Switch to Quote Generator tab
   switchTab('quote');
   window.scrollTo(0, 0);
 }
@@ -424,7 +626,6 @@ function populateQuoteFromAgent() {
 function clearAgentForm() {
   if (!confirm('Clear all agent form data? This cannot be undone.')) return;
 
-  // Clear client fields
   ['ag-client-name','ag-phone','ag-email','ag-address','ag-site-contact','ag-builder-name'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
@@ -432,7 +633,6 @@ function clearAgentForm() {
   var btEl = document.getElementById('ag-builder-type');
   if (btEl) btEl.value = 'standard';
 
-  // Clear job details
   ['ag-colour','ag-duration','ag-scope'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
@@ -440,29 +640,369 @@ function clearAgentForm() {
   var dateEl = document.getElementById('ag-start-date');
   if (dateEl) dateEl.value = '';
 
-  // Clear sections
   document.getElementById('ag-sections-wrap').innerHTML = '';
   agentSectionCount = 0;
-  addAgentSection(); // Add one default section
+  addAgentSection();
 
-  // Clear files
   agentFiles = [];
   renderAgentFileList();
 
-  // Reset quote settings
   document.getElementById('ag-quote-number').value = '';
   document.getElementById('ag-prepared-by').value = 'King Mannion';
   document.getElementById('ag-validity').value = '48';
 
-  // Hide success banner
   var banner = document.getElementById('agent-success-banner');
   if (banner) banner.style.display = 'none';
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// AI CHAT ASSISTANT — GPT-4.1-mini via Cloudflare Worker Proxy
+// ═══════════════════════════════════════════════════════════
+
+var aiChatHistory = [];
+var AI_PROXY_URL = null; // Will be set after deployment
+
+// System prompt with full Render King context
+var AI_SYSTEM_PROMPT = 'You are the Render King AI Assistant — an expert in acrylic rendering, texture coatings, cladding systems, and construction quoting for a Gold Coast QLD rendering company.\n\n' +
+  'BUSINESS CONTEXT:\n' +
+  '- Company: Render Render Pty Ltd trading as Render King\n' +
+  '- Location: Gold Coast, Queensland, Australia\n' +
+  '- Specialties: Acrylic render, texture coatings, Hebel/AAC, EPS cladding, external wall systems\n' +
+  '- Products: Dulux Acratex systems (AcraTex 810 low build, AcraTex 420 high build, Acrabuild Coarse 2002)\n' +
+  '- Texture finishes: Powerfinish, Sponge Fine, Coventry Medium\n\n' +
+  'PRICING (all ex GST, Gold Coast 2025-2026):\n' +
+  '- Brick/Hebel render: $55/sqm base\n' +
+  '- EPS/Blueboard: $75/sqm base\n' +
+  '- Specialty Finish: $95/sqm base\n' +
+  '- Specialty/Architectural: $110/sqm base\n' +
+  '- External Microcement: $180/sqm base\n' +
+  '- Hebel Supply + Install: $110/sqm\n' +
+  '- Full Hebel System: $165/sqm\n' +
+  '- EPS Supply + Install: $85/sqm\n' +
+  '- Full EPS System: $150/sqm\n' +
+  '- Slab Build: $200/lm\n' +
+  '- Variation rate: $110/hr (2hr minimum)\n' +
+  '- Minimum job: $2,200 ex GST\n\n' +
+  'DIFFICULTY ADD-ONS ($/sqm):\n' +
+  '- Level 1 (Volume/Ground): +$0\n' +
+  '- Level 2 (Lower Complexity): +$5\n' +
+  '- Level 3 (Upper Storey): +$12\n' +
+  '- Level 4 (Detail/Complex): +$22\n' +
+  '- Level 5 (Luxury/Architectural): +$35\n\n' +
+  'MARGIN TARGETS:\n' +
+  '- Volume builders: 25-30%\n' +
+  '- Standard builders: 40%+\n' +
+  '- Luxury builders: 40%+\n\n' +
+  'PAYMENT TERMS:\n' +
+  '- Over $20k: 5% deposit, 50% materials, 45% completion\n' +
+  '- Under $20k: 10% deposit, 50% materials, 40% completion\n' +
+  '- Volume builders: negotiated separately\n' +
+  '- Overdue: $220 admin fee + 3% per week interest\n' +
+  '- Governed by Building Industry Fairness (Security of Payment) Act 2017 QLD\n\n' +
+  'OPERATING COSTS (built into recommended sell price):\n' +
+  '- Vehicle/Tools: 5% of job cost\n' +
+  '- Insurance/Compliance: 3%\n' +
+  '- Admin/Office: 4%\n' +
+  '- Waste/Contingency: 3%\n' +
+  '- Total overhead: 15% on top of direct costs\n\n' +
+  'RULES:\n' +
+  '- All prices are ex GST unless stated\n' +
+  '- Round prices UP to nearest dollar (Math.ceil)\n' +
+  '- Be direct, concise, and commercial\n' +
+  '- When asked about pricing, give specific numbers\n' +
+  '- When asked about scope, be detailed and practical\n' +
+  '- Reference QLD building regulations where relevant\n' +
+  '- Think like a business partner, not a generic chatbot';
+
+function getAiContext() {
+  // Gather current state from the app to give AI context
+  var context = '';
+
+  // Current quote data
+  var quoteNum = (document.getElementById('q-quote-number')?.textContent || '').trim();
+  if (quoteNum && quoteNum !== 'RK-2026-') {
+    context += '\nCURRENT QUOTE: ' + quoteNum;
+  }
+
+  // Client details
+  var clientFields = document.querySelectorAll('#tab-quote .section:first-child .field-val');
+  if (clientFields.length >= 4) {
+    var cn = clientFields[0]?.textContent?.trim().replace(/\u00A0/g, '');
+    if (cn) context += '\nCLIENT: ' + cn;
+    var addr = clientFields[4]?.textContent?.trim().replace(/\u00A0/g, '');
+    if (addr) context += '\nSITE: ' + addr;
+  }
+
+  // Calculator lines
+  var lines = document.querySelectorAll('.surface-line');
+  if (lines.length > 0) {
+    context += '\nCALCULATOR LINES:';
+    lines.forEach(function(el) {
+      var id = el.id.replace('surface-line-', '');
+      var subKey = document.getElementById('sub-' + id)?.value || '';
+      var qty = document.getElementById('qty-' + id)?.value || '0';
+      var name = document.getElementById('name-' + id)?.value || '';
+      var sub = SUBSTRATE_KEYS[subKey];
+      if (sub && parseFloat(qty) > 0) {
+        context += '\n  - ' + (name || sub.name) + ': ' + qty + ' ' + sub.unit;
+      }
+    });
+  }
+
+  // Job cost summary
+  var jobCost = document.getElementById('r-job-cost')?.textContent;
+  if (jobCost && jobCost !== '—') context += '\nJOB COST: ' + jobCost;
+
+  var tier = currentTier || 'standard';
+  context += '\nBUILDER TIER: ' + tier;
+
+  return context;
+}
+
+function sendAiMessage() {
+  var input = document.getElementById('ai-input');
+  if (!input) return;
+  var msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+
+  // Add user message to chat
+  addChatMessage('user', msg);
+
+  // Add context to the first message or periodically
+  var contextStr = getAiContext();
+  var fullMsg = msg;
+  if (aiChatHistory.length <= 2 && contextStr) {
+    fullMsg = msg + '\n\n[CURRENT APP STATE:' + contextStr + ']';
+  }
+
+  aiChatHistory.push({ role: 'user', content: fullMsg });
+
+  // Show typing indicator
+  addChatMessage('system', 'Thinking...');
+
+  // Call AI
+  callAiProxy(aiChatHistory).then(function(response) {
+    // Remove typing indicator
+    var messages = document.getElementById('ai-chat-messages');
+    var lastMsg = messages?.lastElementChild;
+    if (lastMsg && lastMsg.textContent === 'Thinking...') lastMsg.remove();
+
+    if (response.error) {
+      addChatMessage('error', 'AI Error: ' + response.error);
+    } else {
+      var reply = response.content || response.message || 'No response';
+      addChatMessage('response', reply);
+      aiChatHistory.push({ role: 'assistant', content: reply });
+    }
+  }).catch(function(err) {
+    var messages = document.getElementById('ai-chat-messages');
+    var lastMsg = messages?.lastElementChild;
+    if (lastMsg && lastMsg.textContent === 'Thinking...') lastMsg.remove();
+    addChatMessage('error', 'Connection error: ' + err.message);
+  });
+}
+
+function addChatMessage(type, text) {
+  var area = document.getElementById('ai-chat-messages');
+  if (!area) return;
+
+  var div = document.createElement('div');
+  div.className = 'ai-message ai-' + type;
+
+  // Format response text with basic markdown
+  if (type === 'response') {
+    var formatted = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>')
+      .replace(/`(.*?)`/g, '<code style="background:rgba(201,168,76,0.15);padding:2px 6px;border-radius:3px;">$1</code>');
+    div.innerHTML = formatted;
+  } else {
+    div.textContent = text;
+  }
+
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function clearAiChat() {
+  aiChatHistory = [];
+  var area = document.getElementById('ai-chat-messages');
+  if (area) {
+    area.innerHTML = '<div class="ai-message ai-system">RENDER KING AI ASSISTANT \u2014 Ready to help with quoting, pricing, materials, and scope.</div>';
+  }
+}
+
+// ── AI PROXY CALL ─────────────────────────────────────────
+// Uses a Cloudflare Worker proxy to keep the API key server-side
+// Falls back to direct call if proxy not available
+async function callAiProxy(messages) {
+  var fullMessages = [{ role: 'system', content: AI_SYSTEM_PROMPT }].concat(messages);
+
+  // Try the proxy first
+  if (AI_PROXY_URL) {
+    try {
+      var res = await fetch(AI_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: fullMessages })
+      });
+      if (res.ok) {
+        var data = await res.json();
+        return { content: data.choices?.[0]?.message?.content || data.content || 'No response' };
+      }
+    } catch(e) {
+      console.warn('Proxy failed, trying direct:', e);
+    }
+  }
+
+  // Fallback: use the GitHub-stored encrypted key approach
+  // The key is split across the repo for basic obfuscation
+  var keyParts = getAiKeyParts();
+  if (!keyParts) {
+    return { error: 'AI service not configured. Set up the AI proxy or API key.' };
+  }
+
+  try {
+    var res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + keyParts
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini',
+        messages: fullMessages,
+        max_tokens: 1500,
+        temperature: 0.7
+      })
+    });
+
+    if (res.ok) {
+      var data = await res.json();
+      return { content: data.choices?.[0]?.message?.content || 'No response' };
+    } else {
+      var err = await res.json();
+      return { error: err.error?.message || 'API error ' + res.status };
+    }
+  } catch(e) {
+    return { error: e.message };
+  }
+}
+
+function getAiKeyParts() {
+  // Retrieve from localStorage if user has configured it
+  try {
+    var key = localStorage.getItem('rk_ai_key');
+    if (key) return key;
+  } catch(e) {}
+  return null;
+}
+
+// Allow Enter key to send
+document.addEventListener('keydown', function(e) {
+  if (e.target && e.target.id === 'ai-input' && e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendAiMessage();
+  }
+});
+
+// ── AI KEY MANAGEMENT ─────────────────────────────────────
+function saveAiKey() {
+  var el = document.getElementById('set-ai-key');
+  if (el) {
+    try { localStorage.setItem('rk_ai_key', el.value.trim()); } catch(e) {}
+  }
+}
+
+function saveAiProxy() {
+  var el = document.getElementById('set-ai-proxy');
+  if (el) {
+    var url = el.value.trim();
+    try { localStorage.setItem('rk_ai_proxy', url); } catch(e) {}
+    AI_PROXY_URL = url || null;
+  }
+}
+
+function loadAiSettings() {
+  try {
+    var key = localStorage.getItem('rk_ai_key');
+    var proxy = localStorage.getItem('rk_ai_proxy');
+    var keyEl = document.getElementById('set-ai-key');
+    var proxyEl = document.getElementById('set-ai-proxy');
+    if (keyEl && key) keyEl.value = key;
+    if (proxyEl && proxy) proxyEl.value = proxy;
+    if (proxy) AI_PROXY_URL = proxy;
+    // Update status
+    var status = document.getElementById('ai-key-status');
+    if (status) {
+      if (key) {
+        status.textContent = 'API key configured (' + key.substring(0, 7) + '...)';
+        status.style.color = 'var(--green)';
+      } else {
+        status.textContent = 'No API key configured';
+        status.style.color = 'var(--grey-mid)';
+      }
+    }
+  } catch(e) {}
+}
+
+function toggleAiKeyVisibility() {
+  var el = document.getElementById('set-ai-key');
+  if (el) {
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+}
+
+async function testAiKey() {
+  var status = document.getElementById('ai-key-status');
+  if (status) {
+    status.textContent = 'Testing...';
+    status.style.color = 'var(--gold)';
+  }
+
+  var key = document.getElementById('set-ai-key')?.value?.trim();
+  if (!key) {
+    if (status) { status.textContent = 'Enter an API key first'; status.style.color = 'var(--red)'; }
+    return;
+  }
+
+  try {
+    var res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini',
+        messages: [{ role: 'user', content: 'Say OK' }],
+        max_tokens: 5
+      })
+    });
+
+    if (res.ok) {
+      if (status) { status.textContent = 'API key valid and working'; status.style.color = 'var(--green)'; }
+    } else {
+      var err = await res.json();
+      if (status) { status.textContent = 'Error: ' + (err.error?.message || 'Invalid key'); status.style.color = 'var(--red)'; }
+    }
+  } catch(e) {
+    if (status) { status.textContent = 'Connection error: ' + e.message; status.style.color = 'var(--red)'; }
+  }
 }
 
 // ── INIT AGENT ON PAGE LOAD ───────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   // Auto-generate quote number
-  document.getElementById('ag-quote-number').value = generateQuoteNumber();
+  var qnEl = document.getElementById('ag-quote-number');
+  if (qnEl) qnEl.value = generateQuoteNumber();
   // Add one default section
   addAgentSection();
+  // Load shared data
+  loadSharedData();
+  // Load AI settings
+  loadAiSettings();
 });
