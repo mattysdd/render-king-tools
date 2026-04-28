@@ -453,7 +453,7 @@
     <button class="tb-btn" onclick="saveAndShareQuote('client')" title="Saves quote and generates a clean client-facing link (no internal data)">SEND TO CLIENT</button>
     <button class="tb-btn" onclick="saveAndShareQuote('tc')" title="Saves and generates a T&amp;C-only link with signature pad" style="background:var(--blue);">T&amp;C ONLY LINK</button>
     <button class="tb-btn ghost" onclick="saveAndShareQuote('internal')" title="Full internal link with margin data">INTERNAL LINK</button>
-    <button class="tb-btn ghost" onclick="window.print()">PRINT / SAVE PDF</button>
+    <button class="tb-btn ghost" onclick="generatePDFQuote()">PRINT / SAVE PDF</button>
     <button class="tb-btn ghost" onclick="toggleEditMode()">EDIT MODE</button>
     <button class="tb-btn ghost" onclick="clearQuoteForm()">CLEAR FORM</button>
     <button class="tb-btn" onclick="generateJobBrief()" style="background:var(--amber);">JOB BRIEF</button>
@@ -1387,6 +1387,7 @@
 
 <script src="calculator.js?v=10"></script>
 <script src="quote.js?v=10"></script>
+<script src="quote-pdf.js?v=10"></script>
 <script src="agent.js?v=10"></script>
 
 </body>
